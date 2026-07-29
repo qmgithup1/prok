@@ -1,0 +1,2407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Systems Go</string>
+
+    <!-- Accessibility (shared across screens) -->
+    <string name="cd_back">Back</string>
+    <string name="cd_scan_qr">Scan QR code</string>
+    <string name="cd_import_file">Import .rdp file</string>
+    <string name="cd_more_add_options">More ways to add a connection</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_toggle_toolbar">Show or hide toolbar</string>
+    <string name="toolbox_open_drawer">All tools</string>
+    <string name="cd_channel_status_printer_connected">Printer redirected and connected</string>
+    <string name="cd_channel_status_printer_waiting">Printer redirect enabled, waiting for the server</string>
+    <string name="cd_channel_status_audio_connected">Remote audio connected</string>
+    <string name="cd_channel_status_audio_waiting">Remote audio enabled, waiting for the server</string>
+    <string name="cd_channel_status_mic_connected">Microphone redirected and connected</string>
+    <string name="cd_channel_status_mic_waiting">Microphone redirect enabled, waiting for the server</string>
+    <string name="cd_channel_status_webcam_connected">Webcam redirected and connected</string>
+    <string name="cd_channel_status_webcam_waiting">Webcam redirect enabled, waiting for the server</string>
+    <string name="cd_channel_status_smartcard_connected">Smart card redirected and connected</string>
+    <string name="cd_channel_status_smartcard_waiting">Smart card redirect enabled, waiting for the server</string>
+    <string name="toolbox_drawer_title">All Tools</string>
+    <string name="cd_enter_pip">Picture-in-picture</string>
+    <string name="cd_move_to_display">Move to display</string>
+    <string name="cd_bring_back_to_phone">Bring back to phone</string>
+    <string name="external_display_choose_title">Choose a display</string>
+    <string name="external_display_banner_title">Session on external display</string>
+    <string name="external_display_banner_subtitle">The remote session is running on the connected display.</string>
+    <string name="cd_navigate_up_folder">Go to parent folder</string>
+
+    <!-- Home -->
+    <string name="no_connections">No Connections Yet</string>
+    <string name="add_first_connection">Launch your first remote session into the digital cosmos</string>
+    <string name="add_connection">Add Connection</string>
+    <string name="add_short">Add</string>
+    <string name="add_options_new_title">New connection</string>
+    <string name="add_options_new_desc">Set up an RDP, VNC, or SSH connection manually</string>
+    <string name="add_options_import_desc">Import settings from an .rdp file</string>
+    <string name="add_options_scan_title">Scan QR Code</string>
+    <string name="add_options_scan_desc">Fill in host, port, username, and protocol from a QR code</string>
+    <string name="add_options_discover_title">Discover Devices</string>
+    <string name="add_options_discover_desc">Find RDP, VNC, and SSH hosts on your network</string>
+    <string name="add_options_webfeed_title">RD Web Feed</string>
+    <string name="add_options_webfeed_desc">Auto-import published apps and desktops from RD Web Access</string>
+    <string name="add_options_quick_transfer_title">Quick Transfer</string>
+    <string name="add_options_quick_transfer_desc">Connect straight to an FTP, SMB, WebDAV, or TFTP server</string>
+
+    <!-- Quick Transfer picker -->
+    <string name="quick_transfer_picker_title">Quick Transfer</string>
+    <string name="quick_transfer_ftp_title">FTP</string>
+    <string name="quick_transfer_ftp_desc">Connect to an FTP or FTPS server</string>
+    <string name="quick_transfer_smb_title">SMB</string>
+    <string name="quick_transfer_smb_desc">Connect to a Windows/Samba network share</string>
+    <string name="quick_transfer_webdav_title">WebDAV</string>
+    <string name="quick_transfer_webdav_desc">Connect to a WebDAV server</string>
+    <string name="quick_transfer_tftp_title">TFTP</string>
+    <string name="quick_transfer_tftp_desc">Connect to a TFTP server</string>
+    <string name="quick_transfer_nfs_title">NFS</string>
+    <string name="quick_transfer_nfs_desc">Browse a Unix/Linux NFSv3 export</string>
+
+    <!-- RD Web Feed -->
+    <string name="webfeed_title">RD Web Feed</string>
+    <string name="webfeed_add">Add Feed</string>
+    <string name="webfeed_add_title">Add RD Web Feed</string>
+    <string name="webfeed_field_name">Display name</string>
+    <string name="webfeed_field_url">Feed URL or server address</string>
+    <string name="webfeed_field_url_placeholder">rdweb.contoso.com</string>
+    <string name="webfeed_accept_self_signed">Accept self-signed certificate</string>
+    <string name="webfeed_empty_title">No feeds added yet</string>
+    <string name="webfeed_empty_desc">Add your organization\'s RD Web Access address to automatically pull in published apps and desktops.</string>
+    <string name="webfeed_type_remoteapp">RemoteApp</string>
+    <string name="webfeed_type_desktop">Desktop</string>
+    <string name="webfeed_resolve_failed">Could not load this app\'s connection settings</string>
+    <!-- WEB-PORTAL FEATURE: fallback shown when the feed's Basic-auth endpoint
+         isn't usable — opens the ordinary browser-facing RDWeb login instead. -->
+    <string name="webfeed_open_in_browser">Open sign-in page in browser</string>
+
+
+    <!-- Auto Discovery (LAN device discovery) -->
+    <string name="discover_devices_title">Discovered Devices</string>
+    <string name="discover_devices_refresh">Refresh scan</string>
+    <string name="discover_devices_stop">Stop scan</string>
+    <string name="discover_devices_add_connection">Add connection</string>
+    <string name="discover_devices_profile_added">Connection added</string>
+    <string name="discover_devices_status_preparing">Checking network…</string>
+    <string name="discover_devices_status_scanning">Scanning your network…</string>
+    <string name="discover_devices_status_scanning_progress">Scanning your network… (%1$d/%2$d)</string>
+    <string name="discover_devices_status_completed">Scan complete — %1$d device(s) found</string>
+    <string name="discover_devices_status_stopped">Scan stopped</string>
+    <string name="discover_devices_searching">Looking for devices on your network…</string>
+    <string name="discover_devices_empty">No devices found yet</string>
+    <string name="discover_devices_error_no_network">No network connection. Connect to Wi-Fi to discover devices.</string>
+    <string name="discover_devices_error_not_local">Connect to Wi-Fi or Ethernet to discover local devices. Discovery doesn\'t run over mobile data.</string>
+    <string name="discover_devices_error_permission">Device discovery isn\'t available on this device.</string>
+    <string name="discover_devices_subnet_too_large">Your network is too large for a full scan — showing devices announced automatically only.</string>
+    <string name="discover_devices_mdns_unsupported">Automatic device announcements aren\'t supported on this device.</string>
+    <string name="discover_devices_found_so_far">%1$d found so far…</string>
+    <string name="discover_devices_source_announced">Announced automatically</string>
+    <string name="discover_devices_source_scanned">Found by scan</string>
+
+    <string name="connect">Connect</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <!-- PIN-CONNECTION FEATURE (UI layer): keep pin_connection/unpin_connection
+         distinct from the unrelated "pin_shortcut" (home-screen shortcut) and
+         "pin_lock" (app-lock PIN) strings already above. -->
+    <string name="pin_connection">Pin</string>
+    <string name="unpin_connection">Unpin</string>
+    <string name="pinned_badge_desc">Pinned</string>
+    <string name="quick_pin_action">Pin connection</string>
+    <string name="quick_unpin_action">Unpin connection</string>
+    <string name="select_connection">Select connection</string>
+    <string name="deselect_connection">Deselect connection</string>
+    <string name="selection_mode_pin_selected">Pin selected</string>
+    <string name="selection_mode_unpin_selected">Unpin selected</string>
+    <string name="selection_mode_count">%1$d selected</string>
+    <string name="reorder_pinned_handle_desc">Drag to reorder pinned connection</string>
+    <string name="pin_shortcut">Add to Home screen</string>
+    <string name="pin_shortcut_requested">Shortcut added</string>
+    <string name="pin_shortcut_unsupported">Your launcher doesn\'t support home screen shortcuts</string>
+    <string name="create_shortcut_title">Create Home Screen Shortcut</string>
+    <string name="create_shortcut_desc">Tapping this shortcut will connect straight to this connection.</string>
+    <string name="shortcut_name_label">Shortcut name</string>
+    <string name="create_shortcut_action">Add Shortcut</string>
+    <string name="shortcut_disabled_message">This connection was deleted</string>
+
+    <!-- QUICK-SETTINGS-TILE FEATURE (Part 1/2) -->
+    <string name="qs_tile_settings_title">Quick Settings Tile</string>
+    <string name="settings_quick_tile_desc">Connect from the Quick Settings panel</string>
+    <string name="qs_tile_settings_hint">Choose which connection the Quick Settings tile connects to. Add the tile from your Quick Settings panel\'s edit screen if you haven\'t already.</string>
+    <string name="qs_tile_clear_selection">Clear tile connection</string>
+    <string name="qs_tile_no_profiles">Save a connection first to bind it to the tile.</string>
+    <string name="qs_tile_label_unconfigured">Quick Connect</string>
+    <string name="qs_tile_subtitle_unconfigured">Tap to set up</string>
+    <string name="qs_tile_subtitle_connect_via">Connect via %1$s</string>
+
+    <!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2) -->
+    <string name="widget_label">Systems Go Connections</string>
+    <string name="widget_description">Connect to a saved server, or browse your connections, right from the home screen.</string>
+
+    <!-- HOME-SCREEN-WIDGET FEATURE (Part 2/2): Settings → Home Screen Widget, a purely
+         explanatory screen — see HomeScreenWidgetInfoScreen's own doc comment for why it
+         has no in-app controls of its own. -->
+    <string name="home_widget_settings_title">Home Screen Widget</string>
+    <string name="settings_home_widget_desc">Add a quick-connect button or connections list to your home screen</string>
+    <string name="home_widget_settings_intro">Systems Go Connections is a resizable home screen widget — a single quick-connect card, or a scrollable list of your saved connections. Here\'s how to add it.</string>
+    <string name="home_widget_step1_title">Leave Systems Go</string>
+    <string name="home_widget_step1_body">Go back to your home screen (or any home screen you can edit).</string>
+    <string name="home_widget_step2_title">Open the widget picker</string>
+    <string name="home_widget_step2_body">Long-press an empty spot on your home screen, then tap Widgets — every launcher\'s wording is slightly different, but this is usually how it\'s reached.</string>
+    <string name="home_widget_step3_title">Find and place Systems Go Connections</string>
+    <string name="home_widget_step3_body">Look for \"%1$s\" in the list, then drag it onto your home screen. You can resize it afterwards to switch between the compact card and the scrollable list.</string>
+    <string name="home_widget_step4_title">Choose what it shows</string>
+    <string name="home_widget_step4_body">A setup screen opens automatically once it\'s placed — pick one saved connection for the compact card, or All/Favorites for the list.</string>
+    <string name="home_widget_settings_note">Already placed a widget and want to change its connection or filter? Long-press that widget directly and choose its settings/edit option — this screen can\'t reconfigure an existing one for you.</string>
+
+    <!-- HOME-SCREEN-WIDGET FEATURE (Part 2/2): mock example data for
+         widget_preview.xml only — see that layout's doc comment. Never
+         shown anywhere real connection data appears. -->
+    <string name="widget_preview_row1_name">Home Server</string>
+    <string name="widget_preview_row1_subtitle">192.168.1.10 · RDP</string>
+    <string name="widget_preview_row2_name">Office PC</string>
+    <string name="widget_preview_row2_subtitle">10.0.0.24 · VNC</string>
+    <string name="widget_preview_row3_name">Dev Box</string>
+    <string name="widget_preview_row3_subtitle">dev.internal · SSH</string>
+    <string name="widget_header_title">Connections</string>
+    <string name="widget_open_app_cd">Open Systems Go</string>
+    <string name="widget_row_subtitle">%1$s:%2$d · %3$s</string>
+    <string name="widget_empty_no_connections">No saved connections yet. Open the app to add one.</string>
+    <string name="widget_empty_no_favorites">No favorites yet. Star a connection to show it here.</string>
+    <string name="widget_unconfigured_title">Quick Connect</string>
+    <string name="widget_unconfigured_subtitle">Tap to set up</string>
+    <string name="widget_configure_title">Configure Widget</string>
+    <string name="widget_configure_mode_label">What should this widget show?</string>
+    <string name="widget_configure_mode_single">One Connection</string>
+    <string name="widget_configure_mode_list">Connection List</string>
+    <string name="widget_configure_filter_label">Which connections?</string>
+    <string name="widget_configure_filter_all">All connections</string>
+    <string name="widget_configure_filter_favorites">Favorites only</string>
+    <string name="widget_configure_pick_profile_hint">Choose which connection this widget opens</string>
+    <string name="widget_configure_no_profiles">Save a connection first to bind it to this widget.</string>
+    <string name="widget_configure_save">Save</string>
+    <string name="widget_configure_cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Profile Form -->
+    <string name="new_connection">New Connection</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="connection_name">Connection Name</string>
+    <string name="host_ip">Host / IP : Port</string>
+    <string name="host_ip_short">Host / IP</string>
+    <string name="port">Port</string>
+    <!-- Profile Form — redesigned layout (Quick Connect / Optional Settings cards) -->
+    <string name="quick_connect">Quick Connect</string>
+    <string name="quick_connect_desc">Just the essentials — fill these in and you\'re ready to go</string>
+    <string name="advanced_optional">Optional Settings</string>
+    <string name="advanced_optional_desc">Tap any card to fine-tune it — only if you need to</string>
+    <!-- Organize section (folder + tags) in the Add/Edit Connection form -->
+<!-- Folder management (create/rename/delete) — FOLDERS-UI feature -->
+    <string name="new_folder">New Folder</string>
+    <string name="folder_name_hint">Folder name</string>
+    <string name="folder_color">Color</string>
+    <string name="folder_color_none">No color</string>
+    <string name="folder_color_cyan">Cyan</string>
+    <string name="folder_color_blue">Blue</string>
+    <string name="folder_color_violet">Violet</string>
+    <string name="folder_color_pink">Pink</string>
+    <string name="folder_color_red">Red</string>
+    <string name="folder_color_orange">Orange</string>
+    <string name="folder_color_yellow">Yellow</string>
+    <string name="folder_color_green">Green</string>
+    <string name="cd_color_swatch_selected">%1$s, selected</string>
+    <string name="folder_icon">Icon</string>
+    <string name="create">Create</string>
+    <string name="rename">Rename</string>
+    <string name="rename_folder">Rename Folder</string>
+    <string name="delete_folder_title">Delete Folder</string>
+    <string name="delete_folder_message">Delete \"%1$s\"? Connections inside will be unfiled, not deleted.</string>
+    <string name="unfiled_folder">Unfiled</string>
+    <string name="status_on">On</string>
+    <string name="status_off">Off</string>
+    <string name="section_security_auth">Security &amp; Sign-in</string>
+    <string name="section_security_auth_desc">Domain and certificate trust</string>
+    <string name="card_gateway_desc">Route through a Remote Desktop Gateway</string>
+    <string name="card_tunnel_desc">Route through an SSH jump host</string>
+    <string name="card_wol_desc">Wake the remote PC before connecting</string>
+    <string name="card_trust_desc">Manage saved server fingerprints</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="use_nla">Use NLA Authentication</string>
+    <!-- BUG-3 FIX: label for per-profile self-signed certificate acceptance toggle
+         (no longer shown in the form — kept only so we don't break old string refs) -->
+<!-- UNTRUSTED-CERT DIALOG FEATURE: shown at connect time instead of the toggle above -->
+    <string name="cert_dialog_title">Certificate not secure</string>
+    <string name="cert_dialog_message">The identity of “%1$s” could not be verified. Its security certificate is self-signed or unknown, which could mean the connection isn\'t private.</string>
+    <string name="cert_dialog_common_name">Issued to</string>
+    <string name="cert_dialog_issuer">Issued by</string>
+    <string name="cert_dialog_fingerprint">Fingerprint</string>
+    <string name="cert_dialog_always_trust">Always trust this certificate</string>
+    <string name="cert_dialog_accept">Connect anyway</string>
+    <string name="cert_dialog_reject">Cancel</string>
+    <string name="protocol">Protocol</string>
+    <string name="protocol_change_title">Change Protocol?</string>
+    <string name="protocol_change_warning">Changing the protocol may reset protocol-specific fields (e.g. domain, VNC view-only, SSH key). Other settings like host, port, username, and password will be kept.</string>
+    <string name="protocol_change_confirm">Change</string>
+    <string name="domain">Domain (optional)</string>
+    <string name="vnc_password">VNC Password</string>
+    <string name="vnc_username">Username (for Apple Screen Sharing / ARD — leave blank for plain VNC)</string>
+    <string name="vnc_view_only">View Only (disable input)</string>
+    <string name="vnc_cleartext_warning">⚠ This app doesn\'t yet support VNC encryption (TLS/VeNCrypt). Traffic — including the VNC password — is sent in plain text. Only use this on a trusted network, or tunnel it through SSH/VPN.</string>
+    <string name="vnc_repeater">UltraVNC Repeater</string>
+    <string name="vnc_repeater_desc">Connect through an UltraVNC Repeater instead of directly — Host/Port above become the repeater\'s address.</string>
+    <string name="vnc_repeater_id">Repeater ID</string>
+    <string name="vnc_repeater_mode_i">Mode I (port-mapped)</string>
+    <string name="vnc_repeater_mode_i_desc">The repeater is configured to map this Host/Port straight through to one server. No ID needed.</string>
+    <string name="vnc_repeater_mode_ii">Mode II (ID-based)</string>
+    <string name="vnc_repeater_mode_ii_desc">The server registers a matching ID with the same repeater; enter that ID below.</string>
+    <string name="error_vnc_repeater_rejected">The repeater didn\'t recognize ID \"%1$s\" — double-check the ID and confirm the target server is currently connected to this repeater.</string>
+    <string name="vnc_listen_mode">Listen Mode (Reverse VNC)</string>
+    <string name="vnc_listen_mode_desc">Wait for the remote VNC server to connect to this device instead of dialing out — useful when the server is behind NAT or a firewall. Host above is ignored while this is on.</string>
+    <string name="vnc_listen_port">Listen Port</string>
+    <string name="vnc_listen_waiting">Waiting for incoming connection on port %1$d…</string>
+    <string name="error_vnc_listen_timeout">No incoming VNC connection was received within %1$ds. Trigger the connection from the remote server and try again.</string>
+    <string name="rd_gateway">RD Gateway</string>
+    <string name="gateway_host">Gateway Host / IP</string>
+    <string name="gateway_port">Gateway Port</string>
+    <string name="gateway_username">Gateway Username</string>
+    <string name="gateway_password">Gateway Password</string>
+    <string name="gateway_domain">Gateway Domain (optional)</string>
+    <string name="gateway_auth_mode_password">Username &amp; Password</string>
+    <string name="gateway_auth_mode_entra_id">Microsoft Entra ID</string>
+    <string name="gateway_entra_id_explainer">Sign in with your organization\'s Microsoft account. Use this when your RD Gateway sits behind Azure AD Application Proxy.</string>
+    <string name="gateway_entra_scope_uri_label">Application ID URI</string>
+    <string name="gateway_entra_scope_uri_hint">api://your-app-proxy-app-id</string>
+    <string name="gateway_entra_scope_uri_helper">From Azure Portal → Enterprise Applications → your App Proxy app → Expose an API. Ask your Azure/IT admin if you don\'t have this.</string>
+    <string name="gateway_entra_sign_in">Sign in with Microsoft</string>
+    <string name="gateway_entra_signing_in">Signing in…</string>
+    <string name="gateway_entra_signed_in_as">Signed in as %1$s</string>
+    <string name="gateway_entra_sign_out">Sign out</string>
+    <string name="outbound_proxy">Outbound Proxy</string>
+    <string name="card_proxy_desc">Route this connection through a SOCKS/HTTP/HTTPS proxy</string>
+    <string name="proxy_host">Proxy Host / IP</string>
+    <string name="proxy_port">Proxy Port</string>
+    <string name="proxy_username">Proxy Username (optional)</string>
+    <string name="proxy_password">Proxy Password (optional)</string>
+    <string name="proxy_https_hint">HTTPS proxy: the app connects to the proxy itself over TLS before tunneling. Typical ports are 443 or 8443 — check with your proxy provider.</string>
+    <!-- PAC-SUPPORT FEATURE (Part 3/n — UI) -->
+    <string name="pac_url_section_title">PAC URL (Proxy Auto-Config)</string>
+    <string name="pac_url_hint">Alternative to setting the proxy manually below: the app fetches this script and runs it for each connection to decide the proxy automatically. If set and resolved successfully, it overrides the manual fields.</string>
+    <string name="pac_url_label">PAC Script URL</string>
+    <string name="proxy_manual_section_title">Manual configuration (used when the PAC URL above is empty, or unreachable)</string>
+    <string name="pac_test_button">Test</string>
+    <string name="pac_test_needs_host_hint">Enter the server Host above first</string>
+    <string name="pac_test_error_missing_host">Enter the server Host above first, so the PAC script has a destination to resolve a proxy for.</string>
+    <string name="pac_test_error_invalid_url">Invalid URL — enter a full http:// or https:// address for the PAC script.</string>
+    <string name="pac_test_error_not_found">PAC file not found (HTTP 404) — check the URL is correct.</string>
+    <string name="pac_test_error_http">Could not fetch the PAC file (HTTP %1$d).</string>
+    <string name="pac_test_error_timeout">Timed out fetching the PAC file — check the server is reachable.</string>
+    <string name="pac_test_error_network">Could not reach the PAC server: %1$s</string>
+    <string name="pac_test_error_script">The PAC script failed to run: %1$s</string>
+    <string name="pac_test_error_no_usable_directive">The PAC script did not return a usable PROXY, SOCKS, or DIRECT rule for this server.</string>
+    <string name="pac_test_result_direct">Resolved: connect directly, no proxy</string>
+    <string name="pac_test_result_proxy">Resolved: HTTP proxy %1$s:%2$d</string>
+    <string name="pac_test_result_socks">Resolved: SOCKS proxy %1$s:%2$d</string>
+    <string name="pac_test_raw_directive">Raw PAC result: %1$s</string>
+    <string name="pac_test_url_changed_hint">You changed the URL since this result — press Test again to verify it.</string>
+    <string name="pac_test_last_success">Last verified working %1$s</string>
+    <string name="rdp_proxy_title">RDP Proxy (MITM Relay)</string>
+    <string name="rdp_proxy_desc">Runs both halves of an RDP session on this device: an inbound listener for a connecting client, and an outbound connection to the real target server, relaying frames and input between them.</string>
+    <string name="rdp_proxy_listen_port_label">Listen Port (for incoming clients)</string>
+    <string name="rdp_proxy_target_section">Target RDP Server</string>
+    <string name="rdp_proxy_target_host_label">Target Host / IP</string>
+    <string name="rdp_proxy_target_port_label">Target Port</string>
+    <string name="rdp_proxy_target_username_label">Target Username</string>
+    <string name="rdp_proxy_target_password_label">Target Password</string>
+    <string name="rdp_proxy_target_domain_label">Target Domain (optional)</string>
+    <string name="rdp_proxy_inbound_section">Who Can Connect To This Device</string>
+    <string name="rdp_proxy_inbound_username_label">Username (optional — enables NLA)</string>
+    <string name="rdp_proxy_inbound_password_label">Password (optional — enables NLA)</string>
+    <string name="rdp_proxy_status_running">Relaying: listening on port %1$d, forwarding to %2$s:%3$d</string>
+    <string name="rdp_proxy_status_stopped">Relay is stopped</string>
+    <string name="rdp_proxy_unavailable">Native RDP server library unavailable — see app/src/main/cpp/SETUP.md (RDP-SERVER-API FEATURE)</string>
+    <string name="rdp_proxy_security_warning">The inbound listener is TLS-encrypted with a self-signed cert; set a username/password above for real NLA too. There\'s still no CA to verify this device\'s identity, so keep this on a trusted LAN/VPN, not the open internet.</string>
+    <string name="rdp_proxy_start">Start Relay</string>
+    <string name="rdp_proxy_stop">Stop Relay</string>
+    <string name="rdp_proxy_notification_channel">RDP Proxy Relay</string>
+    <string name="rdp_proxy_notification_title">RDP Proxy relay is running</string>
+    <string name="rdp_proxy_notification_text">Relaying an RDP session through this device. Tap to manage.</string>
+    <!-- ── NETCONF Call Home (RFC 8071, Part 12) ────────────────────────────── -->
+    <string name="netconf_call_home_channel_name">NETCONF Call Home Listener</string>
+    <string name="netconf_call_home_sessions_channel_name">NETCONF Call Home Sessions</string>
+    <string name="netconf_call_home_notification_title">Listening for NETCONF Call Home devices</string>
+    <string name="netconf_call_home_notification_text">%1$d active Call Home session(s). Tap to manage.</string>
+    <string name="netconf_call_home_session_notif_title">%1$s called home</string>
+    <string name="netconf_call_home_session_notif_text">Device connected from %1$s. Tap to open the session.</string>
+    <string name="remote_app">RemoteApp</string>
+    <string name="card_remote_app_desc">Run a single published program instead of the full desktop</string>
+    <string name="remote_app_program">Program or Alias</string>
+    <string name="remote_app_program_hint">Use the \"||alias\" your server admin published (e.g. \"||notepad\"), or a full path if the server allows it.</string>
+    <string name="remote_app_working_dir">Working Directory (optional)</string>
+    <string name="remote_app_cmdline">Command-Line Arguments (optional)</string>
+    <string name="remote_app_display_mode">Window Display</string>
+    <string name="remote_app_display_mode_single">Single window</string>
+    <string name="remote_app_display_mode_single_hint">Full screen, no title bar, no desktop background</string>
+    <string name="remote_app_display_mode_multi">Multiple windows</string>
+    <string name="remote_app_display_mode_multi_hint">Switch between every open window of the app</string>
+    <string name="remote_app_window_untitled">Untitled window</string>
+    <string name="remote_app_window_resize">Resize window</string>
+    <string name="ssh_authentication">SSH Authentication</string>
+    <string name="ssh_auth_password">Password</string>
+    <string name="ssh_auth_key">Private Key</string>
+    <string name="ssh_private_key">Private Key (PEM)</string>
+    <string name="ssh_key_passphrase">Key Passphrase (optional)</string>
+    <string name="ssh_agent_forwarding">Forward SSH Agent</string>
+    <string name="ssh_agent_forwarding_desc">Lets the remote host use this key for further SSH connections (like ssh -A), without copying the key there. Only enable this for hosts you trust.</string>
+
+    <!-- SSH Dynamic SOCKS5 Proxy (ssh -D equivalent) -->
+    <string name="ssh_socks_proxy">Dynamic SOCKS5 Proxy</string>
+    <string name="ssh_socks_proxy_desc">Starts a local SOCKS5 proxy alongside this session (like ssh -D). Point any app that supports a manual SOCKS proxy at 127.0.0.1 and this port to route its traffic through this server — not just this app\'s own connection.</string>
+    <string name="ssh_socks_proxy_port">Local Proxy Port</string>
+    <string name="ssh_socks_proxy_started_banner">[SYSTEMSGO] SOCKS5 proxy listening on 127.0.0.1:%1$d</string>
+    <string name="ssh_socks_proxy_failed_banner">[SYSTEMSGO] SOCKS5 proxy failed to start (port may be in use)</string>
+
+    <!-- SSH X11 Forwarding (ssh -X / -Y equivalent) -->
+    <string name="ssh_x11_forwarding">X11 Forwarding</string>
+    <string name="ssh_x11_forwarding_desc">Forwards remote GUI programs (like ssh -X) to a local X server on this device. Requires a separate X server app (e.g. Termux:X11) already running and listening on the display below.</string>
+    <string name="ssh_x11_display_host">Local X Server Host</string>
+    <string name="ssh_x11_display_number">Display Number</string>
+    <string name="ssh_x11_auth_cookie">Auth Cookie (optional, hex)</string>
+    <string name="ssh_x11_auth_cookie_desc">MIT-MAGIC-COOKIE-1 from the local X server\'s own Xauthority (e.g. via xauth list). Leave blank to auto-generate — works with X servers that don\'t enforce their own cookie.</string>
+    <string name="ssh_x11_forwarding_started_banner">[SYSTEMSGO] X11 forwarding active — relaying to %1$s:%2$d</string>
+
+    <!-- SSH Local/Remote Port Forwarding (ssh -L / -R equivalent) -->
+    <string name="ssh_port_forwarding">Port Forwarding</string>
+    <string name="ssh_port_forwarding_desc">Static local (-L) or remote (-R) forwards, set up alongside this session. Unlike the dynamic SOCKS proxy above, each rule relays one fixed destination.</string>
+    <string name="ssh_port_forwarding_add_rule">Add Rule</string>
+    <string name="ssh_port_forwarding_no_rules">No forwarding rules yet</string>
+    <string name="ssh_port_forward_type">Direction</string>
+    <string name="ssh_port_forward_type_local">Local (-L)</string>
+    <string name="ssh_port_forward_type_remote">Remote (-R)</string>
+    <string name="ssh_port_forward_bind_address">Bind Address</string>
+    <string name="ssh_port_forward_bind_address_local_desc">127.0.0.1 = this device only, 0.0.0.0 = whole LAN via this device</string>
+    <string name="ssh_port_forward_bind_address_remote_desc">Passed to the SSH server; most servers only honour 127.0.0.1 unless GatewayPorts is enabled</string>
+    <string name="ssh_port_forward_listen_port">Listen Port</string>
+    <string name="ssh_port_forward_listen_port_local_desc">Port opened on this device</string>
+    <string name="ssh_port_forward_listen_port_remote_desc">Port opened on the SSH server</string>
+    <string name="ssh_port_forward_dest_host">Destination Host</string>
+    <string name="ssh_port_forward_dest_port">Destination Port</string>
+    <string name="ssh_port_forward_summary_local">%1$s:%2$d → (via server) → %3$s:%4$d</string>
+    <string name="ssh_port_forward_summary_remote">server:%1$d → (via this device) → %2$s:%3$d</string>
+    <string name="ssh_port_forward_remove_rule">Remove rule</string>
+    <string name="ssh_port_forward_edit_rule">Edit Rule</string>
+    <string name="ssh_port_forward_save_rule">Save</string>
+    <string name="ssh_port_forward_local_started_banner">[SYSTEMSGO] Local forward listening on 127.0.0.1:%1$d → %2$s:%3$d</string>
+    <string name="ssh_port_forward_remote_started_banner">[SYSTEMSGO] Remote forward listening on server port %1$d → %2$s:%3$d</string>
+    <string name="ssh_port_forward_failed_banner">[SYSTEMSGO] %1$s port forward on port %2$d failed to start (port may be in use, or rejected by the server)</string>
+
+    <!-- SSH key generation -->
+    <string name="ssh_generate_key_pair">Generate New Key Pair</string>
+    <string name="ssh_generate_key_title">Generate SSH Key</string>
+    <string name="ssh_generate_key_desc">Creates a new key pair on this device. The private key fills in below; you\'ll still need to add the public key to the server yourself.</string>
+    <string name="ssh_generating_key">Generating…</string>
+    <string name="ssh_generate_ed25519">Ed25519 (recommended)</string>
+    <string name="ssh_generate_rsa">RSA 4096 (wider compatibility)</string>
+    <string name="ssh_generate_key_error">Key generation failed. Please try again.</string>
+    <string name="ssh_public_key_title">Key Generated</string>
+    <string name="ssh_public_key_desc">Add this line to ~/.ssh/authorized_keys on the server. Only this public key ever leaves the device — the private key stays here.</string>
+    <string name="ssh_public_key_fingerprint">Fingerprint: %1$s</string>
+    <string name="ssh_copy_public_key">Copy Public Key</string>
+    <string name="ssh_public_key_copied">Copied</string>
+
+    <!-- SSH Tunnel -->
+    <string name="ssh_tunnel">SSH Tunnel</string>
+    <string name="ssh_tunnel_host">SSH Host / IP</string>
+    <string name="ssh_tunnel_port">SSH Port</string>
+    <string name="ssh_tunnel_username">SSH Username</string>
+    <string name="ssh_tunnel_password">SSH Password</string>
+    <string name="ssh_tunnel_auth">SSH Tunnel Authentication</string>
+    <!-- SSH-PROXYJUMP-CHAIN FEATURE: multi-hop jump-host chain editor,
+         replacing the old single Jump Host fields above. -->
+    <string name="ssh_tunnel_chain_desc">Chain one or more SSH jump hosts (like OpenSSH\'s -J option) before reaching this connection. Hops connect in order — the first is dialed directly from this device, each next hop is reached through the one before it.</string>
+    <string name="ssh_tunnel_chain_no_hops">No jump hosts added yet</string>
+    <string name="ssh_tunnel_chain_add_hop">+ Add Hop</string>
+    <string name="ssh_tunnel_chain_hop_label">Hop %1$d of %2$d</string>
+    <string name="ssh_tunnel_chain_move_up">Move hop up</string>
+    <string name="ssh_tunnel_chain_move_down">Move hop down</string>
+    <string name="ssh_tunnel_chain_remove_hop">Remove hop</string>
+    <string name="ssh_tunnel_chain_incomplete">Fill in every field for this hop (or remove it) before saving</string>
+
+    <!-- Telnet -->
+    <string name="telnet_security">Security</string>
+    <string name="telnet_use_tls">Use TLS (telnets)</string>
+    <string name="telnet_use_tls_desc">Wraps the connection in TLS before Telnet starts, so the server\'s identity can be verified and the session isn\'t sent in clear text. Requires a Telnet server that supports TLS on this port — plain Telnet servers will fail to connect.</string>
+    <string name="telnet_cleartext_warning">⚠ TLS is off — everything in this session, including your password, is sent in plain text and can be read by anyone on the network path. Only use this on a trusted network, or turn TLS on above if the server supports it.</string>
+    <string name="tofu_clear_button_telnet">Clear Trusted Telnet TLS Certificate</string>
+    <string name="error_telnet_connect_failed">Telnet connection failed</string>
+    <string name="error_telnet_timeout">Telnet connection timed out. Check the host address and port, then try again.</string>
+    <string name="error_telnet_refused">Telnet connection refused. Verify the server is running and the port is correct.</string>
+    <string name="error_telnet_tls_failed">Telnet TLS handshake failed. Verify the server supports TLS on this port.</string>
+
+    <!-- Rlogin -->
+    <string name="rlogin_section_title">Rlogin</string>
+    <string name="rlogin_cleartext_warning">⚠ Rlogin has no encryption of its own — everything, including the trust-based login exchange below, is sent in plain text. Only use this on a trusted network, or tunnel it through SSH/VPN.</string>
+    <string name="rlogin_remote_username">Remote Username</string>
+    <string name="rlogin_remote_username_desc">The account to log in as on the remote host, sent as part of the connection handshake. Leave blank to use the username above. If the remote host trusts this device (a matching ~/.rhosts or /etc/hosts.equiv entry), login can happen automatically with no password prompt.</string>
+    <string name="rlogin_terminal_type">Terminal Type</string>
+    <string name="rlogin_terminal_type_desc">Sent to the server as part of the handshake, e.g. \"xterm/38400\" — change only if a particular server expects a different terminal type or speed.</string>
+
+    <string name="mosh_settings_title">Mosh Settings</string>
+    <string name="mosh_remote_server_command">Remote Server Command</string>
+    <string name="mosh_remote_server_command_desc">The mosh-server binary to run on the remote host over the initial SSH connection. Change only if it isn\'t on the default PATH there.</string>
+    <string name="mosh_udp_port_range">UDP Port Range</string>
+    <string name="mosh_udp_port_range_desc">Restricts which UDP port mosh-server picks for the session, e.g. \"60000:61000\" — useful behind a firewall with a narrow open range. Leave blank to let the server choose freely.</string>
+    <string name="mosh_remote_locale">Remote Locale</string>
+    <string name="mosh_remote_locale_desc">Overrides the LANG the remote shell starts with, e.g. \"en_US.UTF-8\" — only needed if the server\'s own locale is missing or wrong. Leave blank to use the server\'s default.</string>
+    <string name="mosh_color_mode">Color Mode</string>
+    <string name="mosh_prediction_mode">Predictive Local Echo</string>
+    <string name="mosh_prediction_mode_desc">Adaptive shows your typing immediately and only when the network is slow, which is Mosh\'s signature feature. Always shows it on every keystroke regardless of latency; Never disables it entirely.</string>
+    <string name="mosh_prediction_adaptive">Adaptive</string>
+    <string name="mosh_prediction_always">Always</string>
+    <string name="mosh_prediction_never">Never</string>
+    <string name="error_rlogin_connect_failed">Rlogin connection failed</string>
+    <string name="error_rlogin_timeout">Rlogin connection timed out. Check the host address and port, then try again.</string>
+    <string name="error_rlogin_refused">Rlogin connection refused. Verify the server is running and the port is correct.</string>
+    <string name="error_rlogin_denied_with_reason">Rlogin connection denied: %1$s</string>
+    <string name="error_serial_console_connect_failed">Serial Console connection failed</string>
+    <string name="error_serial_console_timeout">Serial Console connection timed out. Check the host address and port, then try again.</string>
+    <string name="error_serial_console_refused">Serial Console connection refused. Verify the serial device server is running and the port is correct.</string>
+    <string name="error_serial_console_local_device_unsupported">Direct USB serial devices aren\'t supported yet — use a network serial-device server (RFC 2217 or raw TCP) instead.</string>
+    <string name="error_serial_console_no_usb_host">This device has no USB host support, so a directly-attached USB serial adapter can\'t be used. Use RFC 2217 or Raw TCP against a network serial-device server instead.</string>
+    <string name="error_serial_console_no_usb_device">No supported USB serial adapter is currently attached. Plug one in (CDC-ACM or Silicon Labs CP210x chipsets are supported) and try again.</string>
+    <string name="error_serial_console_ambiguous_usb_device">More than one supported USB serial adapter is attached — enter the specific device path to pick one.</string>
+    <string name="error_serial_console_usb_device_not_found">The specified USB device path doesn\'t match any currently-attached device. Leave the field blank to auto-detect if only one adapter is plugged in.</string>
+    <string name="error_serial_console_usb_permission_denied">USB permission was denied for the serial adapter. Reconnect to be prompted again.</string>
+    <string name="error_serial_console_usb_open_failed">Couldn\'t open the USB serial adapter — it may have been unplugged, or is in use by another app.</string>
+    <string name="error_serial_console_unsupported_usb_chipset">This USB adapter\'s chipset isn\'t supported yet. CDC-ACM and Silicon Labs CP210x devices work today; FTDI, CH340/CH341, and PL2303 aren\'t supported yet.</string>
+    <string name="serial_console_section_title">Serial Console</string>
+    <string name="serial_console_rfc2217_desc">RFC 2217 sends the baud rate/data bits/parity/stop bits below to the server (e.g. ser2net) at connect time, and reports back line/modem status.</string>
+    <string name="serial_console_raw_tcp_desc">Raw TCP is a plain byte-for-byte pipe with no line-control signalling — the server and the physical device on its end must already be configured to match.</string>
+    <string name="serial_console_baud_rate">Baud rate</string>
+    <string name="serial_console_data_bits">Data bits</string>
+    <string name="serial_console_parity">Parity</string>
+    <string name="serial_console_stop_bits">Stop bits</string>
+    <string name="serial_console_device_path">USB device path (optional)</string>
+    <string name="serial_console_local_device_desc">Connects directly to a USB serial adapter — CDC-ACM, Silicon Labs CP210x, FTDI, WCH CH340/CH341, and Prolific PL2303 chipsets are supported. Leave the device path blank to auto-detect when only one supported adapter is plugged in, or fill it in if more than one is attached. You\'ll be prompted for USB permission on connect.</string>
+    <string name="serial_console_hardware_flow_control">Hardware flow control (RTS/CTS)</string>
+    <string name="serial_console_hardware_flow_control_desc">Lets the adapter pause transmission when the remote device\'s buffer is full, instead of dropping bytes. Not supported on CDC-ACM adapters — has no effect there.</string>
+    <string name="ssh_tunnel_private_key">SSH Tunnel Private Key (PEM)</string>
+    <string name="ssh_tunnel_key_passphrase">SSH Key Passphrase (optional)</string>
+    <string name="resolution">Display Resolution</string>
+    <string name="resolution_auto">Auto (match device)</string>
+    <string name="resolution_custom">Custom…</string>
+    <string name="resolution_custom_current">Custom: %1$s</string>
+    <string name="resolution_custom_invalid">Enter a width and height between 1 and 8192</string>
+    <string name="width">Width</string>
+    <string name="height">Height</string>
+
+    <!-- Delete -->
+    <string name="delete_confirm_title">Delete Connection</string>
+    <string name="delete_confirm_message">Delete \"%s\"? This action cannot be undone.</string>
+
+    <!-- Subscribe -->
+<!-- Network -->
+    <string name="poor_network_warning">Weak signal — switching to low-bandwidth mode</string>
+
+    <!-- VPN-AWARE-CONNECTIVITY -->
+    <string name="vpn_active_status">VPN active (%1$s)</string>
+    <string name="vpn_status_ipv4">IPv4</string>
+    <string name="vpn_status_ipv6">IPv6</string>
+    <string name="vpn_status_ipv4_ipv6">IPv4 + IPv6</string>
+    <string name="network_binding">Network</string>
+    <string name="network_binding_any">Any available network</string>
+    <string name="network_binding_vpn_only">VPN only</string>
+    <string name="network_binding_wifi_only">Wi-Fi only</string>
+    <string name="network_binding_cellular_only">Cellular only</string>
+    <string name="error_network_binding_vpn_unavailable">No active VPN connection found. Connect to your VPN and try again.</string>
+    <string name="error_network_binding_wifi_unavailable">No active Wi-Fi connection found. Connect to Wi-Fi and try again.</string>
+    <string name="error_network_binding_cellular_unavailable">No active cellular connection found.</string>
+    <string name="error_network_binding_unavailable">The selected network is not currently available.</string>
+    <string name="error_entra_sign_in_required">Sign in with Microsoft first (Connection settings → RD Gateway) before connecting.</string>
+    <string name="error_entra_token_failed">Couldn\'t get a Microsoft sign-in token: %1$s</string>
+    <string name="error_entra_gateway_scope_missing">Enter the Gateway\'s Application ID URI (Connection settings → RD Gateway) before connecting.</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <!-- UI-FIX (settings reorganization): hub category subtitles -->
+    <string name="settings_appearance_desc">Theme, dark mode, and language</string>
+    <string name="settings_cursor_input_desc">Cursor style, sensitivity, sound, and haptics</string>
+    <string name="settings_connection_desc">Resolution, compression, and background sessions</string>
+    <string name="settings_session_controls_desc">Toolbar, keyboard bar, and reconnect behavior</string>
+    <string name="settings_data_desc">Connection history</string>
+    <string name="settings_security_desc">Biometric and PIN app lock</string>
+    <string name="settings_about_desc">Version, contact, and links</string>
+    <string name="appearance">Appearance</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="theme">Color Theme</string>
+    <string name="theme_space">Deep Space</string>
+    <string name="theme_nebula">Nebula</string>
+    <string name="theme_aurora">Aurora</string>
+    <string name="language">Language</string>
+    <string name="lang_system">System Default</string>
+
+    <!-- Cursor -->
+    <string name="cursor_input">Cursor &amp; Input</string>
+    <string name="cursor_classic">Classic Pointer</string>
+    <string name="cursor_default">Space Arrow</string>
+    <string name="cursor_crosshair">HUD Crosshair</string>
+    <string name="cursor_dot">Plasma Dot</string>
+    <string name="cursor_circle">Orbit Ring</string>
+    <string name="cursor_size">Cursor Size</string>
+    <string name="cursor_stage_hint">Drag the pointer to try it on your own desktop</string>
+    <string name="touchpad_sensitivity">Touchpad Sensitivity</string>
+    <string name="haptic_feedback">Haptic Feedback</string>
+    <string name="sound_effects">Sound Effects</string>
+    <string name="sound_effects_desc">Galaxy sounds for taps, toggles, and connection events</string>
+
+    <!-- Connection -->
+    <string name="connection">Connection</string>
+    <string name="warp_status_title">Cloudflare WARP</string>
+    <string name="warp_connected">Connected</string>
+    <string name="warp_installed_disconnected">Installed, not connected</string>
+    <string name="warp_not_installed">Not installed</string>
+    <string name="warp_status_heuristic_notice">Android doesn\'t let apps confirm which VPN app owns an active tunnel — \"Connected\" means WARP is installed and some VPN is active, which is usually WARP but could be a different VPN app.</string>
+    <string name="warp_open_app">Open</string>
+    <string name="warp_get_app">Get WARP</string>
+    <string name="default_resolution">Default Display Resolution</string>
+    <string name="run_in_background">Keep Session in Background</string>
+    <string name="run_in_background_desc">Stay connected when switching apps or locking the screen</string>
+    <string name="background_power_saving">Background Power Saving</string>
+    <string name="background_power_saving_desc">Don\'t keep the CPU fully awake in the background — relies on the connection\'s keep-alive instead. Saves battery on long background sessions; frames may take a moment to catch up when you return.</string>
+    <string name="battery_optimization_title">Disable battery optimization</string>
+    <string name="battery_optimization_desc_enabled">Already exempt — background sessions won\'t be killed by the system</string>
+    <string name="battery_optimization_desc_disabled">Required so the system doesn\'t kill your connection in the background</string>
+    <string name="autostart_settings_title">Open background app settings</string>
+    <string name="autostart_settings_desc">Your device (%1$s) has its own background-app manager — allow this app there too, or background sessions may still be stopped</string>
+
+    <!-- Session Controls -->
+    <string name="session_controls">In-Session Controls</string>
+    <string name="show_toolbar_by_default">Show Toolbar by Default</string>
+    <string name="show_extra_keys_by_default">Show Keyboard Shortcuts Bar</string>
+
+    <!-- Developer -->
+    <string name="developer">Developer</string>
+    <string name="developer_telegram">GoToHEX — Tap to open Telegram</string>
+    <string name="developer_youtube">@dev-hex404 — Tap to open YouTube</string>
+    <string name="about">About</string>
+    <string name="by_developer">by GoToHEX</string>
+
+    <!-- About screen redesign -->
+    <string name="about_hero_tagline">Fast. Secure. Everywhere you need to be.</string>
+    <string name="about_section_connect">Connect With Us</string>
+    <string name="about_section_support">Support the App</string>
+    <string name="about_section_legal">Legal</string>
+    <string name="about_section_info">App Info</string>
+    <string name="contact_email">Email</string>
+    <string name="contact_email_subtitle">support@gotohex.dev — Tap to send a message</string>
+    <string name="rate_app">Rate the App</string>
+    <string name="rate_app_subtitle">Enjoying Systems Go? Leave us a rating on Google Play</string>
+    <string name="share_app">Share the App</string>
+    <string name="share_app_subtitle">Invite friends and colleagues to try it out</string>
+    <string name="share_app_message">Systems Go — a fast, secure multi-protocol remote desktop client (RDP/VNC/SSH). Try it out:\nhttps://play.google.com/store/apps/details?id=%1$s</string>
+    <string name="share_app_chooser_title">Share Systems Go via</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_subtitle">How your data is handled</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="terms_of_service_subtitle">Rules for using the App</string>
+    <string name="app_version_label">Version</string>
+    <string name="copy_debug_info">Copy Diagnostic Info</string>
+    <string name="copy_debug_info_subtitle">Useful when contacting support</string>
+    <string name="debug_info_copied">Diagnostic info copied to clipboard</string>
+    <string name="about_footer_made_with">Made with ♥ for remote access enthusiasts</string>
+    <string name="about_footer_copyright">© 2026 GoToHEX. All rights reserved.</string>
+    <string name="error_no_store_app">No app found to open the Store.</string>
+    <string name="privacy_policy_content">Last updated: July 2026\n\nThis Privacy Policy explains how Systems Go (\"the App\", \"we\", \"our\") collects, uses, and protects your information.\n\n1. Data We Collect\nSystems Go is a remote desktop client. Connection profiles (host address, port, username, and saved credentials) are stored locally on your device only, encrypted using Android\'s secure storage. We do not upload your connection data, passwords, or session content to any server we control.\n\n2. Permissions\nThe App may request network access to establish RDP/VNC/SSH connections, storage access for file transfer and screenshots, camera/microphone access only if you enable device-redirection features, and biometric access to unlock the App if you enable App Lock. Each permission is used solely to provide its corresponding feature.\n\n3. Local Security\nSaved passwords and PINs are encrypted on-device. Clearing app data or uninstalling the App permanently removes this information from your device.\n\n4. Third-Party Services\nThe App does not currently include advertising or analytics SDKs. If ads, analytics, or subscription services are added in a future update, this policy will be updated in advance and you will be notified through an in-app changelog.\n\n5. Data Sharing\nWe do not sell your personal data, and we do not share it with third parties beyond what is described above.\n\n6. Your Rights\nYou may delete all locally stored data at any time from Settings → Data → Clear Data.\n\n7. Contact\nQuestions about this policy can be sent to support@gotohex.dev or via Telegram @GoToHEX.\n\nNote: this document is a starter template. Please review and adapt it to accurately reflect the App\'s real practices — especially before enabling ads, analytics, or subscriptions — prior to publishing.</string>
+    <string name="terms_of_service_content">Last updated: July 2026\n\nBy downloading, installing, or using Systems Go (\"the App\"), you agree to the following terms.\n\n1. Use of the App\nThe App helps you connect to remote computers and servers that you own or are authorized to access via RDP, VNC, and SSH. You are solely responsible for ensuring you have permission to access any remote system through the App.\n\n2. License\nYou are granted a personal, non-transferable license to use the App for its intended purpose. Reverse engineering, redistribution, or resale of the App without permission is not allowed.\n\n3. No Warranty\nThe App is provided \"as is\", without warranty of any kind. We do not guarantee uninterrupted or error-free operation, especially over unstable networks.\n\n4. Limitation of Liability\nThe developer is not liable for any data loss, unauthorized access, or damage resulting from use of the App, including misuse of saved credentials or connections to unauthorized systems.\n\n5. Updates\nFeatures — including future advertising or subscription plans — may be added, changed, or removed in future updates. Continued use of the App after an update means you accept the revised Terms.\n\n6. Termination\nWe may discontinue support for the App at any time. You may stop using the App and delete it at any time.\n\n7. Contact\nFor questions about these Terms, reach out via Telegram @GoToHEX or support@gotohex.dev.\n\nNote: this document is a starter template. Please review and adapt it before publishing.</string>
+
+    <!-- Background session -->
+    <string name="background_session_channel">Active Remote Sessions</string>
+    <string name="background_session_description">Shows while a remote desktop session is running in the background</string>
+    <string name="background_session_title">Systems Go session active</string>
+    <string name="background_session_text">Connected to %1$s — tap to return</string>
+
+    <!-- Session screen -->
+    <string name="connecting_to">Connecting to %1$s…</string>
+    <string name="close">Close</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="take_screenshot">Screenshot</string>
+    <string name="screenshot_saved">Screenshot saved to gallery</string>
+    <string name="screenshot_failed">Failed to save screenshot</string>
+    <string name="capture_session_tool">Capture session</string>
+    <string name="capture_photo_action">Take photo</string>
+    <string name="capture_video_action">Start video recording</string>
+    <string name="capture_video_stop">Stop recording</string>
+    <string name="capture_video_quality">Quality</string>
+    <string name="recording_indicator">Recording</string>
+    <string name="recording_saved">Recording saved</string>
+    <string name="recording_failed">Failed to save recording</string>
+    <string name="virtual_keyboard_tool">Keyboard</string>
+    <!-- STAGE 11 AUDIT FIX: SessionVirtualKeyboard's icon-only control keys
+         (language switch, backspace, enter, hide) had contentDescription =
+         null with no Text fallback, so TalkBack announced nothing at all
+         for them — unlike every other new Toolbox button, which either
+         passes a real contentDescription or relies on a sibling Text label
+         via merged semantics (see SessionToolbox.kt's ToolboxToolButton
+         comment). -->
+    <string name="vk_switch_language">Switch keyboard language</string>
+    <string name="vk_backspace">Backspace</string>
+    <string name="vk_enter">Enter</string>
+    <string name="vk_hide">Hide keyboard</string>
+    <string name="vk_shift">Shift</string>
+    <string name="vk_space">Space</string>
+    <string name="vk_symbols">Switch to symbols</string>
+    <string name="vk_letters">Switch to letters</string>
+    <string name="vk_arabic_digits_hint">Long-press a digit for ٠١٢٣</string>
+    <string name="blank_screen_tool">Blank screen</string>
+    <string name="blank_screen_hint">Long-press here to exit blank screen</string>
+    <string name="screen_flip_tool">Flip screen</string>
+    <string name="screen_flip_normal">Normal</string>
+    <string name="screen_flip_horizontal">Mirror horizontally</string>
+    <string name="screen_flip_vertical">Mirror vertically</string>
+    <string name="screen_flip_180">Rotate 180°</string>
+    <string name="mouse_mode_touchpad_tool">Mouse: Touchpad</string>
+    <string name="mouse_mode_direct_tool">Mouse: Direct</string>
+    <string name="mouse_mode_multitouch_tool">Mouse: Multitouch</string>
+    <string name="cursor_shape_tool">Cursor shape</string>
+    <!-- TOOLBOX FEATURE (Stage 7): independent FPS / latency toolbox toggles -->
+    <string name="fps_counter_tool">FPS counter</string>
+    <string name="latency_counter_tool">Latency</string>
+    <!-- TOOLBOX FEATURE (Stage 8, Part 2): "Connection quality" — live quality
+         switch via a seamless background-reconnect swap (see
+         docs/stage8-quality-live-change-investigation.md). No technical
+         detail on failure by design (requirement #3). -->
+    <string name="connection_quality_tool">Connection quality</string>
+    <string name="quality_change_succeeded">Quality changed</string>
+    <string name="quality_change_failed">Couldn\'t change quality, try again</string>
+    <!-- TOOLBOX FEATURE (Stage 9): "مزامنة الحافظة" — runtime toggle on top of
+         the always-on-by-default ClipboardSyncManager backend. Two labels
+         (not one + a badge) so screen readers announce the actual current
+         state via contentDescription, same as mouse_mode_touchpad_tool /
+         mouse_mode_direct_tool above. -->
+    <string name="clipboard_sync_on_tool">Clipboard sync: On</string>
+    <string name="clipboard_sync_off_tool">Clipboard sync: Off</string>
+    <string name="initializing">INITIALIZING WARP DRIVE…</string>
+    <!-- UX-06: RDP Advanced settings -->
+<string name="color_depth">Color Depth</string>
+    <string name="color_depth_auto">Auto (matches network speed)</string>
+    <string name="color_depth_16">16-bit (Fastest)</string>
+    <string name="color_depth_24">24-bit</string>
+    <string name="color_depth_32">32-bit (Best Quality)</string>
+    <!-- QUALITY-UNIFY FIX: single 5-level slider replacing the old separate
+         "Frame Compression Quality" percentage slider and 2-option Performance
+         chip. Levels run from a barely-working connection to a very fast one. -->
+    <!-- RENAME FIX: "Network Quality" renamed to "Display Quality" with a
+         new icon (Icons.Outlined.HighQuality) since the label led users to
+         think it measured their live connection rather than a setting they
+         control. -->
+    <string name="display_quality">Display Quality</string>
+    <string name="network_quality_very_weak">Very Weak</string>
+    <string name="network_quality_weak">Weak</string>
+    <string name="network_quality_medium">Medium</string>
+    <string name="network_quality_strong">Strong</string>
+    <string name="network_quality_very_strong">Very Strong</string>
+    <string name="network_quality_auto">Auto (matches network speed)</string>
+    <string name="udp_transport">UDP Transport</string>
+    <string name="udp_transport_desc">Let RDP sessions use UDP alongside TCP when the server supports it. Falls back to TCP automatically if not.</string>
+    <string name="ws_transport_title">WebSocket Transport</string>
+    <string name="ws_transport_subtitle">Tunnel RDP through ws(s)://</string>
+    <string name="ws_transport_label">Transport</string>
+    <string name="ws_transport_desc">Direct TCP talks to the RDP server directly, as today. WS/WSS tunnel RDP through a WebSocket — use this for Guacamole, RD Gateway, Azure Virtual Desktop, or a reverse proxy (Nginx/HAProxy/Traefik/Caddy) in front of the server.</string>
+    <string name="ws_url_label">WebSocket URL (overrides Host/Port/Path below if set)</string>
+    <string name="ws_url_placeholder">wss://gateway.example.com/rdp</string>
+    <string name="ws_host_label">Host</string>
+    <string name="ws_path_label">Path</string>
+    <string name="ws_path_placeholder">/rdp</string>
+    <string name="ws_auth_headers_title">Authentication &amp; headers</string>
+    <string name="ws_bearer_token_label">Bearer token</string>
+    <string name="ws_authorization_header_label">Authorization header (overrides Bearer token)</string>
+    <string name="ws_origin_header_label">Origin header</string>
+    <string name="ws_subprotocol_label">Sec-WebSocket-Protocol</string>
+    <string name="ws_cookie_header_label">Cookie header</string>
+    <string name="ws_custom_headers_label">Custom headers</string>
+    <string name="ws_header_name_label">Name</string>
+    <string name="ws_header_value_label">Value</string>
+    <string name="ws_header_remove">Remove</string>
+    <string name="ws_tls_title">TLS</string>
+    <string name="ws_validate_certificate_label">Validate certificate</string>
+    <string name="ws_allow_self_signed_label">Allow self-signed certificates</string>
+    <string name="ws_self_signed_warning">The connection stays encrypted, but the server\'s identity will not be verified. Only enable this for a server you control, ideally combined with certificate pinning below.</string>
+    <string name="ws_auto_reconnect_label">Auto-reconnect</string>
+    <string name="smart_sizing">Smart Sizing</string>
+    <string name="smart_sizing_desc">Keep the remote session at a fixed resolution and scale it to fit the screen, instead of resizing the session on every rotation or window resize.</string>
+    <string name="data_saver">Data Saver</string>
+    <string name="data_saver_desc">Force every session to the lightest quality settings to minimize data usage, regardless of how fast the network looks — useful on a metered or roaming connection.</string>
+    <string name="enable_sound">Enable Remote Sound</string>
+    <string name="enable_mic_redirect">Redirect Microphone</string>
+    <!-- AUDIO-BACKEND FIX: shown under "Enable Remote Sound" (and the toggle
+         disabled) when this build's native library has no working Android
+         audio backend — see AFreeRdpBridge.isAudioBackendAvailable. -->
+    <string name="enable_sound_unsupported">Not supported in this build (no audio backend)</string>
+    <!-- PRINTER-REDIRECT FEATURE: lets the remote server see this device as
+         a printer and send it jobs, handed off to Android's own Print
+         Framework (Wi-Fi/network/USB printers, or Save as PDF). -->
+    <string name="enable_printer_redirect">Redirect Printers</string>
+    <!-- Shown under "Redirect Printers" (and the toggle disabled) when this
+         build's native library has no working printer backend — see
+         AFreeRdpBridge.isPrinterBackendAvailable. -->
+    <string name="enable_printer_redirect_unsupported">Not supported in this build (no printer backend)</string>
+    <!-- WEBCAM-REDIRECT FEATURE: lets the remote server use this device's
+         camera as a redirected webcam (MS-RDPECAM, "rdpecam" dynamic
+         channel). -->
+    <string name="enable_webcam_redirect">Redirect Webcam</string>
+    <!-- Shown under "Redirect Webcam" (and the toggle disabled) when this
+         build's native library has no working webcam backend — see
+         AFreeRdpBridge.isWebcamBackendAvailable. -->
+    <string name="enable_webcam_redirect_unsupported">Not supported in this build (no webcam backend)</string>
+    <!-- SMARTCARD-REDIRECT FEATURE: lets the remote server see a PC/SC
+         smart-card reader backed by this device (MS-RDPESC, "smartcard"
+         rdpdr device) — mainly for smart-card logon (PIV/CAC). -->
+    <string name="enable_smartcard_redirect">Redirect Smart Card</string>
+    <!-- Shown under "Redirect Smart Card" (and the toggle disabled) when this
+         build's native library has no working smartcard backend — see
+         AFreeRdpBridge.isSmartcardBackendAvailable. -->
+    <string name="enable_smartcard_redirect_unsupported">Not supported in this build (no smart card backend)</string>
+    <!-- Shown once the toggle is turned on, even when the backend above is
+         "available": the channel compiles in, but this app does not yet
+         ship an on-device PC/SC resource manager (no pcscd equivalent), so
+         a physical reader may not actually respond. -->
+    <string name="enable_smartcard_redirect_experimental">Experimental: card may not be readable without a PC/SC resource manager on this device</string>
+
+    <!-- PARALLEL-REDIRECT FEATURE: lets the remote server see a parallel
+         port backed by a local device node on this device (RDPDR
+         "parallel" device, same channel as drive/printer/smartcard above).
+         Unlike those, there is no *_backend_available gate — see
+         systemsgo_jni.c's parallel block — but it does need a user-supplied
+         local path, since Android has no built-in default the way drive
+         redirect has this app's own storage directory. -->
+    <string name="enable_parallel_redirect">Redirect Parallel Port</string>
+    <!-- Label for the text field where the user enters the local device
+         node exposed as the remote parallel port. Only shown once the
+         toggle above is turned on. -->
+    <string name="parallel_port_path_label">Local device path</string>
+    <!-- Shown under the path field once the toggle is on: explains that,
+         unlike drive redirect, nothing is redirected until a real device
+         path is entered, and that most Android devices have no such
+         hardware without a USB-OTG adapter. -->
+    <string name="enable_parallel_redirect_hint">Requires a real local device node (e.g. from a USB-OTG parallel/serial adapter). Left blank, this toggle has no effect.</string>
+
+    <!-- SERIAL-REDIRECT FEATURE: mirrors enable_parallel_redirect above,
+         just a "serial" RDPDR device (MS-RDPESP) instead of "parallel". -->
+    <string name="enable_serial_redirect">Redirect Serial Port</string>
+    <string name="serial_port_path_label">Local device path</string>
+    <string name="enable_serial_redirect_hint">Requires a real local device node (e.g. /dev/ttyUSB0 or /dev/ttyACM0 from a USB-OTG serial adapter). Left blank, this toggle has no effect.</string>
+
+    <!-- CODEC-NEGOTIATION FEATURE: "Advanced Settings" card in the RDP
+         connection form's Optional Settings section — lets a user choose
+         which RDPGFX codec(s) this profile offers the server. See
+         com.systemsgo.hex.data.model.CodecPreference's doc comment and
+         AFreeRdpBridge.CodecPreference for the full mapping. -->
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="advanced_settings_desc">Codec negotiation</string>
+    <string name="codec_preference_auto">Auto (Recommended)</string>
+    <string name="codec_preference_prefer_av1">Prefer AV1</string>
+    <string name="codec_preference_prefer_h264">Prefer H.264</string>
+    <string name="codec_preference_disable_modern">Disable modern codecs</string>
+    <!-- Shown under a codec option (and the option disabled) when this
+         build's native library has no working decode backend for it — see
+         AFreeRdpBridge.isH264BackendAvailable / isAv1BackendAvailable. -->
+    <string name="codec_preference_unavailable_in_build">Not available in this build (no decoder backend compiled in)</string>
+    <!-- Shown under "Prefer AV1" even when the backend is available: AV1 is
+         still experimental upstream in FreeRDP and only negotiates against
+         FreeRDP-based servers today — see AFreeRdpBridge.isAv1BackendAvailable's
+         doc comment. -->
+    <string name="codec_preference_av1_experimental">Experimental — most RDP servers don\'t offer AV1 yet; falls back automatically</string>
+    <!-- CODEC-NEGOTIATION FEATURE (hardware-decode signal): shown under a
+         codec option when this specific device has a hardware decoder for
+         it — informational only, see HardwareDecoderCapabilities' class
+         doc. Never shown together with codec_preference_unavailable_in_build
+         or codec_preference_av1_experimental for the same option. -->
+    <string name="codec_preference_hardware_decode_hint">Hardware-accelerated on this device — lower CPU/battery use</string>
+
+    <!-- UX-07: View-only banner -->
+    <string name="view_only_banner">VIEW ONLY — Input disabled</string>
+
+    <!-- ✅ إعدادات جديدة -->
+    <string name="scroll_sensitivity">Scroll Sensitivity</string>
+    <string name="right_click_long_press">Long Press = Right Click</string>
+    <string name="right_click_long_press_desc">Hold finger to trigger right mouse button</string>
+    <string name="keep_screen_on">Keep Screen On</string>
+    <string name="keep_screen_on_desc">Prevent screen from sleeping during sessions</string>
+
+    <!-- ✅ قسم الأمان -->
+    <string name="security">Security</string>
+    <string name="biometric_lock">Biometric Lock</string>
+    <string name="biometric_lock_desc">Unlock app with fingerprint or face</string>
+    <string name="pin_lock">PIN Lock</string>
+    <string name="pin_lock_desc">Set a numeric PIN to unlock app</string>
+    <string name="pin_lock_set">PIN is set — tap to change or disable</string>
+    <string name="auto_lock">Auto Lock</string>
+    <string name="auto_lock_disabled">Disabled</string>
+    <string name="auto_lock_30s">30 seconds</string>
+    <string name="auto_lock_1m">1 minute</string>
+    <string name="auto_lock_5m">5 minutes</string>
+    <string name="auto_lock_15m">15 minutes</string>
+    <string name="auto_lock_30m">30 minutes</string>
+    <string name="auto_lock_immediate">Immediately when app goes to background</string>
+
+    <!-- Wake-on-LAN -->
+<string name="wol_enable">Enable Wake-on-LAN</string>
+    <string name="wol_mac_address">MAC Address (AA:BB:CC:DD:EE:FF)</string>
+    <string name="wol_broadcast">Broadcast Address</string>
+    <string name="wol_hint">Send Magic Packet to wake the device before connecting. Use the subnet broadcast (e.g. 192.168.1.255) for cross-router delivery.</string>
+    <string name="wol_mac_invalid">Invalid MAC address format</string>
+    <string name="wol_wake">Wake</string>
+    <string name="wol_sent">Magic Packet sent — waiting for device…</string>
+    <string name="wol_error">Failed to send Wake-on-LAN packet</string>
+    <string name="wol_port">UDP Port</string>
+    <string name="wol_wake_and_connect_section">Wake &amp; Connect timing</string>
+    <string name="wol_timeout">Timeout (sec)</string>
+    <string name="wol_retry_interval">Retry every (sec)</string>
+    <string name="wol_max_retries">Max retries</string>
+    <string name="wol_wake_and_connect">Wake &amp; Connect</string>
+    <string name="wol_wake_and_connect_short">Wake &amp; Connect</string>
+    <string name="wol_progress_sending">Sending Wake-on-LAN packet…</string>
+    <string name="wol_progress_waiting">Waiting for the computer to start…</string>
+    <string name="wol_progress_waiting_attempt">Waiting for the computer to start… (attempt %1$d/%2$d)</string>
+    <string name="wol_progress_online">Computer is online.</string>
+    <string name="wol_progress_connecting">Connecting…</string>
+    <string name="wol_progress_failed">Wake failed.</string>
+    <!-- Import .rdp file -->
+    <string name="import_rdp_label">Import</string>
+    <string name="scan_qr_prompt">Align the QR code within the frame</string>
+    <!-- ── App Lock Screen ───────────────────────────────────────────────── -->
+    <string name="unlock_to_continue">Enter PIN to continue</string>
+    <string name="biometric_prompt_title">Unlock Systems Go</string>
+    <string name="biometric_prompt_subtitle">Use your fingerprint or device credentials</string>
+    <!-- BUGFIX-UI: pin_locked_message / pin_attempts_remaining used a single
+         %1$d with a fixed noun form. Arabic has 6 grammatical plural
+         categories (zero/one/two/few/many/other) and "5 ثانية" is simply
+         wrong Arabic for that count — it needs "5 ثوانٍ". Converted to proper
+         <plurals> so each language picks the grammatically correct form. -->
+<!-- BUG 3 FIX: shown when user tries to enable biometric lock but hardware
+         is absent, no fingerprints are enrolled, or the sensor is locked out -->
+    <string name="biometric_not_available">Biometric authentication is not available on this device. Please enroll a fingerprint in Settings first.</string>
+
+    <!-- ── Session Tabs ──────────────────────────────────────────────────── -->
+    <string name="active_sessions">Active Sessions</string>
+    <string name="session_tab_connecting">Connecting…</string>
+    <string name="close_session">Close Session</string>
+
+    <!-- ── Split Screen ──────────────────────────────────────────────────── -->
+    <string name="split_screen">Split Screen</string>
+    <string name="split_screen_title">Split Screen</string>
+    <string name="split_screen_unsupported">Split Screen isn\'t available here</string>
+    <string name="split_screen_unsupported_detail">This feature needs a tablet, unfolded foldable, Samsung DeX, or Android Desktop Mode display. It\'s automatically hidden on regular phone screens.</string>
+    <string name="split_screen_toggle_layout">Switch layout (side by side / stacked)</string>
+    <string name="split_screen_maximize_left">Maximize left pane</string>
+    <string name="split_screen_maximize_right">Maximize right pane</string>
+    <string name="split_screen_restore">Restore split</string>
+    <string name="split_screen_exit">Exit Split Screen</string>
+    <string name="split_screen_pick_title">Choose two connections</string>
+    <string name="split_screen_pick_left">Left / top pane</string>
+    <string name="split_screen_pick_right">Right / bottom pane</string>
+    <string name="split_screen_pick_hint">Pick a saved connection for each pane. Any combination of RDP, VNC, or SSH works.</string>
+    <string name="split_screen_start">Start Split Screen</string>
+    <string name="split_screen_need_two_profiles">You need at least two saved connections to use Split Screen</string>
+
+    <!-- ── Connection History ────────────────────────────────────────────── -->
+    <string name="connection_history">Connection History</string>
+    <string name="data_section">Data</string>
+
+    <!-- ── Export All Connections / Import Connections (Settings → Data) ──── -->
+    <string name="export_all_connections">Export All Connections</string>
+    <string name="export_all_connections_desc">Save every connection as one encrypted backup file</string>
+    <string name="export_password_desc">Choose a password to encrypt this backup. You\'ll need it to restore these connections later — it cannot be recovered if you forget it.</string>
+    <string name="import_connections">Import Connections</string>
+    <string name="import_connections_desc">Restore connections from an encrypted backup file</string>
+
+    <!-- ── CLEAR-DATA REDESIGN: Settings → Data → "Clear Data" ─────────────
+         Tapping this no longer deletes anything directly. If App Lock is
+         configured, it first requires a successful PIN/biometric check
+         (SecurityConfirmDialog), then opens DataManagementScreen, which
+         itself requires an explicit, separate confirmation per category
+         before deleting anything. This is a different, unrelated feature
+         from the "Forgot PIN?" 24h-delayed reset on the lock screen. -->
+    <string name="clear_data">Clear Data</string>
+    <string name="clear_data_desc">Review and remove app data, protected by App Lock</string>
+
+    <string name="data_management_title">Manage App Data</string>
+    <string name="data_management_intro">Choose what to remove. Nothing is deleted until you confirm each action below.</string>
+
+    <string name="data_management_cache_title">Cache &amp; Temporary Files</string>
+    <string name="data_management_cache_desc">Thumbnails and other temporary files. Safe to remove — nothing you saved is affected, and they\'ll be recreated as needed.</string>
+    <string name="data_management_cache_clear">Clear Cache</string>
+    <string name="data_management_cache_confirm_title">Clear cache?</string>
+    <string name="data_management_cache_confirm_message">Temporary files and cached thumbnails will be deleted. Your saved connections, profiles, and settings are not affected.</string>
+    <string name="data_management_cache_cleared">Cache cleared</string>
+
+    <string name="data_management_history_title">Connection History</string>
+    <string name="data_management_history_desc">The log of past connection attempts shown in Connection History.</string>
+    <string name="data_management_history_clear">Clear History</string>
+
+    <string name="data_management_erase_title">Erase All App Data</string>
+    <string name="data_management_erase_desc">Permanently deletes every saved connection, credential, and setting on this device, and restores the app to its first-launch state.</string>
+    <string name="data_management_erase_button">Erase Everything</string>
+    <string name="data_management_erase_confirm_title">Erase all app data?</string>
+    <string name="data_management_erase_confirm_message">This will permanently delete every saved connection, password, and setting on this device. This cannot be undone and there is no way to recover this data afterward.</string>
+    <string name="data_management_erase_confirm_button">Erase Everything</string>
+    <string name="data_management_erasing">Erasing app data…</string>
+    <string name="import_password_desc">Enter the password used to encrypt this backup file.</string>
+    <string name="backup_password">Password</string>
+    <string name="confirm_backup_password">Confirm password</string>
+    <string name="confirm_action">Confirm</string>
+    <string name="export_connections_success">Exported %1$d connection(s) to the backup file</string>
+    <string name="import_connections_success">Imported %1$d connection(s), skipped %2$d duplicate(s)</string>
+    <string name="error_backup_password_empty">Password cannot be empty</string>
+    <string name="error_backup_password_mismatch">Passwords do not match</string>
+    <string name="error_backup_wrong_password">Incorrect password, or this file is not a valid backup</string>
+    <string name="error_backup_corrupt">This backup file is corrupted or unsupported</string>
+    <string name="error_export_failed">Failed to export connections. Please try again.</string>
+    <string name="error_import_failed">Failed to import connections. Please try again.</string>
+
+    <string name="history_empty">No history yet</string>
+    <string name="history_empty_subtitle">Your connections will appear here after the first session</string>
+    <string name="history_reconnect">Reconnect</string>
+    <string name="history_clear">Clear History</string>
+    <string name="history_clear_confirm">The entire connection history will be deleted and cannot be undone.</string>
+    <string name="history_duration_hours">%1$dh %2$dm</string>
+    <string name="history_duration_minutes">%1$dm %2$ds</string>
+    <string name="history_duration_seconds">%1$ds</string>
+    <string name="disconnect_reason_auth">Authentication failed</string>
+    <string name="disconnect_reason_error">Connection error</string>
+    <string name="disconnect_reason_dropped">Connection dropped unexpectedly</string>
+    <!-- ── FIX B1/B2: Settings strings that were missing ─────────────────── -->
+    <string name="show_fps_counter">FPS Counter</string>
+    <string name="show_fps_counter_desc">Show frames-per-second overlay during session</string>
+    <string name="show_latency_counter">Latency Counter</string>
+    <string name="show_latency_counter_desc">Show response-time (latency) overlay during session</string>
+    <string name="show_cursor_on_touch">Show Cursor on Touch</string>
+    <string name="show_cursor_on_touch_desc">Display a cursor indicator when Direct Mouse mode is active (the cursor is always hidden in Touchpad mode)</string>
+
+    <!-- ── i18n FIX: Previously hardcoded UI strings ─────────────────────── -->
+    <!-- Disconnect dialog -->
+    <string name="disconnect_dialog_title">Disconnect?</string>
+    <string name="disconnect_dialog_message">This will end the current remote session.</string>
+    <!-- KBD-INT FIX: shown when the SSH server/jump host asks a real keyboard-interactive
+         question (TOTP code, PAM challenge). default_title is the dialog/field fallback
+         label used only when the server didn't supply its own name/prompt text. -->
+    <string name="ssh_auth_prompt_default_title">Verification required</string>
+    <string name="ssh_auth_prompt_submit">Submit</string>
+    <!-- SSH-PROXYJUMP-CHAIN FEATURE: shown in the interactive auth prompt
+         dialog when the challenge came from a hop partway through a chain
+         (hopCount > 1) — e.g. "Hop 2 of 3 — user@10.0.0.5". %1$d = hop index,
+         %2$d = hop count, %3$s = "username@host" label. -->
+    <string name="ssh_auth_prompt_hop_indicator">Hop %1$d of %2$d — %3$s</string>
+
+    <!-- ConnectingOverlay -->
+    <string name="connecting_please_wait">Please wait…</string>
+
+    <!-- ErrorOverlay -->
+    <string name="error_connection_failed">Connection Failed</string>
+    <string name="retry_connection">Retry</string>
+    <!-- DisconnectedOverlay -->
+    <string name="disconnected_title">Disconnected</string>
+
+    <!-- Gesture Guide -->
+    <string name="gesture_guide_title">Gesture Guide</string>
+    <string name="gesture_pinch_pan_title">Pinch / Pan</string>
+    <string name="gesture_pinch_pan_desc">Two fingers to zoom &amp; move</string>
+    <string name="gesture_long_press_title">Long Press</string>
+    <string name="gesture_long_press_desc">Right mouse click</string>
+    <string name="gesture_toolbar_title">Toolbar Button</string>
+    <string name="gesture_toolbar_desc">Tap ↓ at top-right to show / hide toolbar</string>
+    <string name="gesture_got_it">Got it</string>
+
+    <!-- UI-AUDIT FIX: first-launch welcome overlay (see WelcomeOverlay.kt) -->
+    <string name="welcome_title">Welcome to Systems Go</string>
+    <string name="welcome_subtitle">A quick look before you get started.</string>
+    <string name="welcome_protocols_title">RDP, VNC, and SSH in one app</string>
+    <string name="welcome_protocols_desc">Connect to Windows, VNC, and SSH hosts from a single unified screen.</string>
+    <string name="welcome_security_title">Your credentials stay on this device</string>
+    <string name="welcome_security_desc">Saved passwords and keys are encrypted locally. You can also enable a PIN or biometric app lock.</string>
+    <string name="welcome_camera_title">Camera</string>
+    <string name="welcome_camera_desc">Used only when you scan a QR code to add a connection.</string>
+    <string name="welcome_mic_title">Microphone</string>
+    <string name="welcome_mic_desc">Used only if you turn on microphone redirection during a session.</string>
+    <string name="welcome_storage_title">Files</string>
+    <string name="welcome_storage_desc">Used only when you transfer files to or from a remote session.</string>
+    <string name="welcome_get_started">Get Started</string>
+
+    <!-- Onboarding pager (3-screen first-launch flow) -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_welcome_prefix">Welcome to</string>
+    <string name="onboarding_welcome_subtitle">Connect to any device, anywhere</string>
+    <string name="onboarding_page2_title_line1">One App,</string>
+    <string name="onboarding_page2_title_line2">Every Protocol</string>
+    <string name="onboarding_page2_subtitle">RDP, VNC, SSH, and more — all from one place</string>
+    <string name="onboarding_page3_title">Your data, your control</string>
+    <string name="onboarding_page3_subtitle">Encrypted locally, backed up only if you choose to</string>
+
+    <string name="onboarding_page4_title">Work like a pro</string>
+    <string name="onboarding_page4_subtitle">Built for real multitasking, on phone or desk</string>
+    <string name="gesture_tap_to_dismiss">Tap anywhere to dismiss</string>
+
+    <!-- Toolbar content descriptions -->
+    <string name="cd_ctrl_alt_del">Ctrl+Alt+Del</string>
+
+    <!-- Connection card chips -->
+    <string name="chip_gateway">Gateway</string>
+    <string name="chip_view_only">View Only</string>
+    <string name="chip_key">Key</string>
+
+    <!-- Empty-state per-protocol -->
+    <string name="no_rdp_connections">No RDP Connections</string>
+    <string name="no_rdp_connections_desc">Add an RDP connection to remotely access Windows</string>
+    <string name="no_vnc_connections">No VNC Connections</string>
+    <string name="no_vnc_connections_desc">Add a VNC connection to control remote desktops</string>
+    <string name="no_ssh_connections">No SSH Connections</string>
+    <string name="no_ssh_connections_desc">Add an SSH connection for secure terminal access</string>
+    <string name="no_telnet_connections">No Telnet Connections</string>
+    <string name="no_telnet_connections_desc">Add a Telnet connection for direct terminal access</string>
+    <string name="no_rlogin_connections">No Rlogin Connections</string>
+    <string name="no_rlogin_connections_desc">Add a Rlogin connection for direct terminal access</string>
+    <!-- EMPTY-STATE-GAP FIX: Web/Redfish/IPMI/AMT never got dedicated empty-state
+         copy of their own (see HomeScreen.kt's EmptyState `when`) — they used to
+         silently fall back to the generic "no_connections" text even while
+         filtered to one specific protocol. -->
+    <string name="no_web_connections">No Web Connections</string>
+    <string name="no_web_connections_desc">Add a Web connection to reach an HTTP/HTTPS management console</string>
+    <string name="no_redfish_connections">No Redfish Connections</string>
+    <string name="no_redfish_connections_desc">Add a Redfish connection to manage server hardware out-of-band</string>
+    <string name="no_ipmi_connections">No IPMI Connections</string>
+    <string name="no_ipmi_connections_desc">Add an IPMI connection for out-of-band server management</string>
+    <string name="no_amt_connections">No Intel AMT Connections</string>
+    <string name="no_amt_connections_desc">Add an Intel AMT connection for remote hardware management</string>
+
+    <!-- Search / list UI -->
+    <string name="search_hint">Search by name, IP, or tag…</string>
+    <!-- DUPLICATE-CONNECTION FEATURE -->
+    <string name="duplicate_connection">Duplicate</string>
+    <string name="duplicate_connection_suffix">%1$s (copy)</string>
+    <string name="connection_duplicated">Connection duplicated</string>
+    <!-- QR-SHARE FEATURE -->
+    <string name="share_via_qr">Share via QR</string>
+    <string name="share_via_qr_title">Share Connection</string>
+    <string name="share_via_qr_include_credentials">Include username &amp; password</string>
+    <string name="share_via_qr_credentials_warning">This code contains your password in plain text. Only share it with people you trust.</string>
+    <!-- TEST-CONNECTION FEATURE -->
+    <string name="test_connection">Test Connection</string>
+    <string name="test_connection_success">Reachable (%1$d ms)</string>
+    <string name="test_connection_failure">Unreachable: %1$s</string>
+    <!-- LAST-CONNECTED-ON-CARD FEATURE -->
+    <string name="last_connected_label">Last connected %1$s</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_lock_icon">App locked</string>
+    <string name="cd_paste">Paste from clipboard</string>
+    <string name="cd_disconnect">Disconnect session</string>
+    <string name="cd_scroll_to_bottom">Scroll to bottom</string>
+    <string name="cd_biometric_button">Unlock with biometrics</string>
+    <!-- FEATURE-TERM-FONT / FEATURE-TERM-SNIPPETS -->
+    <string name="cd_decrease_font_size">Decrease terminal font size</string>
+    <string name="cd_increase_font_size">Increase terminal font size</string>
+    <string name="cd_add_snippet">Save a new command</string>
+    <string name="cd_delete_snippet">Delete saved command \"%1$s\"</string>
+    <string name="snippet_dialog_title">Save command</string>
+    <string name="snippet_label_hint">Label (e.g. List files)</string>
+    <string name="snippet_command_hint">Command (e.g. ls -la)</string>
+    <string name="delete_snippet_title">Delete saved command?</string>
+    <string name="delete_snippet_message">Delete \"%1$s\"? This can\'t be undone.</string>
+
+    <!-- Quick Connect dialog -->
+    <string name="error_quick_connect_host_required">Quick Connect: host address is required</string>
+    <string name="quick_connect_title">Quick Connect</string>
+    <string name="quick_connect_dialog_desc">Connect instantly without saving a profile.</string>
+    <!-- BUG-7 FIX -->
+    <string name="field_host_port">Host : Port</string>
+
+    <!-- PIN Setup dialog -->
+    <string name="pin_setup_title">Set PIN Code</string>
+    <string name="pin_setup_desc">Enter a 4–6 digit PIN to lock the app.</string>
+    <string name="pin_confirm_label">Confirm PIN</string>
+    <string name="pin_error_too_short">PIN must be at least 4 digits</string>
+    <string name="pin_error_mismatch">PINs do not match</string>
+    <string name="pin_error_weak">This PIN is too easy to guess. Try a less predictable combination.</string>
+    <string name="pin_setup_confirm_desc">Re-enter the same PIN to confirm.</string>
+    <plurals name="pin_locked_minutes">
+        <item quantity="one">Locked. Try again in %1$d minute.</item>
+        <item quantity="other">Locked. Try again in %1$d minutes.</item>
+    </plurals>
+    <plurals name="pin_locked_seconds">
+        <item quantity="one">Locked. Try again in %1$d second.</item>
+        <item quantity="other">Locked. Try again in %1$d seconds.</item>
+    </plurals>
+    <plurals name="pin_attempts_remaining_plural">
+        <item quantity="one">%1$d attempt remaining</item>
+        <item quantity="other">%1$d attempts remaining</item>
+    </plurals>
+    <!-- BUGFIX-UI: icon-only password visibility toggle had no accessible label -->
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_search_icon">Search</string>
+    <string name="cd_hide_password">Hide password</string>
+    <!-- BUGFIX-UI: icon-only "clear all history" toolbar action had no accessible label -->
+    <string name="cd_clear_all_history">Clear all history</string>
+    <string name="security_confirm_title">Confirm It\'s You</string>
+    <string name="security_confirm_pin_desc">Enter your current PIN to change this security setting.</string>
+    <string name="security_confirm_biometric_desc">Confirm your identity with biometrics to change this security setting.</string>
+
+    <!-- About card -->
+<!-- AppLockScreen -->
+    <string name="use_biometrics">Use Biometrics</string>
+
+    <!-- TerminalScreen -->
+    <string name="terminal_connecting">Connecting…</string>
+    <string name="terminal_ssh_latency">SSH • %dms</string>
+
+    <!-- Session limit (MAX_TABS) -->
+    <string name="error_max_sessions">Maximum sessions reached (%1$d). Close a session before opening a new one.</string>
+
+    <!-- BUGFIX: duplicate active sessions — shown when a connection attempt is folded
+         into an already connecting/connected session with identical parameters. -->
+    <string name="error_session_already_active">A session to this destination is already connecting or connected. Switch to it from Active Sessions instead of opening another one.</string>
+
+    <!-- ── Bug fixes: new i18n strings ──────────────────────────────────────── -->
+
+    <!-- Bug #2: ConnectionHistoryScreen dialog strings -->
+    <string name="history_clear_title">Clear History?</string>
+    <string name="clear">Clear</string>
+    <string name="history_quickconnect_prompt">This session was Quick Connect — enter credentials to continue.</string>
+
+    <!-- Bug #3: MainViewModel import/PIN error messages -->
+    <string name="error_file_cannot_open">Cannot open the file. It may have been moved or access was denied.</string>
+    <string name="error_rdp_file_corrupted">Failed to read the .rdp file. The file may be corrupted.</string>
+    <string name="error_no_app_to_open_link">No app found to open this link.</string>
+    <string name="error_rdp_file_missing_host">Invalid .rdp file: the \'full address\' field is missing or empty.</string>
+    <!-- IMPORT-FIX: shown when the file picked in "Import .rdp file" is not named *.rdp -->
+    <string name="error_rdp_file_wrong_type">Please select a valid .rdp file. Other file types (images, PDFs, etc.) can\'t be imported.</string>
+    <string name="error_qr_invalid">Couldn\'t read connection details from that QR code.</string>
+    <string name="error_camera_permission_denied">Camera permission is required to scan a QR code.</string>
+    <!-- QR-SCANNER-REDESIGN: shown when the image picked via "Import QR from gallery" doesn't contain a readable QR code -->
+    <string name="error_qr_image_no_code">No QR code was found in that image.</string>
+    <string name="qr_scanner_flip_camera">Switch camera</string>
+    <string name="qr_scanner_import_gallery">Import QR from photo</string>
+    <string name="qr_scanner_close">Close</string>
+    <string name="error_camera_unavailable">Couldn\'t open the camera on this device.</string>
+    <string name="error_pin_keystore_unavailable">Failed to save PIN. Device Keystore is unavailable.</string>
+    <!-- CRIT-4 FIX: shown by HomeScreen Snackbar when addProfile/updateProfile fails due to Keystore -->
+    <string name="error_profile_save_keystore">Failed to save profile: device Keystore unavailable. Please restart your device and try again.</string>
+
+    <!-- Bug #4: SwipeableCard / Components swipe hint labels -->
+<string name="swipe_hint_combined">Swipe a card right to delete, left to edit — or tap ⋮ for more options</string>
+    <string name="connection_history_in_settings">View your connection history</string>
+
+    <!-- Bug #5: Network layer error messages -->
+    <string name="error_auth_failed_credentials">Authentication failed. Check credentials.</string>
+    <string name="error_connect_failed_host">Failed to connect to %1$s:%2$d</string>
+    <string name="error_vnc_timeout">VNC connection timed out after %1$ds. Check host and port.</string>
+    <!-- VNC-STUB FIX: shown when the user attempts a VNC connection. The underlying
+         RFB client (com.undatech.opaque.*) is currently a stub with no real protocol
+         implementation — every VNC connection attempt fails by design. This message
+         tells the user clearly that it's a missing feature, not a network/credential
+         problem, so they don't waste time retrying or re-entering passwords. -->
+    <string name="error_ssh_connect_failed">SSH connection failed</string>
+    <string name="error_connection_lost">Connection lost</string>
+    <!-- BUG-i18n-LEAK FIX: localized, opaque VNC/SSH-tunnel connect-failure messages so
+         the raw java.io/socket/JSch exception message (which can contain the host/port)
+         is never shown to the user — mirrors error_ssh_connect_failed / error_ssh_refused. -->
+    <string name="error_vnc_connect_failed">VNC connection failed</string>
+    <string name="error_vnc_refused">VNC connection refused. Verify the server is running and the port is correct.</string>
+    <string name="error_ssh_tunnel_failed">SSH tunnel connection failed</string>
+    <!-- BUGFIX-UI: RDP/generic session errors (via lastError / throwable.message,
+         sourced from the native FreeRDP bridge or a raw exception) used to be
+         shown to the user completely untranslated, unlike the VNC/SSH paths
+         above which already map to localized strings. These are used by
+         localizeConnectionError() as best-effort translations for the most
+         common raw substrings, with error_connection_generic_detail as the
+         final fallback so at least the surrounding text is localized even
+         when the specific technical detail can't be mapped. -->
+    <string name="error_timeout_generic">Connection timed out. Check the host address and try again.</string>
+    <string name="error_refused_generic">Connection refused by the remote host. Check the port and try again.</string>
+    <string name="error_unreachable_generic">Could not reach the host. Check the network and address.</string>
+    <string name="error_server_unreachable">Server is unreachable. Check the host address and network connection, then try again.</string>
+    <string name="error_dns_generic">Host not found. Check the address and try again.</string>
+    <string name="error_certificate_generic">The remote server\'s security certificate could not be verified.</string>
+    <string name="error_connection_generic_detail">Connection error: %1$s</string>
+    <string name="error_connection_generic">Couldn\'t complete the connection. Please try again.</string>
+    <string name="error_cancelled_generic">Connection cancelled.</string>
+    <string name="error_denied_generic">The server denied the connection. Check your account\'s access permissions.</string>
+    <string name="error_password_expired_generic">Your password has expired. Sign in on the remote computer to update it, then try again.</string>
+    <string name="error_account_generic">This account can\'t sign in right now. Check that it isn\'t disabled, locked, or expired.</string>
+    <!-- BUG-DECRYPT FIX: shown when Android Keystore key is lost after reinstall/restore -->
+    <string name="error_credentials_lost">Saved credentials could not be decrypted (Keystore key lost after reinstall or restore). Please edit the profile and re-enter your password.</string>
+    <string name="error_guacamole_authentication_failed">Guacamole authentication failed</string>
+
+    <!-- BUG-i18n FIX: session tab / reconnect strings that were hardcoded in English -->
+    <string name="session_tab_auth_failed">Auth failed</string>
+    <string name="session_tab_error">Error</string>
+    <!-- %1$d = current attempt, %2$d = total attempts -->
+    <string name="session_tab_retry">Reconnecting…</string>
+    <!-- %1$d = current attempt, %2$d = total attempts, %3$d = wait seconds -->
+    <string name="session_connecting_countdown">Reconnecting in %1$ds…</string>
+    <!-- %1$d = current attempt, %2$d = total attempts -->
+    <string name="session_connecting_retry">Reconnecting…</string>
+    <string name="disconnect_reason_app_closed">App closed</string>
+
+    <!-- Bug #6: Protocol filter "All" label -->
+    <string name="filter_all">All</string>
+
+    <!-- Protocol category filter group titles/subtitles (HomeScreen protocolCategoryDefs) -->
+    <string name="filter_category_desktop_title">Desktop &amp; Remote Access</string>
+    <string name="filter_category_desktop_subtitle">Full remote-desktop control</string>
+    <string name="filter_category_terminal_title">Terminal</string>
+    <string name="filter_category_terminal_subtitle">Command-line &amp; console access</string>
+    <string name="filter_category_server_title">Server Management</string>
+    <string name="filter_category_server_subtitle">Out-of-band device management</string>
+    <string name="filter_category_web_title">Web</string>
+    <string name="filter_category_web_subtitle">Browser-based connections</string>
+    <string name="filter_category_network_title">Network</string>
+    <string name="filter_category_network_subtitle">REST/YANG &amp; NETCONF device management</string>
+
+    <!-- ── i18n FIX: strings that were hardcoded in Kotlin code ─────────── -->
+    <!-- MainViewModel: default name for imported .rdp files -->
+    <string name="imported_profile_name">Imported</string>
+    <string name="scanned_profile_name">Scanned</string>
+    <!-- RdpSessionService: fallback notification title when no host name was passed -->
+    <string name="notif_remote_session_fallback">Remote Session</string>
+    <!-- RdpSessionViewModel: error when profile ID is not found in DB -->
+    <string name="error_profile_not_found">Profile not found</string>
+    <!-- RdpSessionViewModel: generic fallback for unhandled exceptions -->
+    <string name="error_unexpected">Unexpected error</string>
+    <!-- Components: WoL chip label on connection card -->
+    <string name="chip_wol">WoL</string>
+
+    <!-- ── Web/HTTPS Portal Feature ──────────────────────────────────────── -->
+    <string name="web_protocol_label">Web/HTTPS</string>
+    <string name="web_url_label">Portal URL</string>
+    <string name="web_url_placeholder">https://rdweb.example.com/RDWeb</string>
+    <string name="web_trust_self_signed">Trust self-signed certificate</string>
+    <string name="amt_use_tls">Use TLS (port 16993)</string>
+    <string name="amt_cira_limitation_desc">Direct connection only. This app reaches Intel AMT/vPro over your local network — it does not support CIRA, so a device behind NAT or outside this network can\'t be managed remotely.</string>
+    <string name="amt_cira_enabled">Connect via CIRA relay</string>
+    <string name="amt_cira_enabled_desc">For a device behind NAT/off your local network, provisioned for CIRA. Instead of dialing the device directly, this app connects to a relay/MPS component that speaks CIRA on your behalf — enter its address below instead of the device\'s own host/port.</string>
+    <string name="amt_cira_relay_host">Relay address</string>
+    <string name="amt_cira_relay_port">Relay port</string>
+    <string name="amt_cira_relay_username">Relay username</string>
+    <string name="amt_cira_relay_password">Relay password</string>
+    <string name="amt_cira_device_id">Device ID</string>
+    <string name="amt_cira_device_id_hint">the identifier your relay uses for this device</string>
+    <string name="amt_cira_status_note">Full device management (power control, boot device, firmware info, audit/access logs) works over this CIRA relay, in addition to SOL/KVM/IDE-R redirection sessions.</string>
+    <string name="amt_cira_tls_not_supported">This profile has \"Use TLS\" on for the AMT WS-Man port, but whether a CIRA-forwarded channel to AMT\'s TLS port needs a second TLS handshake on top of the relay connection isn\'t confirmed yet — turn off \"Use TLS\" for this CIRA profile, or use a plain (non-CIRA) connection if the device is reachable directly.</string>
+    <string name="amt_cira_relay_use_tls">Use wss:// (TLS) to the relay</string>
+    <string name="amt_cira_relay_use_tls_desc">Encrypts this app\'s connection to the relay above (including the relay login and every byte of the SOL/KVM/IDE-R session). Off by default so an existing relay reachable only over a VPN/private network keeps working unchanged — turn this on once the relay is configured with its own TLS certificate. Unrelated to whether the relay\'s connection to the AMT device itself is encrypted (it always is).</string>
+    <string name="web_trust_self_signed_desc">Only enable for portals you control — this skips certificate validation for this profile.</string>
+    <string name="web_autofill_http_auth">Auto-fill sign-in prompt</string>
+    <string name="web_autofill_http_auth_desc">Offer this profile\'s username/password to the portal\'s own sign-in prompt automatically.</string>
+    <string name="web_autofill_login_form">Auto-fill login page</string>
+    <string name="web_autofill_login_form_desc">Fill this profile\'s username/password into recognized login pages (Guacamole, ESXi/vCenter, iDRAC/iLO, Proxmox VE). Never submits automatically.</string>
+    <string name="web_portal_loading">Loading portal…</string>
+    <string name="cd_web_forward">Forward</string>
+    <string name="cd_web_refresh">Refresh</string>
+    <string name="cd_web_more">More options</string>
+    <string name="web_open_in_browser">Open in browser</string>
+    <string name="web_error_title">Can\'t reach this portal</string>
+    <string name="web_error_host_not_found">Systems Go couldn\'t find that address. Check the URL and your connection.</string>
+    <string name="web_error_timeout">The portal took too long to respond. Check your connection and try again.</string>
+    <string name="web_error_connection_refused">The portal refused the connection. It may be offline or blocking this network.</string>
+    <string name="web_error_ssl">Systems Go couldn\'t verify this portal\'s security certificate.</string>
+    <string name="web_error_generic">Something went wrong loading this portal.</string>
+    <string name="web_error_retry">Retry</string>
+    <string name="web_cert_untrusted_title">Untrusted certificate</string>
+    <string name="web_cert_untrusted_message">The certificate for %1$s could not be verified. Only continue if you trust this server.</string>
+    <string name="web_cert_trust_once">Continue anyway</string>
+    <string name="web_cert_reject">Go back</string>
+    <string name="web_http_auth_title">Sign in to %1$s</string>
+    <string name="web_http_auth_username">Username</string>
+    <string name="web_http_auth_password">Password</string>
+
+    <!-- ── File Transfer Feature ─────────────────────────────────────────── -->
+    <string name="ft_toolbar_button">Files</string>
+    <string name="ft_title">File Transfer</string>
+    <string name="ft_phone_files">Phone Files</string>
+    <string name="ft_remote_files">Remote Files</string>
+    <string name="ft_server_info">Server Info</string>
+    <string name="ft_empty_folder">Empty folder</string>
+    <string name="ft_server_running">HTTP Server Active</string>
+    <string name="ft_server_starting">Starting server…</string>
+    <string name="ft_server_hint">Open this address in the remote PC\'s browser:</string>
+    <string name="ft_server_token_note">This link contains a one-time access code and only works while this screen is open.</string>
+    <string name="ft_show_qr">Show QR code</string>
+    <string name="ft_qr_scan_hint">Scan with the other device\'s camera to open the link instantly.</string>
+    <string name="ft_download_tip">Download</string>
+    <string name="ft_upload_tip">Upload</string>
+    <string name="ft_rdp_vnc_note">For RDP/VNC sessions, file sharing uses a local HTTP server.\nBrowse from the remote PC via the URL above.</string>
+    <string name="ft_permission_needed">Storage access needed to browse phone files</string>
+    <!-- BUGFIX-UI: fallback label for the phone storage root when its folder name is empty; was hardcoded "Storage" -->
+    <string name="ft_storage_root">Storage</string>
+    <string name="ft_grant">Grant</string>
+    <string name="ft_retry">Retry</string>
+
+    <!-- FIX 4: FileTransfer fallback error strings (were hardcoded in English) -->
+    <string name="ft_error_sftp_connect">SFTP connection failed</string>
+    <string name="ft_error_list_dir">Failed to list directory</string>
+    <string name="ft_error_upload">Upload failed</string>
+    <string name="ft_error_download">Download failed</string>
+    <!-- SCP-FEATURE: transfer-engine toggle shown on SSH profiles -->
+    <string name="ft_engine_sftp">SFTP</string>
+    <string name="ft_engine_scp">SCP</string>
+
+    <!-- FTP-FEATURE: standalone FTP/FTPS quick-connect screen -->
+    <string name="ftp_title">FTP Server</string>
+    <string name="ftp_host">Host</string>
+    <string name="ftp_port">Port</string>
+    <string name="ftp_username">Username</string>
+    <string name="ftp_password">Password</string>
+    <string name="ftp_security">Security</string>
+    <string name="ftp_security_plain">FTP (no encryption)</string>
+    <string name="ftp_security_explicit">FTPS (explicit / AUTH TLS)</string>
+    <string name="ftp_security_implicit">FTPS (implicit, port 990)</string>
+    <string name="ftp_passive_mode">Passive mode (recommended)</string>
+    <string name="ftp_connect">Connect</string>
+
+    <!-- SMB-FEATURE: standalone SMB/CIFS quick-connect screen -->
+    <string name="smb_title">SMB Server</string>
+    <string name="smb_share">Share name</string>
+    <string name="smb_domain">Domain (optional)</string>
+
+    <!-- WEBDAV-FEATURE: standalone WebDAV quick-connect screen -->
+    <string name="webdav_title">WebDAV Server</string>
+    <string name="webdav_server_url">Server URL</string>
+    <string name="webdav_server_url_placeholder">https://example.com/remote.php/dav/files/user/</string>
+
+    <!-- TFTP-FEATURE: standalone TFTP quick-connect screen (no directory listing) -->
+    <string name="tftp_title">TFTP Server</string>
+    <string name="tftp_no_listing_notice">TFTP has no directory-listing command — enter the exact remote filename to upload or download.</string>
+    <string name="tftp_remote_filename">Remote filename</string>
+    <string name="tftp_mode_binary">Binary (octet) — correct for almost everything</string>
+    <string name="tftp_mode_ascii">ASCII (netascii) — plain text files only</string>
+
+    <!-- NFS-FEATURE: standalone NFSv3 quick-connect screen -->
+    <string name="nfs_title">NFS Server</string>
+    <string name="nfs_export_path">Export path</string>
+    <string name="nfs_export_path_hint">e.g. /export/data</string>
+    <string name="nfs_uid">UID</string>
+    <string name="nfs_gid">GID</string>
+    <string name="nfs_auth_notice">This client speaks NFSv3 with AUTH_SYS only — no NFSv4 and no Kerberos. The server only trusts the UID/GID this app sends, so use an export configured for this device rather than as a login substitute. Servers or environments that require NFSv4 or Kerberos won\'t work with this connection.</string>
+    <string name="ft_error_nfs_connect">NFS mount failed</string>
+    <string name="nfs_advanced">Advanced</string>
+    <string name="nfs_mountd_port">Mountd port (optional)</string>
+    <string name="nfs_mountd_port_hint">auto-detected if left blank</string>
+    <string name="nfs_mountd_port_notice">Leave blank to auto-detect via the portmapper. Set this only if connecting fails and the server\'s mountd isn\'t on the standard port — run `rpcinfo -p` on the server to find it.</string>
+    <!-- FIX 4: Progress banner labels -->
+    <string name="ft_progress_uploading">Uploading</string>
+    <string name="ft_progress_downloading">Downloading</string>
+    <string name="ft_progress_uploaded">uploaded</string>
+    <string name="ft_progress_downloaded">downloaded</string>
+
+    <!-- FIX 5: Terminal extra-key labels (were hardcoded) -->
+    <string name="term_key_esc">Esc</string>
+    <string name="term_key_tab">Tab</string>
+    <string name="term_key_home">Home</string>
+    <string name="term_key_end">End</string>
+
+    <!-- FIX 6: QuickConnect host:port placeholder -->
+    <string name="quick_connect_placeholder">192.168.1.1:3389</string>
+
+    <!-- FIX-VALID: QuickConnect username validation -->
+    <string name="error_username_required">Username is required</string>
+    <!-- UX-FIX: QuickConnect host/IP validation — same "required" treatment as username -->
+    <string name="error_host_required">Host or IP address is required</string>
+    <!-- UX-FIX: QuickConnect password is not strictly required (some servers accept a
+         blank password), but a blank password is a very common reason a Quick Connect
+         attempt fails right after tapping Connect — this is a non-blocking hint, not
+         an error, so it doesn't contradict the rest of the app where blank passwords
+         are always allowed. -->
+    <string name="hint_password_optional_quick_connect">Leave blank only if the server doesn\'t require a password</string>
+
+    <!-- FIX-I18N: HttpServerPanel hints (were hardcoded English) -->
+    <string name="ft_http_download_hint">Tap any file in the browser to download it</string>
+    <string name="ft_http_upload_hint">Use the upload form at the bottom of the page</string>
+
+
+    <!-- BUG-5 FIX: Storage size unit labels moved from hardcoded English to string resources -->
+    <string name="storage_unit_b">B</string>
+    <string name="storage_unit_kb">KB</string>
+    <string name="storage_unit_mb">MB</string>
+    <string name="storage_unit_gb">GB</string>
+    <!-- %1$s = free bytes formatted, %2$s = total bytes formatted -->
+    <string name="storage_free_of">%1$s free of %2$s</string>
+    <string name="storage_free">free</string>
+
+    <!-- FIX-MED-R3-3: distinct message for Keystore failure during PIN verification -->
+    <string name="error_pin_keystore_verify">Device security key unavailable — cannot verify PIN. Please restart your device and try again.</string>
+
+    <!-- FIX-MED-R3-4: TOFU fingerprint clear button and confirmation dialog -->
+    <string name="tofu_clear_section">Server Trust</string>
+    <string name="tofu_clear_button_ssh">Clear saved SSH fingerprint</string>
+    <string name="tofu_clear_button_tunnel">Clear saved tunnel fingerprint</string>
+    <string name="tofu_clear_button_rdp">Reset trusted certificate (RDP)</string>
+    <string name="tofu_clear_button_vnc">Reset trusted certificate (VNC)</string>
+    <string name="tofu_clear_confirm_title">Clear server fingerprint?</string>
+    <string name="tofu_clear_confirm_message">The stored fingerprint for this server will be deleted. On the next connection you will be asked to trust the server again.</string>
+    <string name="tofu_cleared">Fingerprint cleared. The server will be re-verified on reconnect.</string>
+
+    <!-- FIX-LIMIT: ConnectionHistory cap notice -->
+    <string name="history_limit_note">Showing the 50 most recent connections</string>
+
+    <!-- HIGH-2 FIX: Plain VNC (no TLS) security warning shown in UI -->
+    <string name="warning_vnc_no_tls">⚠ This VNC server does not offer TLS encryption. Your session and password may be visible to others on the network. Proceed only on a trusted private network.</string>
+
+    <!-- CRIT-1 FIX: Opaque SSH error strings (no host/port/algo leakage) -->
+    <string name="error_ssh_timeout">SSH connection timed out. Check the host address and port, then try again.</string>
+    <string name="error_ssh_refused">SSH connection refused. Verify the server is running and the port is correct.</string>
+
+    <!-- Sessions screen -->
+    <string name="sessions">Sessions</string>
+    <string name="sessions_empty">No active sessions</string>
+    <string name="sessions_empty_subtitle">Sessions you open will appear here</string>
+    <string name="session_close">Close session</string>
+    <string name="session_state_connected">Connected</string>
+    <string name="session_state_connecting">Connecting…</string>
+    <string name="session_state_reconnecting">Reconnecting…</string>
+    <string name="session_state_error">Error</string>
+    <string name="session_state_disconnected">Disconnected</string>
+    <!-- CONNECTION-STATUS-INDICATOR FEATURE: labels for the two new ConnectionState values -->
+    <string name="session_state_auth_required">Authentication Required</string>
+    <string name="session_state_suspended">Session Suspended</string>
+    <!-- CONNECTION-STATUS-INDICATOR FEATURE: per-card live status badge — tooltip
+         text distinct from the Sessions-tab labels above where they'd otherwise
+         read oddly on a card that was never opened as a tab (e.g. "Offline" vs
+         "Disconnected", "Connection Failed" vs the generic "Error"). Connecting/
+         Connected/Reconnecting/Authentication Required reuse the session_state_*
+         strings above since the wording already fits both contexts. -->
+    <string name="conn_status_offline">Offline</string>
+    <string name="conn_status_failed">Connection Failed</string>
+    <string name="conn_status_a11y_template">%1$s status: %2$s</string>
+    <string name="session_details_title">Connection Details</string>
+    <string name="session_details_protocol">Protocol</string>
+    <string name="session_details_host">Host</string>
+    <string name="session_details_current_status">Status</string>
+    <string name="session_details_duration">Connected for</string>
+    <string name="session_details_reconnect_count">Reconnect attempts</string>
+    <string name="session_details_failure_reason">Reason</string>
+    <!-- FAVORITES FEATURE -->
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="card_size_toggle">Change card size</string>
+    <string name="card_size_large">Large</string>
+    <string name="favorites">Favorites</string>
+    <string name="favorites_only">Favorites only</string>
+    <!-- FILTER-CONSOLIDATION: content description for the trailing funnel icon
+         in FolderFilterRow that opens the protocol/tag filter dropdown -->
+    <string name="filter_options">Filters</string>
+    <string name="all_connections">All Connections</string>
+
+    <!-- CATEGORY-FILTER-REDESIGN: the funnel icon now opens a floating
+         Category Filter popup (protocols grouped into categories) instead of
+         a flat DropdownMenu listing every protocol individually. -->
+    <string name="filter_categories_title">Filter Connections</string>
+    <string name="filter_categories_search_hint">Search categories or protocols…</string>
+    <string name="filter_categories_all_desc">Shows every connection</string>
+    <string name="filter_categories_tags_title">Tags</string>
+    <string name="filter_categories_no_results">No matching categories or protocols</string>
+    <!-- RECENT-FILTER FEATURE: quick-filter card in the Category Filter popup
+         that narrows the list to the most recently connected profiles. -->
+    <string name="filter_recent">Recent</string>
+    <string name="filter_categories_recent_desc">Most recently connected</string>
+    <!-- EMPTY-FOLDER-SUGGESTION FEATURE: snackbar offering to delete a folder
+         right after its last connection was moved/removed out of it. -->
+    <string name="folder_empty_suggest_delete">"%1$s" is now empty</string>
+    <!-- CLEAR-FILTERS FEATURE: secondary action on the empty state when the
+         list is empty because of an active filter/search/folder, not because
+         the user has zero connections. -->
+    <string name="clear_filters">Clear filters</string>
+
+    <!-- Lock screen: Forgot PIN → wipe-all-data flow -->
+    <string name="forgot_pin_button">Forgot PIN?</string>
+    <string name="forgot_pin_options_title">Forgot your PIN?</string>
+    <string name="forgot_pin_options_message">Your PIN can\'t be recovered or reset in place. Choose one of the options below.</string>
+    <string name="forgot_pin_guest_option_title">Continue as Guest</string>
+    <string name="forgot_pin_guest_option_desc">A temporary, empty profile with no access to your saved connections, passwords, settings, or history.</string>
+    <string name="forgot_pin_reset_option_title">Reset Application Data</string>
+    <string name="forgot_pin_reset_option_desc">Permanently erase everything on this device and start over.</string>
+    <string name="forgot_pin_dialog_title">Erase all app data?</string>
+    <string name="forgot_pin_dialog_message">If you\'ve forgotten your PIN, you can reset the app by permanently erasing all of its data — every saved connection, credential, and setting on this device.\n\nThe erase will happen 24 hours from now, not immediately — you\'ll see a countdown and can cancel it any time before then with biometric or PIN confirmation. This action is IRREVERSIBLE once it happens and there is no way to recover the data afterward.</string>
+    <string name="forgot_pin_confirm_button">Schedule erase in 24h</string>
+    <string name="guest_mode_banner_label">Guest Profile</string>
+    <string name="guest_mode_banner_desc">Temporary and empty — no saved connections, passwords, settings, or history.</string>
+    <string name="guest_mode_switch_primary">Switch to Primary</string>
+    <string name="guest_mode_settings_blocked">Settings aren\'t available in Guest Mode</string>
+
+    <!-- PROFILE-SWITCHER FEATURE: a direct, always-reachable way to switch to the
+         isolated Guest Profile (previously only reachable via the "Forgot PIN?"
+         recovery flow on the lock screen). Switching back to Primary still goes
+         through SecurityConfirmDialog re-authentication (see GuestModeBanner). -->
+    <string name="profiles">Profiles</string>
+    <string name="settings_profiles_desc">Switch between Primary and Guest</string>
+    <string name="profile_primary_title">Primary Profile</string>
+    <string name="profile_primary_desc">Your real, encrypted connections, credentials, settings, and history.</string>
+    <string name="profile_active_badge">Active</string>
+    <string name="profile_guest_title">Guest Profile</string>
+    <string name="profile_guest_desc">A temporary, isolated profile with no access to your saved connections, passwords, settings, or history. Anything added while in Guest is discarded when you switch back.</string>
+    <string name="profile_switch_to_guest">Switch to Guest</string>
+    <string name="profile_switch_to_guest_confirm_title">Switch to Guest Profile?</string>
+    <string name="profile_switch_to_guest_confirm_message">You\'ll leave your Primary Profile and see an empty, isolated workspace. Nothing from Primary is visible in Guest, and nothing added in Guest is ever saved to Primary. Re-authentication is required to switch back.</string>
+    <string name="profile_switch_to_guest_confirm_button">Switch</string>
+
+    <!-- DELAYED-RESET FEATURE: 24h delayed "Reset Application Data" -->
+    <string name="data_reset_notif_channel">Scheduled Data Reset</string>
+    <string name="data_reset_notif_channel_desc">Shows a persistent countdown while a Reset Application Data request is pending.</string>
+    <string name="data_reset_notif_title">Application data will be erased</string>
+    <string name="data_reset_notif_text">Erasing in %1$s. Tap to review or cancel.</string>
+    <string name="data_reset_banner_title">Application data will be erased</string>
+    <string name="data_reset_banner_countdown">Erasing in %1$s unless cancelled</string>
+    <string name="data_reset_banner_cancel">Cancel Reset</string>
+    <string name="data_reset_screen_desc">You scheduled a full erase of this app\'s data after selecting \"Forgot PIN?\". Everything — saved connections, credentials, settings, and history — will be permanently deleted when the countdown below reaches zero.</string>
+    <string name="data_reset_screen_time_remaining">Time remaining</string>
+    <string name="data_reset_screen_cancel_desc">Know your PIN after all? Verify it to cancel the erase and keep your data.</string>
+    <string name="data_reset_screen_or_divider">or</string>
+    <string name="data_reset_screen_guest_desc">Still can\'t remember it? Keep using the app with a temporary, empty profile while the countdown continues in the background.</string>
+    <string name="data_reset_screen_guest_button">Continue as Guest</string>
+
+    <!-- SHADOW-SERVER FEATURE: MediaProjection-based screen sharing over the
+         RDP Server API (see systemsgo_server_jni.c / AFreeRdpServerBridge.kt /
+         ShadowScreenCaptureService.kt SHADOW-SERVER FEATURE comments). -->
+    <string name="shadow_server_title">Shadow Server</string>
+    <string name="shadow_server_desc">Let another RDP client see and control this device\'s real screen over your local network. TLS is always on now (self-signed cert); set a username/password below for real NLA authentication too. Still LAN/VPN only — a self-signed cert has no CA, so treat this as trusted-network-only, not safe on the open internet.</string>
+    <string name="shadow_server_port_label">Listen port</string>
+    <string name="shadow_server_username_label">Username (optional — enables NLA)</string>
+    <string name="shadow_server_password_label">Password (optional — enables NLA)</string>
+    <string name="shadow_server_nla_hint">Leave both blank to allow any client that reaches this port (TLS-encrypted, no login required). Set both to require a real NLA login before anyone connects.</string>
+    <string name="shadow_server_start">Start Sharing</string>
+    <string name="shadow_server_stop">Stop Sharing</string>
+    <string name="shadow_server_status_running">Sharing this screen on port %1$d</string>
+    <string name="shadow_server_status_stopped">Not sharing</string>
+    <string name="shadow_server_permission_denied">Screen-capture permission was not granted</string>
+    <string name="shadow_server_unavailable">Native RDP server library unavailable — see SETUP.md (RDP-SERVER-API FEATURE)</string>
+    <string name="shadow_server_accessibility_hint">Enable \"Remote Input (Systems Go)\" in Accessibility settings so connecting viewers can move the mouse and type, not just watch.</string>
+    <string name="shadow_server_accessibility_open_settings">Open Accessibility Settings</string>
+    <string name="shadow_server_notification_channel">Shadow Server</string>
+    <string name="shadow_server_notification_title">Shadow Server is running</string>
+    <string name="shadow_server_notification_text">This device\'s screen is being shared. Tap to manage.</string>
+    <string name="remote_input_accessibility_service_desc">Lets a connected Shadow Server viewer\'s mouse and keyboard control this device. Only active while Shadow Server is running; has no effect otherwise.</string>
+
+    <!-- USB-REDIRECT FEATURE (Part 1/3) -->
+    <string name="settings_usb_redirection_desc">Redirect connected USB devices into the remote session</string>
+    <string name="usb_redirection_title">USB Redirection</string>
+    <string name="usb_redirection_desc">Attach USB devices connected to this device — smart-card readers, security keys, storage, barcode scanners, and more — directly into the remote Windows session, as if plugged into it locally.</string>
+    <string name="usb_redirection_enable">Enable USB Redirection</string>
+    <string name="usb_redirection_auto_redirect_new">Automatically redirect newly connected devices</string>
+    <string name="usb_redirection_ask_before">Ask before redirecting</string>
+    <string name="usb_redirection_reconnect_automatically">Reconnect automatically</string>
+    <string name="usb_redirection_debug_logging">Debug logging</string>
+    <string name="usb_redirection_devices_header">Devices</string>
+    <string name="usb_redirection_no_devices">No USB devices detected. Connect a device to see it here.</string>
+    <string name="usb_redirection_vendor_id">Vendor ID</string>
+    <string name="usb_redirection_product_id">Product ID</string>
+    <string name="usb_redirection_class">USB class</string>
+    <string name="usb_redirection_serial">Serial number</string>
+    <string name="usb_redirection_connection_state">Connection</string>
+    <string name="usb_redirection_redirection_state">Redirection</string>
+    <string name="usb_redirection_redirect_button">Redirect</string>
+    <string name="usb_redirection_stop_button">Stop redirecting</string>
+    <string name="usb_redirection_state_not_redirected">Not redirected</string>
+    <string name="usb_redirection_state_pending">Connecting…</string>
+    <string name="usb_redirection_state_redirected">Redirected</string>
+    <string name="usb_redirection_state_failed">Failed</string>
+    <string name="usb_redirection_state_disconnected_pending_restore">Disconnected — will restore</string>
+    <string name="usb_redirection_conn_disconnected">Disconnected</string>
+    <string name="usb_redirection_conn_permission_requested">Requesting permission…</string>
+    <string name="usb_redirection_conn_permission_denied">Permission denied</string>
+    <string name="usb_redirection_conn_connected">Connected</string>
+    <string name="usb_redirection_conn_error">Error</string>
+    <string name="usb_redirection_notification_channel_name">USB Redirection</string>
+    <string name="usb_redirection_notification_channel_description">Keeps redirected USB devices connected to the remote session while Systems Go is in the background</string>
+    <string name="usb_redirection_notification_title">USB Redirection active</string>
+    <string name="usb_redirection_notification_text_active">%1$d device(s) redirected</string>
+    <string name="usb_redirection_notification_text_idle">Waiting for devices</string>
+
+    <!-- CLOUD-SYNC FEATURE (Part 3-b): Settings → Cloud Sync -->
+    <string name="cloud_sync">Cloud Sync</string>
+    <string name="settings_cloud_sync_desc">Back up your connections to Google Drive or Dropbox</string>
+    <string name="cloud_sync_status_not_linked">Not connected</string>
+    <string name="cloud_sync_provider_google_drive">Google Drive</string>
+    <string name="cloud_sync_provider_dropbox">Dropbox</string>
+    <string name="cloud_sync_last_success_never">Never synced yet</string>
+    <string name="cloud_sync_last_success_fmt">Last synced %1$s</string>
+    <string name="cloud_sync_last_error">Last sync failed</string>
+    <string name="cloud_sync_connect_section">Connect</string>
+    <string name="cloud_sync_connect_google_drive">Connect Google Drive</string>
+    <string name="cloud_sync_connect_dropbox">Connect Dropbox</string>
+    <string name="cloud_sync_linking">Connecting…</string>
+    <string name="cloud_sync_provider_not_configured">Not available yet — this provider hasn\'t been set up by the app developer</string>
+    <string name="cloud_sync_reconnect">Reconnect</string>
+    <string name="cloud_sync_passphrase_title">Sync passphrase</string>
+    <string name="cloud_sync_passphrase_desc">This encrypts your cloud backup. It\'s separate from the password you use for manual export/import — losing it just means your next sync will ask for it again.</string>
+    <string name="cloud_sync_passphrase_field_label">Passphrase</string>
+    <string name="cloud_sync_passphrase_set">Set — tap to change</string>
+    <string name="cloud_sync_passphrase_not_set">Not set — required before syncing</string>
+    <string name="cloud_sync_passphrase_save">Save</string>
+    <string name="cloud_sync_passphrase_empty_error">Passphrase cannot be empty</string>
+    <string name="cloud_sync_auto_sync_section">Automatic sync</string>
+    <string name="cloud_sync_auto_sync_toggle">Auto-sync</string>
+    <string name="cloud_sync_auto_sync_desc">Sync automatically in the background at the interval below</string>
+    <string name="cloud_sync_interval_title">Sync interval</string>
+    <string name="cloud_sync_interval_minutes_fmt">%1$d min</string>
+    <string name="cloud_sync_now">Sync Now</string>
+    <string name="cloud_sync_syncing">Syncing…</string>
+    <string name="cloud_sync_result_uploaded">Backup uploaded to the cloud</string>
+    <string name="cloud_sync_result_downloaded_fmt">Synced from the cloud — %1$d connection(s) imported</string>
+    <string name="cloud_sync_disconnect_section">Disconnect</string>
+    <string name="cloud_sync_disconnect">Sign out</string>
+    <string name="cloud_sync_switch_account">Switch account</string>
+    <string name="cloud_sync_switch_account_desc">Sign in with a different account for this provider</string>
+    <string name="cd_account_avatar">Account profile photo</string>
+    <string name="cloud_sync_manage_google_account">Manage Google Account</string>
+    <string name="cloud_sync_disconnect_confirm_title">Disconnect cloud sync?</string>
+    <string name="cloud_sync_disconnect_confirm_message">This forgets the linked account and the stored sync passphrase on this device. Your cloud backup file itself is not deleted.</string>
+    <string name="cloud_sync_error_not_linked">This device isn\'t linked to a cloud account yet.</string>
+    <string name="cloud_sync_error_auth_expired">Cloud account access expired — please reconnect.</string>
+    <string name="cloud_sync_error_network">Couldn\'t reach the cloud service. Check your connection and try again.</string>
+    <string name="cloud_sync_error_wrong_passphrase">The cloud backup couldn\'t be decrypted — check your sync passphrase.</string>
+
+    <!-- ADD-CONNECTION PROTOCOL PICKER (Part 2/2): AddConnectionProtocolScreen -->
+    <string name="add_connection_protocol_subtitle">Choose a protocol to get started</string>
+    <string name="add_connection_protocol_search_placeholder">Search protocols…</string>
+    <string name="add_connection_protocol_more_categories">More categories</string>
+    <string name="add_connection_protocol_recently_used">Recently Used</string>
+    <string name="add_connection_protocol_popular">Popular</string>
+    <string name="add_connection_protocol_category_desktop">Remote Desktop</string>
+    <string name="add_connection_protocol_category_enterprise">Enterprise &amp; Virtualization</string>
+    <string name="add_connection_protocol_category_hardware">Server Management</string>
+    <string name="add_connection_protocol_category_file_transfer">File Transfer</string>
+    <string name="add_connection_protocol_category_terminal">Terminal</string>
+    <string name="add_connection_protocol_category_network">Network Management</string>
+    <string name="add_connection_protocol_category_virtualization">Virtualization</string>
+    <string name="add_connection_protocol_category_industrial">Industrial</string>
+    <string name="add_connection_protocol_category_cameras">Cameras</string>
+    <string name="add_connection_protocol_category_wake_on_lan">Wake-on-LAN</string>
+    <string name="add_connection_protocol_category_monitoring">Monitoring</string>
+    <string name="add_connection_protocol_category_web">Web</string>
+    <string name="add_connection_protocol_empty_title">No protocols found</string>
+    <string name="add_connection_protocol_empty_subtitle">Try another keyword.</string>
+    <string name="add_connection_protocol_request_cta_title">Can\'t find what you need?</string>
+    <string name="add_connection_protocol_request_cta_subtitle">Request a protocol or suggest a feature.</string>
+    <string name="add_connection_protocol_badge_new">New</string>
+    <string name="add_connection_protocol_badge_beta">Beta</string>
+    <string name="add_connection_protocol_badge_popular">Popular</string>
+    <string name="add_connection_protocol_badge_enterprise">Enterprise</string>
+    <string name="add_connection_protocol_badge_coming_soon">Coming Soon</string>
+    <string name="add_connection_protocol_coming_soon_hint">Not built yet — tap to let us know you want it.</string>
+
+    <!-- Coach-mark / spotlight tutorial engine (generic button labels, reused by every tour) -->
+    <string name="coach_mark_next">Next</string>
+    <string name="coach_mark_done">Got it</string>
+    <string name="coach_mark_skip">Skip</string>
+
+    <!-- "How to create a connection" spotlight tour — shown once, the first time this screen is reached -->
+    <string name="add_connection_spotlight_search_title">Search for anything</string>
+    <string name="add_connection_spotlight_search_body">Type a name like \"RDP\" or \"SSH\" to jump straight to it.</string>
+    <string name="add_connection_spotlight_card_title">Tap a protocol to start</string>
+    <string name="add_connection_spotlight_card_body">Pick the protocol you want, then fill in the address to create your connection.</string>
+    <string name="add_connection_spotlight_request_title">Don\'t see yours?</string>
+    <string name="add_connection_spotlight_request_body">Tap here to request a protocol that isn\'t on the list yet.</string>
+
+    <!-- "How to use the session toolbar" spotlight tour — shown once, the first time a session connects -->
+    <string name="rdp_toolbox_spotlight_title">Your session toolbar</string>
+    <string name="rdp_toolbox_spotlight_body">Tap here anytime for screenshots, the keyboard, file transfer, and more. Drag it to any edge of the screen.</string>
+
+    <!-- ADD-CONNECTION PROTOCOL PICKER (Part 2/2): ProtocolIntroContent — curated per-protocol copy shown in ProtocolIntroPanel -->
+    <string name="protocol_intro_rdp_headline">Connect to a remote Windows PC or server using Microsoft\'s Remote Desktop Protocol.</string>
+    <string name="protocol_intro_rdp_feature1_title">Full desktop access</string>
+    <string name="protocol_intro_rdp_feature1_subtitle">Control the remote machine</string>
+    <string name="protocol_intro_rdp_feature2_title">Secure connection</string>
+    <string name="protocol_intro_rdp_feature2_subtitle">TLS encryption &amp; NLA support</string>
+    <string name="protocol_intro_rdp_feature3_title">Multi-monitor</string>
+    <string name="protocol_intro_rdp_feature3_subtitle">Supports multiple displays</string>
+    <string name="protocol_intro_rdp_feature4_title">Clipboard</string>
+    <string name="protocol_intro_rdp_feature4_subtitle">Copy and paste between devices</string>
+    <string name="protocol_intro_rdp_feature5_title">Smart card</string>
+    <string name="protocol_intro_rdp_feature5_subtitle">Supports smart card authentication</string>
+    <string name="protocol_intro_rdp_feature6_title">Drive &amp; device redirection</string>
+    <string name="protocol_intro_rdp_feature6_subtitle">Redirect local resources</string>
+    <string name="protocol_intro_rdp_usecase1">Access your work computer from anywhere</string>
+    <string name="protocol_intro_rdp_usecase2">Manage servers and remote workstations</string>
+    <string name="protocol_intro_rdp_usecase3">Remote support and IT administration</string>
+
+    <string name="protocol_intro_ssh_headline">Get encrypted command-line access to Linux, macOS, and network equipment.</string>
+    <string name="protocol_intro_ssh_feature1_title">Full shell access</string>
+    <string name="protocol_intro_ssh_feature1_subtitle">Run any command on the remote host</string>
+    <string name="protocol_intro_ssh_feature2_title">Strong encryption</string>
+    <string name="protocol_intro_ssh_feature2_subtitle">Traffic is encrypted end-to-end</string>
+    <string name="protocol_intro_ssh_feature3_title">Key-based auth</string>
+    <string name="protocol_intro_ssh_feature3_subtitle">Sign in with an SSH key instead of a password</string>
+    <string name="protocol_intro_ssh_feature4_title">File transfer</string>
+    <string name="protocol_intro_ssh_feature4_subtitle">Move files over the same connection via SFTP/SCP</string>
+    <string name="protocol_intro_ssh_usecase1">Administer Linux and macOS servers</string>
+    <string name="protocol_intro_ssh_usecase2">Automate deployments and scripts over a secure shell</string>
+    <string name="protocol_intro_ssh_usecase3">Tunnel other traffic through an encrypted connection</string>
+
+    <string name="protocol_intro_vnc_headline">Share and control a remote screen with the cross-platform RFB protocol.</string>
+    <string name="protocol_intro_vnc_feature1_title">Cross-platform</string>
+    <string name="protocol_intro_vnc_feature1_subtitle">Works with Windows, Linux, and macOS servers</string>
+    <string name="protocol_intro_vnc_feature2_title">Lightweight</string>
+    <string name="protocol_intro_vnc_feature2_subtitle">Simple framebuffer protocol, low overhead</string>
+    <string name="protocol_intro_vnc_feature3_title">Password or TLS auth</string>
+    <string name="protocol_intro_vnc_feature3_subtitle">Depending on the server\'s configuration</string>
+    <string name="protocol_intro_vnc_usecase1">Access a Linux or macOS desktop remotely</string>
+    <string name="protocol_intro_vnc_usecase2">Support headless machines with a display server</string>
+
+    <string name="protocol_intro_sftp_headline">Transfer files securely over an encrypted SSH connection.</string>
+    <string name="protocol_intro_sftp_feature1_title">Encrypted transfer</string>
+    <string name="protocol_intro_sftp_feature1_subtitle">Rides on the same encryption as SSH</string>
+    <string name="protocol_intro_sftp_feature2_title">Full file management</string>
+    <string name="protocol_intro_sftp_feature2_subtitle">Browse, upload, download, rename, and delete</string>
+    <string name="protocol_intro_sftp_feature3_title">Key-based auth</string>
+    <string name="protocol_intro_sftp_feature3_subtitle">Reuses your SSH keys</string>
+    <string name="protocol_intro_sftp_usecase1">Move files to and from a server securely</string>
+    <string name="protocol_intro_sftp_usecase2">Automate backups over an encrypted channel</string>
+
+    <string name="protocol_intro_spice_headline">High-performance remote display protocol built for virtual machines.</string>
+    <string name="protocol_intro_spice_feature1_title">Low latency</string>
+    <string name="protocol_intro_spice_feature1_subtitle">Tuned for responsive VM interaction</string>
+    <string name="protocol_intro_spice_feature2_title">Rich display</string>
+    <string name="protocol_intro_spice_feature2_subtitle">Multi-monitor and dynamic resolution</string>
+    <string name="protocol_intro_spice_feature3_title">Clipboard &amp; USB</string>
+    <string name="protocol_intro_spice_feature3_subtitle">Share the clipboard and redirect USB devices</string>
+    <string name="protocol_intro_spice_usecase1">Access a KVM/QEMU virtual machine\'s console</string>
+    <string name="protocol_intro_spice_usecase2">Manage virtual desktops on Linux hypervisors</string>
+
+    <!-- Generic fallback intro content, built from live catalog data (category label / port / protocol name) -->
+    <string name="protocol_intro_generic_feature_title_fmt">%1$s protocol</string>
+    <string name="protocol_intro_generic_feature_subtitle_fmt">Default port %1$s</string>
+    <string name="protocol_intro_generic_port_varies">varies</string>
+    <string name="protocol_intro_generic_usecase_fmt">Connect to a %1$s endpoint for %2$s tasks</string>
+
+    <!-- ADD-CONNECTION PROTOCOL PICKER (Part 2/2): ProtocolIntroPanel chrome -->
+    <string name="protocol_intro_most_popular">Most Popular</string>
+    <string name="protocol_intro_key_features">Key Features</string>
+    <string name="protocol_intro_preview_title">Preview</string>
+    <string name="protocol_intro_use_cases_title">Common Use Cases</string>
+    <string name="protocol_intro_continue">Continue</string>
+    <string name="protocol_intro_learn_more_fmt">Learn more about %1$s</string>
+
+    <!-- ADD-CONNECTION PROTOCOL PICKER (Part 2/2): RequestProtocolSheet -->
+    <string name="protocol_request_title_specific_fmt">%1$s isn\'t supported yet</string>
+    <string name="protocol_request_title_generic">Request a protocol</string>
+    <string name="protocol_request_desc_specific_fmt">We list %1$s so you know it\'s on our radar, but there\'s no connection client for it in the app yet. Let us know you need it and we\'ll factor it into what we build next.</string>
+    <string name="protocol_request_desc_generic">Don\'t see the protocol you\'re after? Tell us which one and what you\'d use it for — it helps us prioritize what to build next.</string>
+    <string name="protocol_request_email_subject_specific_fmt">%1$s — Protocol request: %2$s</string>
+    <string name="protocol_request_email_subject_generic_fmt">%1$s — Protocol request</string>
+    <string name="protocol_request_email_button">Email us this request</string>
+
+    <!-- ADD-CONNECTION PROTOCOL PICKER (Part 2/2): Components.kt — ProfileFormDialog's "What is this protocol?" action -->
+    <string name="cd_what_is_this_protocol">What is this protocol?</string>
+
+    <!-- GUACAMOLE-PROTOCOL FEATURE -->
+    <string name="guacamole_section_title">Guacamole</string>
+    <string name="guacamole_server_url">Server URL</string>
+    <string name="guacamole_data_source">Data Source (optional)</string>
+    <string name="guacamole_connection_identifier">Connection Identifier</string>
+    <string name="guacamole_connection_name">Connection Name</string>
+    <string name="guacamole_picker_not_yet_available">Or enter the connection identifier directly, exactly as it appears in your Guacamole server\'s admin UI.</string>
+    <string name="guacamole_browse_connections">Browse Connections</string>
+    <string name="guacamole_remember_session">Remember Session</string>
+    <string name="guacamole_remember_session_subtitle">Store the login token securely so reconnecting doesn\'t always require signing in again.</string>
+    <string name="guacamole_search">Search</string>
+    <string name="guacamole_no_connections_available">No connections available for this account.</string>
+    <string name="guacamole_no_connections_match">No connections match the current search/filter.</string>
+    <string name="guacamole_could_not_load_connections">Could not load connections</string>
+    <string name="guacamole_unfavorite">Unfavorite</string>
+    <string name="guacamole_favorite">Favorite</string>
+
+    <!-- RTSP FEATURE -->
+    <string name="rtsp_section_title">RTSP Stream</string>
+    <string name="rtsp_stream_path_label">Stream path</string>
+    <string name="rtsp_stream_path_hint">e.g. cam/realmonitor?channel=1&amp;subtype=0 — leave blank if the camera serves its stream at the bare URL.</string>
+    <string name="rtsp_transport_tcp">TCP</string>
+    <string name="rtsp_transport_udp">UDP</string>
+    <string name="rtsp_use_tls">Use TLS (rtsps://)</string>
+    <string name="rtsp_use_tls_subtitle">Encrypts the RTSP control connection. Media sent over UDP is never encrypted by this option.</string>
+
+    <!-- BMC Management -->
+    <string name="bmc_connecting_to">Connecting to %1$s:%2$d…</string>
+    <string name="bmc_no_computer_system">No ComputerSystem resource found on this BMC.</string>
+    <string name="bmc_power_actions">Power Actions</string>
+    <string name="bmc_eject">Eject</string>
+    <string name="bmc_mount">Mount</string>
+    <string name="bmc_iso_url_label">ISO/IMG URL (http/https, reachable by the BMC)</string>
+    <string name="bmc_no_chassis_status">No chassis status yet.</string>
+    <string name="bmc_chassis_identify_led">Chassis Identify (LED)</string>
+    <string name="bmc_identify_15s">Identify (15s)</string>
+    <string name="bmc_stop">Stop</string>
+    <string name="bmc_record_number">Record #%1$d</string>
+    <string name="bmc_tap_refresh_to_load">Tap refresh to load.</string>
+    <string name="bmc_change_static_ip">Change static IP…</string>
+    <string name="bmc_ip_address">IP Address</string>
+    <string name="bmc_subnet_mask">Subnet Mask</string>
+    <string name="bmc_default_gateway">Default Gateway</string>
+    <string name="bmc_apply">Apply</string>
+    <string name="bmc_loading_users">Loading users…</string>
+    <string name="bmc_privilege_enabled">%1$s · enabled</string>
+    <string name="bmc_privilege_disabled">%1$s · disabled</string>
+    <string name="bmc_new_password_for_user">New password for user #%1$d</string>
+    <string name="bmc_set_password">Set Password</string>
+    <string name="bmc_pef_not_supported">PEF isn\'t supported by this BMC.</string>
+    <string name="bmc_pef_enabled_version">PEF enabled (v%1$s)</string>
+    <string name="bmc_countdown_seconds">Countdown (seconds)</string>
+    <string name="bmc_action_on_expiration">Action on expiration:</string>
+    <string name="bmc_configure_start">Configure &amp; Start</string>
+    <string name="bmc_refresh">Refresh</string>
+    <string name="bmc_type_and_press_enter">Type and press Enter</string>
+    <string name="bmc_one_shot_boot">One-Shot Boot</string>
+    <string name="bmc_ider_virtual_media">IDE-R Virtual Media</string>
+    <string name="bmc_unmount">Unmount</string>
+    <string name="bmc_preparing_image">Preparing image…</string>
+    <string name="bmc_choose_image">Choose Image (.iso/.img)</string>
+    <string name="bmc_test_ider_channel">Test IDE-R Channel</string>
+    <string name="bmc_opening_ider_channel">Opening IDE-R channel…</string>
+    <string name="bmc_channel_open">Channel open ✓</string>
+    <string name="bmc_ider_sol_access_log">IDE-R / SOL Access Log</string>
+    <string name="bmc_load_access_log">Load Access Log</string>
+    <string name="bmc_no_access_log_entries">No access log entries loaded yet.</string>
+    <string name="bmc_audit_app_event">%1$s · event %2$s</string>
+    <string name="bmc_key_ctrl">Ctrl</string>
+    <string name="bmc_key_alt">Alt</string>
+    <string name="bmc_key_esc">Esc</string>
+    <string name="bmc_key_tab">Tab</string>
+    <string name="bmc_type_here_key_by_key">Type here — sent key by key</string>
+    <string name="bmc_back">Back</string>
+    <string name="bmc_no_log_entries">No log entries.</string>
+    <string name="bmc_powered_on">Powered On</string>
+    <string name="bmc_powered_off">Powered Off</string>
+    <string name="bmc_no_device_fru_info">No device/FRU information yet.</string>
+    <string name="bmc_firmware">BMC Firmware</string>
+    <string name="bmc_fru_inventory">FRU Inventory</string>
+    <string name="bmc_lan_configuration">BMC LAN Configuration</string>
+    <string name="bmc_users_header">BMC Users</string>
+    <string name="bmc_set_password_desc">Set password</string>
+    <string name="bmc_watchdog_timer">Watchdog Timer</string>
+    <string name="bmc_key_home">Home</string>
+    <string name="bmc_key_end">End</string>
+    <string name="bmc_key_break">BREAK</string>
+    <string name="bmc_intel_amt">Intel AMT</string>
+    <string name="bmc_tab_power">Power</string>
+    <string name="bmc_tab_sensors">Sensors</string>
+    <string name="bmc_tab_event_log">Event Log</string>
+    <string name="bmc_tab_info">Info</string>
+    <string name="bmc_tab_admin">Admin</string>
+    <string name="bmc_tab_console">Console</string>
+    <string name="bmc_tab_boot">Boot</string>
+    <string name="bmc_tab_audit_log">Audit Log</string>
+    <string name="bmc_tab_kvm">KVM</string>
+    <string name="bmc_tab_media">Media</string>
+    <string name="bmc_tab_virtual_media">Virtual Media</string>
+    <string name="bmc_no_sensor_data">No sensor data available (Thermal/Power resource not exposed by this BMC).</string>
+    <string name="bmc_no_sensors_found_sdr">No sensors found (or this BMC\'s SDR repository couldn\'t be read).</string>
+    <string name="bmc_pef_section_title">Platform Event Filtering (PEF)</string>
+    <string name="bmc_no_audit_log_entries">No audit log entries (or the log couldn\'t be read).</string>
+    <string name="bmc_event_log_empty">Event log is empty (or the BMC\'s SEL couldn\'t be read).</string>
+    <string name="bmc_label_power">Power: %1$s</string>
+    <string name="bmc_label_health">Health: %1$s</string>
+    <string name="bmc_label_serial">Serial: %1$s</string>
+    <string name="bmc_label_bios">BIOS: %1$s</string>
+    <string name="bmc_label_memory_gib">Memory: %1$s GiB</string>
+    <string name="bmc_label_firmware_version">Firmware version: %1$s</string>
+    <string name="bmc_label_ipmi_version">IPMI version: %1$s</string>
+    <string name="bmc_label_manufacturer_id">Manufacturer ID: %1$s</string>
+    <string name="bmc_label_product_id">Product ID: %1$s</string>
+    <string name="bmc_label_manufacturer">Manufacturer: %1$s</string>
+    <string name="bmc_label_board_manufacturer">Board manufacturer: %1$s</string>
+    <string name="bmc_label_part_number">Part number: %1$s</string>
+    <string name="bmc_label_board_part_number">Board part number: %1$s</string>
+    <string name="bmc_label_board_serial">Board serial: %1$s</string>
+    <string name="bmc_label_asset_tag">Asset tag: %1$s</string>
+    <string name="bmc_label_chassis_type">Chassis type: %1$s</string>
+    <string name="bmc_label_chassis_serial">Chassis serial: %1$s</string>
+    <string name="bmc_label_source">Source: %1$s</string>
+    <string name="bmc_label_subnet_mask">Subnet mask: %1$s</string>
+    <string name="bmc_label_gateway">Gateway: %1$s</string>
+    <string name="bmc_label_mac">MAC: %1$s</string>
+    <string name="bmc_label_vlan">VLAN: %1$s</string>
+    <string name="bmc_label_firmware">Firmware: %1$s</string>
+    <string name="bmc_label_network_interface">Network interface: %1$s</string>
+    <string name="bmc_status_enabled">enabled</string>
+    <string name="bmc_status_disabled">disabled</string>
+    <string name="bmc_label_digest_realm">Digest realm: %1$s</string>
+    <string name="bmc_label_mounted">Mounted: %1$s</string>
+    <string name="bmc_generic_image">image</string>
+    <string name="bmc_no_virtual_media_slots">No virtual media slots exposed by this BMC\'s Manager resource.</string>
+    <string name="bmc_amt_power_actions_note">These four are always supported by AMT regardless of OS/LMS state.</string>
+    <string name="bmc_no_amt_general_settings">No AMT_GeneralSettings data yet.</string>
+    <string name="bmc_ider_mount_hint">Mount a local ISO or IMG as a virtual CD/DVD or floppy drive on the managed box, regardless of its power/OS state.</string>
+    <string name="bmc_next_boot_set_to">Next boot set to %1$s. Power-cycle or reset the host to apply it.</string>
+    <string name="bmc_connection_failed">Connection failed</string>
+    <string name="bmc_error_lan_config">LAN config: %1$s</string>
+    <string name="bmc_lan_config_updated">LAN configuration updated.</string>
+    <string name="bmc_error_set_lan_config">Set LAN config: %1$s</string>
+    <string name="bmc_error_users">Users: %1$s</string>
+    <string name="bmc_error_set_privilege">Set privilege: %1$s</string>
+    <string name="bmc_error_enable_disable_user">Enable/disable user: %1$s</string>
+    <string name="bmc_password_updated_for_user">Password updated for user #%1$s.</string>
+    <string name="bmc_error_set_password">Set password: %1$s</string>
+    <string name="bmc_error_pef">PEF: %1$s</string>
+    <string name="bmc_error_watchdog">Watchdog: %1$s</string>
+    <string name="bmc_ider_channel_accepted">AMT accepted the IDE-R channel — connectivity and authentication are confirmed. Pick an image below to mount it.</string>
+    <string name="bmc_ider_default_media_name">image</string>
+    <string name="bmc_ider_writable">Writable (opt-in)</string>
+    <string name="bmc_ider_writable_warning">Writes will modify the mounted image file directly. Only enable this if you trust the guest OS not to corrupt it.</string>
+    <string name="bmc_error_ider">IDE-R: %1$s</string>
+    <string name="bmc_error_ider_mount">IDE-R mount: %1$s</string>
+    <string name="bmc_dismiss">Dismiss</string>
+    <string name="bmc_admin_settings_warning">Administrative BMC settings — changes here affect the physical server, not just this app.</string>
+    <string name="bmc_media_inserted">Inserted: %1$s</string>
+    <string name="bmc_media_empty">Empty · %1$s</string>
+    <string name="bmc_user_number">(user #%1$d)</string>
+    <string name="bmc_disable">Disable</string>
+    <string name="bmc_enable">Enable</string>
+    <string name="bmc_watchdog_running">Running</string>
+    <string name="bmc_watchdog_stopped">Stopped</string>
+    <string name="bmc_watchdog_use">Use: %1$s</string>
+    <string name="bmc_watchdog_action_expiration_value">Action on expiration: %1$s</string>
+    <string name="bmc_watchdog_countdown_remaining">Countdown remaining: %1$ss of %2$ss</string>
+    <string name="bmc_load_refresh">Load/refresh</string>
+    <string name="bmc_smaller_text">Smaller text</string>
+    <string name="bmc_larger_text">Larger text</string>
+    <string name="bmc_save_console_log">Save console log</string>
+    <string name="bmc_console_log_saved">Console log saved.</string>
+    <string name="bmc_console_log_save_failed">Couldn\'t save log: %1$s</string>
+    <string name="bmc_send">Send</string>
+    <string name="bmc_power_state_unknown">Power state unknown</string>
+    <string name="bmc_raw_cim_power_state">Raw CIM PowerState value: %1$s</string>
+    <string name="bmc_toggle_keyboard">Toggle keyboard</string>
+    <string name="bmc_remote_screen">Remote screen</string>
+    <string name="bmc_drag_click_drag_hint">Drag to click-drag • two fingers to scroll</string>
+
+    <!-- NETCONF session -->
+    <string name="netconf_datastores">Datastores</string>
+    <string name="netconf_not_yet_known">Not yet known</string>
+    <string name="netconf_bullet_item">• %1$s</string>
+    <string name="netconf_dismiss">Dismiss</string>
+    <string name="netconf_connection">Connection</string>
+    <string name="netconf_statistics">Statistics</string>
+    <string name="netconf_capabilities_count">Capabilities (%1$d)</string>
+    <string name="netconf_datastore">Datastore</string>
+    <string name="netconf_tab_status">Status</string>
+    <string name="netconf_tab_rpc_tools">RPC Tools</string>
+    <string name="netconf_tab_yang">YANG</string>
+    <string name="netconf_tab_diff">Diff</string>
+    <string name="netconf_tab_wire_log">Wire Log</string>
+    <string name="netconf_tab_notifications">Notifications</string>
+    <string name="netconf_label_host">Host</string>
+    <string name="netconf_label_session_id">Session ID</string>
+    <string name="netconf_label_uptime">Uptime</string>
+    <string name="netconf_label_latency">Latency</string>
+    <string name="netconf_label_rpcs">RPCs</string>
+    <string name="netconf_label_notifications">Notifications</string>
+    <string name="netconf_label_username">Username</string>
+    <string name="netconf_label_session_state">Session state</string>
+    <string name="netconf_label_last_rpc_latency">Last RPC latency</string>
+    <string name="netconf_label_reconnects">Reconnects</string>
+    <string name="netconf_label_rpc_count">RPC count</string>
+    <string name="netconf_label_notification_count">Notification count</string>
+    <string name="netconf_label_bytes_sent">Bytes sent</string>
+    <string name="netconf_label_bytes_received">Bytes received</string>
+    <string name="netconf_no_rpc_run_yet">No RPC run yet.</string>
+    <string name="netconf_state_connected">Connected</string>
+    <string name="netconf_state_connecting">Connecting…</string>
+    <string name="netconf_state_reconnecting">Reconnecting…</string>
+    <string name="netconf_state_auth_failed">Auth failed</string>
+    <string name="netconf_state_error">Error</string>
+    <string name="netconf_state_disconnected">Disconnected</string>
+    <string name="netconf_get_config">Get Config</string>
+    <string name="netconf_lock">Lock</string>
+    <string name="netconf_unlock">Unlock</string>
+    <string name="netconf_validate">Validate</string>
+    <string name="netconf_commit">Commit</string>
+    <string name="netconf_discard">Discard</string>
+    <string name="netconf_last_result">Last result</string>
+    <string name="netconf_rpc_builder">RPC Builder</string>
+    <string name="netconf_send">Send</string>
+    <string name="netconf_saved_rpc_library">Saved RPC Library</string>
+    <string name="netconf_result">Result</string>
+    <string name="netconf_save_rpc">Save RPC</string>
+    <string name="netconf_name">Name</string>
+    <string name="netconf_yang_modules_count">YANG Modules (%1$d)</string>
+    <string name="netconf_search_modules">Search modules or namespaces</string>
+    <string name="netconf_namespace_explorer">Namespace Explorer</string>
+    <string name="netconf_no_yang_modules">No YANG modules discovered yet.</string>
+    <string name="netconf_revision">Revision: %1$s</string>
+    <string name="netconf_features">Features: %1$s</string>
+    <string name="netconf_xpath_label">XPath (tap tree nodes to build)</string>
+    <string name="netconf_no_schema_source">No schema source fetched for this module (metadata-only entry).</string>
+    <string name="netconf_ro_flag">ro</string>
+    <string name="netconf_no_notifications">No notifications received yet. Use create-subscription in RPC Tools to subscribe.</string>
+
+    <!-- SNMP management -->
+    <string name="snmp_tab_dashboard">Dashboard</string>
+    <string name="snmp_tab_mib_browser">MIB Browser</string>
+    <string name="snmp_tab_get_set">Get/Set</string>
+    <string name="snmp_tab_traps">Traps</string>
+    <string name="snmp_back">Back</string>
+    <string name="snmp_favorite">Favorite</string>
+    <string name="snmp_refresh">Refresh</string>
+    <string name="snmp_walk">Walk</string>
+    <string name="snmp_load_mib">Load MIB</string>
+    <string name="snmp_remove">Remove</string>
+    <string name="snmp_host_port_version">%1$s:%2$d · %3$s</string>
+    <string name="snmp_system_overview">System overview</string>
+    <string name="snmp_favorites">Favorites</string>
+    <string name="snmp_root_oid_label">Root OID (e.g. 1.3.6.1.2.1.2 for interfaces)</string>
+    <string name="snmp_load_custom_mib">Load a custom MIB</string>
+    <string name="snmp_mib_text">MIB text</string>
+    <string name="snmp_load">Load</string>
+    <string name="snmp_oid">OID</string>
+    <string name="snmp_get">GET</string>
+    <string name="snmp_get_next">GET NEXT</string>
+    <string name="snmp_set">SET</string>
+    <string name="snmp_value">Value</string>
+    <string name="snmp_confirm_set">Confirm SET</string>
+    <string name="snmp_set_warning">This writes a new value to the device — it can change live configuration.</string>
+    <string name="snmp_arrow_value">→ %1$s</string>
+    <string name="snmp_listen_port">Listen port</string>
+    <string name="snmp_accepted_communities">Accepted communities (comma-separated)</string>
+    <string name="snmp_v3_users">SNMPv3 users</string>
+    <string name="snmp_add_user">Add user</string>
+    <string name="snmp_no_v3_users">No v3 users configured yet.</string>
+    <string name="snmp_username_security_level">%1$s · %2$s</string>
+    <string name="snmp_start_listening">Start listening</string>
+    <string name="snmp_stop">Stop</string>
+    <string name="snmp_listening_on_udp">Listening on UDP %1$s</string>
+    <string name="snmp_events_received">%1$d received</string>
+    <string name="snmp_add_v3_trap_user">Add SNMPv3 trap user</string>
+    <string name="snmp_username">Username</string>
+    <string name="snmp_security_level">Security level</string>
+    <string name="snmp_auth_protocol">Auth protocol</string>
+    <string name="snmp_auth_passphrase">Auth passphrase</string>
+    <string name="snmp_privacy_protocol">Privacy protocol</string>
+    <string name="snmp_privacy_passphrase">Privacy passphrase</string>
+    <string name="snmp_add">Add</string>
+    <string name="snmp_version_label">SNMP version</string>
+    <string name="snmp_authentication_protocol">Authentication protocol</string>
+    <string name="snmp_v3_recommended">v3 (recommended)</string>
+    <string name="snmp_port_label">SNMP port</string>
+    <string name="snmp_community">Community</string>
+    <string name="snmp_community_plaintext_warning">Sent in plain text on the wire — v1/v2c have no encryption. Prefer v3 for anything reachable outside a trusted LAN.</string>
+    <string name="snmp_passphrase_min_length_warning">At least 8 characters — RFC 3414 §11.2 requires this minimum; every real agent enforces it too.</string>
+    <string name="snmp_context_name_optional">Context name (optional)</string>
+    <string name="components_host_label">Host</string>
+    <string name="components_port_label">Port</string>
+    <string name="bmc_kg_key_optional">Kg key (optional)</string>
+    <string name="bmc_kg_key_hint">leave blank unless the BMC has a BMC/Kg key set</string>
+    <string name="redfish_trust_self_signed_desc">Most BMCs (iDRAC, iLO, XCC, Supermicro) ship a self-signed HTTPS certificate out of the box.</string>
+    <string name="bmc_ipmi_privilege_level_label">Privilege level requested for this session</string>
+    <string name="bmc_kg_key_desc">Only needed for a "two-key" BMC login. Enter either the raw ASCII passphrase, or a 0x-prefixed hex string, exactly as configured on the BMC.</string>
+    <string name="serial_console_usb_device">USB device</string>
+
+    <!-- ARD command -->
+    <string name="ard_title">ARD: Send UNIX Command</string>
+    <string name="ard_back">Back</string>
+    <string name="ard_required_fields_error">Host, admin username, and command are required.</string>
+    <string name="ard_remote_management_hint">Requires \"Remote Management\" enabled on the target Mac (System Settings \u2192 General \u2192 Sharing) with an account that has admin/remote-management privileges.</string>
+    <string name="ard_host_or_ip">Host or IP</string>
+    <string name="ard_admin_username">Admin username</string>
+    <string name="ard_admin_password">Admin password</string>
+    <string name="ard_run_command_as">Run command as (blank = admin user)</string>
+    <string name="ard_shell_command">Shell command</string>
+    <string name="ard_running">  Running…</string>
+    <string name="ard_run">Run</string>
+    <string name="ard_exit_status">Exit status: %1$d</string>
+    <string name="ard_output">Output</string>
+
+    <!-- NETCONF XML editor / diff tool -->
+    <string name="netconf_xml_well_formed">✓ Well-formed</string>
+    <string name="netconf_xml_diff_tool">Diff Tool</string>
+    <string name="netconf_xml_running_vs_candidate">Running vs Candidate</string>
+    <string name="netconf_xml_load_running_a">Load Running → A</string>
+    <string name="netconf_xml_load_startup_b">Load Startup → B</string>
+    <string name="netconf_xml_compare">Compare</string>
+    <string name="netconf_xml_copy_diff">Copy diff</string>
+
+    <!-- RESTCONF explorer -->
+    <string name="restconf_resource_path">Resource path</string>
+    <string name="restconf_yang_tab_modules">Modules</string>
+    <string name="restconf_yang_tab_datastore">Datastore</string>
+    <string name="restconf_yang_tab_xpath">XPath</string>
+    <string name="restconf_search_modules">Search modules</string>
+    <string name="restconf_refresh">Refresh</string>
+    <string name="restconf_no_modules_loaded">No modules loaded yet — tap refresh to query the server\'s YANG library.</string>
+    <string name="restconf_load">Load</string>
+    <string name="restconf_load_resource_hint">Load a resource path to browse its subtree.</string>
+    <string name="restconf_path_to_xpath">Path → XPath</string>
+    <string name="restconf_xpath_to_path">XPath → Path</string>
+    <string name="restconf_resource_path_field">RESTCONF resource path</string>
+    <string name="restconf_xpath_field">XPath</string>
+    <string name="restconf_conversion_failed">Couldn\'t convert: %1$s</string>
+    <string name="restconf_xpath_key_hint">List keys are shown positionally (key1, key2, …) — the resource path alone doesn\'t carry the real YANG key names.</string>
+    <string name="restconf_param_name">Param</string>
+    <string name="restconf_back">Back</string>
+    <string name="restconf_monitoring_dashboard">Monitoring Dashboard</string>
+    <string name="restconf_yang_browser">YANG Browser</string>
+    <string name="restconf_api_explorer">API Explorer</string>
+    <string name="restconf_configuration">Configuration</string>
+    <string name="restconf_send">Send</string>
+    <string name="restconf_state_disconnected">Disconnected</string>
+    <string name="restconf_state_connecting">Connecting…</string>
+    <string name="restconf_state_connected">Connected</string>
+    <string name="restconf_state_reconnecting">Reconnecting…</string>
+    <string name="restconf_state_connection_error">Connection error</string>
+    <string name="restconf_error_request_failed">Request failed</string>
+    <string name="restconf_error_capability_probe_failed">Capability probe failed</string>
+    <string name="restconf_error_yang_discovery_failed">YANG module discovery failed</string>
+    <string name="restconf_export_summary">Exported %1$d request(s), %2$d collection(s), %3$d environment(s).</string>
+    <string name="restconf_error_export_failed">Export failed: %1$s</string>
+    <string name="restconf_error_import_failed">Import failed: %1$s</string>
+    <string name="restconf_error_unknown">unknown error</string>
+    <string name="restconf_capabilities">Capabilities</string>
+    <string name="restconf_yang_modules">YANG Modules</string>
+    <string name="restconf_stat_requests">Requests: %1$d</string>
+    <string name="restconf_stat_errors">Errors: %1$d</string>
+    <string name="restconf_stat_avg_latency">Avg: %1$d ms</string>
+    <string name="guacamole_all">All</string>
+
+    <!-- RESTCONF API Explorer -->
+    <string name="restconf_explorer_title">API Explorer</string>
+    <string name="restconf_import_collection">Import collection</string>
+    <string name="restconf_export_collection">Export collection</string>
+    <string name="restconf_save">Save</string>
+    <string name="restconf_tab_saved">Saved</string>
+    <string name="restconf_tab_favorites">Favorites</string>
+    <string name="restconf_tab_recent">Recent</string>
+    <string name="restconf_tab_collections">Collections</string>
+    <string name="restconf_tab_environments">Environments</string>
+    <string name="restconf_delete_collection">Delete collection</string>
+    <string name="restconf_save_request_title">Save request</string>
+    <string name="restconf_name_label">Name</string>
+    <string name="restconf_save_request_tip">Tip: use {{name}} anywhere in the path, body, headers, or query params — you\'ll be prompted to fill it in each time you load this request.</string>
+    <string name="restconf_untitled_request">Untitled request</string>
+    <string name="restconf_cancel">Cancel</string>
+    <string name="restconf_new_collection">New collection</string>
+    <string name="restconf_create">Create</string>
+    <string name="restconf_nothing_here_yet">Nothing here yet.</string>
+    <string name="restconf_template_badge_desc">Template — has fill-in placeholders</string>
+    <string name="restconf_favorite_desc">Favorite</string>
+    <string name="restconf_load_desc">Load</string>
+    <string name="restconf_delete_desc">Delete</string>
+    <string name="restconf_no_requests_sent_yet">No requests sent yet.</string>
+    <string name="restconf_replay_desc">Replay</string>
+    <string name="restconf_search_saved_requests">Search saved requests</string>
+
+    <!-- RESTCONF Configuration screen -->
+    <string name="restconf_config_title">Configuration</string>
+    <!-- DUPLICATE-RESOURCE FIX: restconf_back was already declared above
+         (line ~2113, identical "Back" value) — Android's resource merger
+         fails the build on any duplicate <string name="..."> within the
+         same values/ file (not just across configs), so this second
+         declaration had to go, not just be de-duplicated logically. -->
+    <string name="restconf_save_and_reconnect">Save &amp; Reconnect</string>
+    <string name="restconf_section_connection">Connection</string>
+    <string name="restconf_section_authentication">Authentication</string>
+    <string name="restconf_section_tls_security">TLS &amp; Security</string>
+    <string name="restconf_section_custom_headers">Custom Headers</string>
+    <string name="restconf_section_performance">Performance</string>
+    <string name="restconf_host">Host</string>
+    <string name="restconf_port">Port</string>
+    <string name="restconf_port_error">Port must be 1–65535</string>
+    <string name="restconf_username">Username</string>
+    <string name="restconf_password">Password</string>
+    <string name="restconf_show_password">Show password</string>
+    <string name="restconf_hide_password">Hide password</string>
+    <string name="restconf_use_https">Use HTTPS</string>
+    <string name="restconf_accept_self_signed">Accept self-signed certificate</string>
+    <string name="restconf_preferred_data_format">Preferred data format</string>
+    <string name="restconf_require_mutual_tls">Require Mutual TLS</string>
+    <string name="restconf_certificate_pins">Certificate pins (SHA-256)</string>
+    <string name="restconf_no_pinning">No pinning — comma-separated "sha256/BASE64…" values</string>
+    <plurals name="restconf_pins_configured">
+        <item quantity="one">%1$d pin configured</item>
+        <item quantity="other">%1$d pins configured</item>
+    </plurals>
+    <string name="restconf_header_name">Header</string>
+    <string name="restconf_header_value">Value</string>
+    <string name="restconf_http2">HTTP/2</string>
+    <string name="restconf_response_compression">Response compression</string>
+    <string name="restconf_keep_alive">Keep-alive</string>
+    <string name="restconf_expand">Expand</string>
+    <string name="restconf_collapse">Collapse</string>
+    <string name="restconf_status_connected">Connected</string>
+    <string name="restconf_status_error">Error</string>
+    <string name="restconf_status_off">Off</string>
+
+    <!-- RESTCONF Environment editor -->
+    <string name="restconf_new_environment">New environment</string>
+    <string name="restconf_edit_environment">Edit environment</string>
+    <string name="restconf_env_name_hint">Name (e.g. "Lab switch", "Production")</string>
+    <string name="restconf_no_environments_yet">No environments yet. Create one to reuse the same {{host}}, {{token}}, etc. across every saved request without retyping them.</string>
+    <string name="restconf_active_environment">Active environment</string>
+    <string name="restconf_set_as_active">Set as active</string>
+    <plurals name="restconf_variable_count">
+        <item quantity="one">%1$d variable</item>
+        <item quantity="other">%1$d variables</item>
+    </plurals>
+    <string name="restconf_edit_variables">Edit variables</string>
+    <string name="restconf_delete_environment">Delete environment</string>
+    <string name="restconf_variable_label">Variable</string>
+    <string name="restconf_env_variable_tip">Use these as {{variableName}} anywhere in a saved request\'s path, body, headers, or query params.</string>
+
+    <!-- RESTCONF Template fill dialog -->
+    <string name="restconf_fill_in_template">Fill in "%1$s"</string>
+    <string name="restconf_use_template">Use template</string>
+    <plurals name="restconf_placeholder_count">
+        <item quantity="one">This saved request uses %1$d placeholder — fill it in before sending.</item>
+        <item quantity="other">This saved request uses %1$d placeholders — fill them in before sending.</item>
+    </plurals>
+
+    <!-- RESTCONF Monitoring dashboard -->
+    <string name="restconf_latency_trend">Latency trend</string>
+    <string name="restconf_status_codes">Status codes</string>
+    <string name="restconf_stat_requests_label">Requests</string>
+    <string name="restconf_stat_errors_label">Errors</string>
+    <string name="restconf_avg_latency_label">Avg latency</string>
+    <string name="restconf_last_latency_label">Last latency</string>
+    <string name="restconf_sent_label">Sent</string>
+    <string name="restconf_received_label">Received</string>
+    <string name="restconf_recent_requests">Recent requests</string>
+    <string name="restconf_no_requests_this_session">No requests sent yet in this session.</string>
+    <string name="restconf_conn_connected">Connected</string>
+    <string name="restconf_conn_connecting">Connecting…</string>
+    <string name="restconf_conn_reconnecting">Reconnecting…</string>
+    <string name="restconf_conn_error">Connection error</string>
+    <string name="restconf_conn_disconnected">Disconnected</string>
+    <string name="restconf_uptime">Uptime</string>
+    <string name="restconf_tls_label">TLS</string>
+    <string name="restconf_protocol_label">Protocol</string>
+    <string name="restconf_reconnects_label">Reconnects</string>
+    <string name="restconf_max_latency">max %1$d ms</string>
+    <string name="restconf_ms_ago">%1$dm ago</string>
+    <string name="restconf_hr_ago">%1$dh ago</string>
+    <string name="restconf_just_now">just now</string>
+    <string name="restconf_uptime_hm">%1$dh %2$dm</string>
+    <string name="restconf_uptime_ms">%1$dm %2$ds</string>
+    <string name="restconf_uptime_s">%1$ds</string>
+
+    <!-- RESTCONF Response viewer -->
+    <string name="restconf_unpin_baseline">Unpin baseline</string>
+    <string name="restconf_pin_as_baseline">Pin as baseline</string>
+    <string name="restconf_copy_response">Copy response</string>
+    <string name="restconf_export_response">Export response</string>
+    <string name="restconf_diff_previous">Previous</string>
+    <string name="restconf_diff_baseline">Baseline</string>
+    <string name="restconf_diff_current">Current</string>
+    <string name="restconf_diff_vs">vs %1$s</string>
+    <string name="restconf_diff_nothing_to_compare">Nothing to compare against yet — send another request, or use the pin icon above to set this response as a baseline to diff future responses against.</string>
+    <string name="restconf_body_invalid_showing_raw">Response body isn\'t valid %1$s — showing Raw instead.</string>
+    <string name="restconf_empty_body">(empty body)</string>
+    <string name="restconf_tab_pretty">Pretty</string>
+    <string name="restconf_tab_tree">Tree</string>
+    <string name="restconf_tab_raw">Raw</string>
+    <string name="restconf_tab_headers">Headers</string>
+    <string name="restconf_tab_diff">Diff</string>
+    <string name="restconf_diff_header">%1$s  →  %2$s</string>
+    <string name="restconf_diff_too_large">One of these responses is too large to diff line-by-line.</string>
+    <string name="restconf_diff_identical">Identical — no differences between %1$s and %2$s.</string>
+
+    <!-- RESTCONF Request editor -->
+    <string name="restconf_add_row">Add row</string>
+    <string name="restconf_bearer_token">Bearer token</string>
+    <string name="restconf_header_name_field">Header name</string>
+    <string name="restconf_key_value">Key value</string>
+    <string name="restconf_token_url">Token URL</string>
+    <string name="restconf_client_id">Client ID</string>
+    <string name="restconf_client_secret">Client secret</string>
+    <string name="restconf_no_client_cert_selected">No client certificate selected</string>
+    <string name="restconf_choose_from_keystore">Choose from Android Keystore</string>
+    <string name="restconf_no_authentication">No authentication</string>
+
+    <string name="restconf_key">Key</string>
+    <string name="restconf_remove_row">Remove</string>
+    <string name="restconf_jwt">JWT</string>
+    <string name="restconf_oauth2_scope">Scope (optional)</string>
+    <string name="restconf_custom_header_hint">Add your header(s) in the Headers tab.</string>
+    <string name="restconf_format_body">Format</string>
+    <string name="restconf_body_valid">Valid %1$s</string>
+    <string name="restconf_body_invalid">Invalid %1$s</string>
+    <string name="restconf_body_invalid_at_line">Invalid %1$s (line %2$d)</string>
+
+    <!-- BMC management -->
+    <string name="bmc_refreshing">Refreshing…</string>
+    <string name="bmc_refresh_sensors">Refresh sensors</string>
+
+    <!-- NETCONF session -->
+    <string name="netconf_load_into_builder">Load into builder</string>
+    <string name="netconf_run">Run</string>
+    <string name="netconf_copy_xml">Copy XML</string>
+    <string name="netconf_toggle_favorite">Toggle favorite</string>
+    <string name="netconf_default_datastore_desc">Datastore the Session UI and RPC Builder default to when this connection opens. The actual set of datastores the server supports is discovered live from its &lt;hello&gt; capabilities.</string>
+    <string name="netconf_default_datastore_label">Default datastore</string>
+    <string name="snmp_dashboard_menu_item">SNMP Dashboard</string>
+    <string name="snmp_monitoring_title">SNMP Monitoring</string>
+    <string name="snmp_monitoring_subtitle">Poll this device\'s stats via SNMP alongside the main connection · %1$s</string>
+    <string name="snmp_security_level_none">None</string>
+    <string name="snmp_security_level_auth_only">Auth only</string>
+    <string name="snmp_security_level_auth_privacy">Auth + Privacy</string>
+    <string name="netconf_extra_capabilities">Extra capabilities (one per line)</string>
+    <string name="netconf_extra_capabilities_desc">base:1.0 and base:1.1 are always advertised automatically. Add extra capability URIs here only if a server needs an explicit opt-in it doesn\'t infer on its own.</string>
+    <string name="netconf_keep_alive_ms">Keep-alive (ms)</string>
+    <string name="netconf_connect_timeout_ms">Connect timeout (ms)</string>
+    <string name="netconf_enable_ssh_compression">Enable SSH compression</string>
+    <string name="netconf_automatic_reconnect">Automatic reconnect</string>
+    <string name="netconf_security_advanced_title">Security &amp; Advanced</string>
+    <string name="netconf_openssh_certificate_optional">OpenSSH certificate (optional)</string>
+    <string name="netconf_openssh_cert_desc">Paste the contents of an id_*-cert.pub file to authenticate with an OpenSSH certificate signed by a CA the server trusts, instead of (or alongside) a plain public key.</string>
+    <string name="netconf_hostkey_verification_desc">Host-key verification uses the same Trust-On-First-Use store as SSH — see the connection\'s host-key/fingerprint management under Security settings.</string>
+    <string name="netconf_call_home_title">Call Home (RFC 8071)</string>
+    <string name="netconf_call_home_accept">Accept inbound Call Home connections</string>
+    <string name="netconf_call_home_accept_desc">For devices behind NAT/firewalls that dial out to this app instead of accepting inbound SSH themselves. Host/username/password/key above still authenticate the connection — they just stop being a dial target.</string>
+    <string name="netconf_call_home_transport_label">Transport</string>
+    <string name="netconf_call_home_listen_port">Listen port</string>
+    <string name="netconf_call_home_port_desc_tls">RFC 8071/IANA default is 4335. Must match this device\'s Call Home client-list "port" configuration.</string>
+    <string name="netconf_call_home_port_desc_ssh">RFC 8071/IANA default is 4334. Must match this device\'s Call Home client-list "port" configuration.</string>
+    <string name="netconf_call_home_expected_source_ip">Expected source IP (optional)</string>
+    <string name="netconf_call_home_source_ip_desc">Only required if more than one Call Home-enabled connection shares this same listen port — otherwise leave blank to accept from any address.</string>
+    <string name="netconf_call_home_tls_client_certificate">TLS client certificate (optional)</string>
+    <string name="netconf_call_home_tls_cert_desc">PEM bundle: an X.509 certificate block immediately followed by its PKCS#8 private key block (openssl pkcs8 -topk8 -nocrypt). Leave blank to handshake without presenting a client certificate. The device\'s own certificate is not entered here — it\'s pinned automatically on first connection (Trust-On-First-Use), the same as SSH host keys.</string>
+    <string name="netconf_reconnect">Reconnect</string>
+    <string name="netconf_export_xml_clipboard">Export XML (copy to clipboard)</string>
+    <string name="netconf_import_xml_clipboard">Import XML (paste from clipboard)</string>
+    <string name="netconf_favorite">Favorite</string>
+    <string name="netconf_namespace_explorer_icon">Namespace explorer</string>
+    <string name="netconf_rediscover">Rediscover</string>
+    <string name="netconf_metadata_only_no_schema">Metadata only — schema not fetchable</string>
+    <string name="netconf_back_to_module_list">Back to module list</string>
+    <string name="netconf_disconnect_reason_failed_to_connect">Failed to connect</string>
+    <string name="netconf_toast_failed_to_connect_to">Failed to connect to %1$s:%2$d</string>
+    <string name="netconf_toast_not_connected">Not connected</string>
+    <string name="netconf_error_unknown">Unknown error</string>
+    <string name="netconf_xml_invalid">Invalid XML</string>
+    <string name="netconf_diff_left_label">Left (A)</string>
+    <string name="netconf_diff_right_label">Right (B)</string>
+    <string name="snmp_error_invalid_value_for_type">Invalid value for the chosen type</string>
+    <string name="netconf_toast_call_home_reconnect_info">This is a Call Home session — it reconnects when the device calls home again, not from here.</string>
+    <string name="netconf_toast_yang_discovery_failed">YANG discovery failed: %1$s</string>
+    <string name="netconf_toast_get_schema_failed">get-schema failed for %1$s: %2$s</string>
+    <string name="netconf_toast_get_config_failed">get-config(%1$s) failed: %2$s</string>
+
+    <!-- ── VirtualBox VRDE Feature (Part 2/N: editor fields) ─────────────── -->
+    <string name="vrde_section_title">VirtualBox VRDE</string>
+    <string name="vrde_auth_type_label">VRDE auth method (host-side setting)</string>
+    <string name="vrde_auth_type_null">Null</string>
+    <string name="vrde_auth_type_external">External</string>
+    <string name="vrde_auth_type_guest">Guest</string>
+    <string name="vrde_auth_type_desc">Informational only — matches whatever --vrdeauthtype the VM itself is configured with. Doesn\'t change what this client sends; auth is negotiated server-side.</string>
+    <string name="vrde_multi_connection_label">Host allows multiple simultaneous clients</string>
+    <string name="vrde_multi_connection_desc">Informational only — reflects the VM\'s own MultiConnection VRDE setting.</string>
+
+    <!-- ── VMware vSphere Feature (Part 2/N: editor fields) ──────────────── -->
+    <string name="vsphere_section_title">VMware vSphere</string>
+    <string name="vsphere_api_mode_label">API mode</string>
+    <string name="vsphere_api_mode_rest">REST</string>
+    <string name="vsphere_api_mode_soap">SOAP</string>
+    <string name="vsphere_api_mode_desc">REST (vSphere 6.7+) is preferred and JSON-based. SOAP is needed for older hosts and for operations REST doesn\'t cover yet, such as acquiring a WebMKS console ticket.</string>
+    <string name="vsphere_datacenter_label">Datacenter (optional)</string>
+    <string name="vsphere_datacenter_desc">Scopes inventory listing when the account can see more than one datacenter (vCenter only). Leave blank to list across all of them.</string>
+    <string name="vsphere_trust_self_signed_desc">vCenter/ESXi almost always ships with a self-signed certificate out of the box.</string>
+</resources>

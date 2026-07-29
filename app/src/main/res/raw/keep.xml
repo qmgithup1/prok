@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    BUGFIX-UI (critical, release-only): SpaceIcons.kt resolves every themed
+    icon (protocol badges, nav icons, action icons...) via
+    Context.resources.getIdentifier("ic_${iconBase}_$variant", "drawable", ...)
+    — a resource name built entirely from runtime string interpolation, never
+    as a static "ic_xxx_yyy" literal or a direct R.drawable.xxx reference
+    anywhere in the code.
+
+    The release build has both isMinifyEnabled and isShrinkResources enabled
+    (see app/build.gradle.kts). The Android Gradle Plugin's resource shrinker
+    finds "used" resources by statically scanning the code for direct
+    references; it cannot resolve a name assembled from variables at runtime,
+    so without this file every one of these 57 drawables (19 icon bases × 3
+    theme variants: space/nebula/aurora) is a candidate for removal from the
+    release APK. That means the app can look completely fine in a debug
+    build and still ship with blank/missing icons in the version users
+    actually install — with no crash, error, or warning to flag it.
+
+    tools:keep whitelists them explicitly so the shrinker never touches them,
+    regardless of whether it can trace the dynamic lookup.
+
+    NOTE: ic_rdp_*/ic_vnc_*/ic_ssh_* (the old protocol icon SVGs) were removed
+    — protocol badges now render via Icons.Outlined.DesktopWindows/Monitor/
+    Terminal directly (see ProtocolIconBadge in Components.kt), and
+    SpaceIcons.rdp()/vnc()/ssh() had no remaining callers.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_grid_space,@drawable/ic_grid_nebula,@drawable/ic_grid_aurora,
+                 @drawable/ic_history_space,@drawable/ic_history_nebula,@drawable/ic_history_aurora,
+                 @drawable/ic_file_transfer_space,@drawable/ic_file_transfer_nebula,@drawable/ic_file_transfer_aurora,
+                 @drawable/ic_settings_space,@drawable/ic_settings_nebula,@drawable/ic_settings_aurora,
+                 @drawable/ic_add_space,@drawable/ic_add_nebula,@drawable/ic_add_aurora,
+                 @drawable/ic_search_space,@drawable/ic_search_nebula,@drawable/ic_search_aurora,
+                 @drawable/ic_refresh_space,@drawable/ic_refresh_nebula,@drawable/ic_refresh_aurora,
+                 @drawable/ic_close_space,@drawable/ic_close_nebula,@drawable/ic_close_aurora,
+                 @drawable/ic_swap_space,@drawable/ic_swap_nebula,@drawable/ic_swap_aurora,
+                 @drawable/ic_folder_space,@drawable/ic_folder_nebula,@drawable/ic_folder_aurora,
+                 @drawable/ic_code_space,@drawable/ic_code_nebula,@drawable/ic_code_aurora,
+                 @drawable/ic_flash_space,@drawable/ic_flash_nebula,@drawable/ic_flash_aurora,
+                 @drawable/ic_lock_space,@drawable/ic_lock_nebula,@drawable/ic_lock_aurora,
+                 @drawable/ic_fingerprint_space,@drawable/ic_fingerprint_nebula,@drawable/ic_fingerprint_aurora,
+                 @drawable/ic_security_space,@drawable/ic_security_nebula,@drawable/ic_security_aurora,
+                 @drawable/ic_wifi_space,@drawable/ic_wifi_nebula,@drawable/ic_wifi_aurora,
+                 @drawable/ic_phone_space,@drawable/ic_phone_nebula,@drawable/ic_phone_aurora,
+                 @drawable/ic_rocket_space,@drawable/ic_rocket_nebula,@drawable/ic_rocket_aurora,
+                 @drawable/ic_palette_space,@drawable/ic_palette_nebula,@drawable/ic_palette_aurora" >
+</resources>

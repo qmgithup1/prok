@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): mirrors RdpProfile.isConnected's
+     "green dot" indicator already used on HomeScreen's connection cards,
+     redrawn as a plain shape since RemoteViews rows can't host that Compose
+     indicator directly. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/widget_success" />
+</shape>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET FEATURE (Part 1/2).
+
+    minWidth/minHeight ("2x1" cells at the common 74dp/cell approximation) is
+    the *small* quick-connect-button size; minResizeWidth/minResizeHeight let
+    the user shrink it no further than that single-row card, while
+    targetCellWidth/targetCellHeight (API 31+, ignored pre-31 same as
+    previewLayout below) describe the larger *default* placement — a 3x3
+    list — that most launchers actually drop on the home screen when the
+    widget is first added. resizeMode="horizontal|vertical" is what makes
+    the widget resizable in both directions in the first place: dragging it
+    anywhere between minWidth/minHeight and the full list size is what
+    HexRdpAppWidgetProvider.onAppWidgetOptionsChanged() reacts to by
+    swapping between widget_quick_connect_small.xml and
+    widget_connections_list.xml — see that method's chooseLayout() doc
+    comment for the exact size thresholds.
+
+    updatePeriodMillis="0": this widget is never redrawn on a dumb timer —
+    every redraw is pushed explicitly by WidgetUpdater.requestUpdate*() right
+    when something it displays actually changed (profile added/edited/
+    deleted, isConnected flipped, isFavorite toggled), the same reasoning
+    QuickConnectTileService's ACTIVE_TILE-less design already documents for
+    the Quick Settings tile.
+
+    android:configure requires WidgetConfigureActivity to be BOTH declared
+    in AndroidManifest.xml with the ACTION_APPWIDGET_CONFIGURE intent-filter
+    AND exported — this xml resource alone does not make the widget
+    configurable; see the manifest comment for that activity.
+
+    HOME-SCREEN-WIDGET FEATURE (Part 2/2): previewLayout points at
+    widget_preview.xml, not the real widget_connections_list.xml used by
+    initialLayout above — the real layout's ListView has no adapter bound
+    when the system's "Add widget" picker inflates it (nothing in this app
+    is running at that point to call setRemoteAdapter()), so it would always
+    render as the empty state. widget_preview.xml is a static mock with
+    hardcoded example rows instead, purely for a representative picker
+    preview — see its own doc comment.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="3"
+    android:maxResizeWidth="300dp"
+    android:maxResizeHeight="300dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_connections_list"
+    android:previewLayout="@layout/widget_preview"
+    android:previewImage="@mipmap/ic_launcher"
+    android:configure="com.systemsgo.hex.widget.WidgetConfigureActivity"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_description" />

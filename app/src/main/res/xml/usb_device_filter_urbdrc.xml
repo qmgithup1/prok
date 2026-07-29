@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    USB-REDIRECT FEATURE (Part 1/3): deliberately empty — a <resources> with
+    no <usb-device> children matches every attached USB device regardless of
+    vendor/product/class. FreeRDP's URBDRC channel redirects any USB device
+    class per MS-RDPEUSB §1.3 (see UsbDeviceClassCategory's doc comment in
+    UsbModels.kt), so narrowing this filter to specific classes would only
+    limit which devices can auto-launch UsbDeviceAttachedActivity while the
+    app isn't already running — never which devices this feature actually
+    supports redirecting once running. The user-facing "is this device
+    actually redirected" gate is the approval flow in
+    UsbRedirectionSettingsScreen, not this filter.
+
+    Kept as a SEPARATE resource from usb_device_filter.xml (the pre-existing
+    SMARTCARD-REDIRECT FEATURE filter, narrowed to interface class 0x0B and
+    referenced from RdpSessionActivity's own USB_DEVICE_ATTACHED meta-data)
+    rather than widening that one — RdpSessionActivity's narrow smart-card-
+    only filter is intentional (see its own manifest comment) and must keep
+    working exactly as before regardless of this feature.
+-->
+<resources>
+</resources>

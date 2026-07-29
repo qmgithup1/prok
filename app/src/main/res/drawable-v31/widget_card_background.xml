@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE — CORNER RADIUS (API 31+).
+
+     @android:dimen/system_app_widget_background_radius is the radius the
+     current launcher itself enforces on widget backgrounds/cutouts (added in
+     API 31 alongside the rest of the widget theming/masking behavior) — it
+     is NOT a fixed dp constant, its resolved value differs per launcher/OEM
+     (e.g. Pixel's launcher vs. Samsung One UI vs. others each ship a
+     different value). Referencing it here instead of a hardcoded 20dp means
+     this card's inner corners always agree with whatever cutout/mask shape
+     that specific launcher already applies to the widget's outer edge,
+     instead of visibly clashing with it.
+
+     Only shape/radius differs from the base drawable/widget_card_background.xml;
+     the color still comes from widget_card_surface (values / values-night). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/widget_card_surface" />
+    <corners android:radius="@android:dimen/system_app_widget_background_radius" />
+</shape>

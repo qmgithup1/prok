@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET FEATURE (Part 1/2): one row inside the CONNECTION_LIST
+    widget's ListView, inflated by RdpProfileRemoteViewsFactory.getViewAt().
+    Deliberately the same id shape as widget_quick_connect_small.xml
+    (android:id/text1, android:id/text2, R.id.widget_icon, R.id.widget_status_dot)
+    so both layouts can be populated by the same
+    HexRdpAppWidgetProvider.populateConnectionViews() helper — a row here and
+    the single-connection widget's whole card show exactly the same fields for
+    exactly the same reason (name, host:port · protocol, connected/not dot).
+
+    No onClick is wired here directly — RdpProfileRemoteViewsFactory sets a
+    per-row fillInIntent instead (see its getViewAt()), completed against the
+    list's shared setPendingIntentTemplate() from
+    HexRdpAppWidgetProvider.buildConnectionListViews(). This split (template +
+    fillInIntent) is the documented ListView-inside-a-widget pattern — a plain
+    setOnClickPendingIntent() per row is not supported by RemoteViewsService-
+    backed collections.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_list_item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/widget_row_background"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="10dp"
+    android:minHeight="56dp">
+
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/widget_icon_badge_background">
+
+        <ImageView
+            android:id="@+id/widget_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_tile_quick_connect"
+            android:contentDescription="@null" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/widget_status_dot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/widget_status_dot_disconnected"
+        android:contentDescription="@null" />
+</LinearLayout>

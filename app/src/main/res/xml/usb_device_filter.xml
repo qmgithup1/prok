@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SMARTCARD-REDIRECT FEATURE: matches any USB device declaring interface
+  class 0x0B (11 decimal) — the USB-IF-assigned "Smart Card" device class,
+  which every CCID-compliant reader (the near-universal standard for USB
+  smart-card/PIV/CAC readers) reports. Deliberately does NOT filter on
+  vendor/product ID: unlike, say, a specific printer model, any CCID reader
+  should work here, so listing individual vendor IDs would just mean readers
+  from vendors nobody thought to add don't get auto-detected.
+
+  Referenced from AndroidManifest.xml's RdpSessionActivity
+  USB_DEVICE_ATTACHED <meta-data>. See UsbCcidReader.kt for the class byte
+  this mirrors (CCID_INTERFACE_CLASS = 0x0B) and for why interface-class
+  (not device-class) matching is used underneath in code too — most CCID
+  readers report class-per-interface (0x00 at the device level) rather than
+  a device-level smart-card class, so relying on the OS-level device filter
+  alone can under-match; UsbCcidReader's own enumeration re-checks every
+  attached device's interfaces directly for this reason and doesn't rely on
+  this filter having caught everything.
+-->
+<resources>
+    <usb-device class="11" />
+</resources>

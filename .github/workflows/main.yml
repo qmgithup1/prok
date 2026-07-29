@@ -1,0 +1,2649 @@
+# ══════════════════════════════════════════════════════════════════
+# HexRDP — GitHub Actions CI/CD
+# كل شيء تلقائي 100%، لا تحتاج Android Studio ولا NDK على جهازك
+# ══════════════════════════════════════════════════════════════════
+#
+# كيف يعمل:
+#   1. GitHub Actions يسحب كود مشروعك
+#   2. يُصلح gradle-wrapper.jar (Git LFS pointer → JAR حقيقي)
+#   3. يحمّل FreeRDP مباشرة من GitHub (git clone) إلى المكان الصحيح
+#   4. يثبّت NDK + CMake تلقائياً
+#   5. يبني OpenSSL لـ Android (arm64-v8a و armeabi-v7a و x86_64 و x86)
+#   6. يبني APK كامل (native + Kotlin) مع تمرير مسار OpenSSL
+#   7. يحفظ مخرجات FreeRDP و OpenSSL في cache → البناءات التالية سريعة جداً
+#
+# للـ Release (APK موقّع + نشر تلقائي على GitHub Releases):
+#   أضف هذه الـ Secrets في:
+#   GitHub repo → Settings → Secrets and variables → Actions → New secret
+#
+#   KEYSTORE_BASE64   → محتوى ملف .jks مشفّر بـ base64
+#   KEY_ALIAS         → اسم الـ alias داخل الـ keystore
+#   KEY_PASSWORD      → كلمة مرور الـ key
+#   STORE_PASSWORD    → كلمة مرور الـ keystore
+# ══════════════════════════════════════════════════════════════════
+#
+# ── إصدارات المكتبات (محدّثة 2026-06-29) ─────────────────────────
+# NDK r27d LTS  → أكثر استقراراً مع Clang 17 لـ cross-compile
+# FreeRDP 3.24.2 → أحدث إصدار أمني مستقر مع تحسينات Android ضخمة
+# OpenSSL 3.5.6  → LTS حتى 2030، يصلح -Wcast-function-type-strict مع Clang 16+
+#
+# ── ABI-FIX (2026-06-29) ──────────────────────────────────────────
+# المشكلة: armeabi-v7a (32-bit ARM) كان مُضافاً في abiFilters (Gradle)
+# وفي wrapper scripts لـ OpenSSL هنا، لكن build_openssl() و حلقة بناء
+# FreeRDP الفعليتين كانتا تُستدعيان فقط لـ "arm64-v8a x86_64" — أي أن
+# الـ wrappers كانت تُصنع بلا استخدام، ولا يوجد أي ناتج armeabi-v7a/x86
+# فعلي في freerdp-prebuilt/ أو openssl-build/. النتيجة: على أي جهاز
+# armeabi-v7a فعلي، CMakeLists.txt في التطبيق لا يجد
+# freerdp-prebuilt/armeabi-v7a/lib/libfreerdp3.so فيتجاهل البناء
+# الأصلي بصمت (Kotlin fallback فقط — لا كراش، لكن لا دعم FreeRDP حقيقي).
+# الإصلاح: إضافة armeabi-v7a (و x86 للمحاكي القديم) إلى كل حلقات
+# البناء الفعلية (OpenSSL + FreeRDP) في كلا job (build و release)،
+# ليتطابق الناتج مع abiFilters في app/build.gradle.kts.
+#
+# ── REAL-PCM FIX (هذا الملف) ───────────────────────────────────────
+# المشكلة: قناتا rdpsnd (تشغيل الصوت البعيد) و audin (المايك) كانتا
+# تتصلان بنجاح (تظهر الحالة في الواجهة عبر hexrdp_jni.c) لكن بلا أي
+# صوت فعلي — لأن خطوة بناء FreeRDP أدناه لم تكن تمرر أي علم يفعّل
+# backend صوتي حقيقي لأندرويد، فتختار FreeRDP داخلياً خيار "fake"
+# (rdpsnd_process_connect في FreeRDP نفسها) بصمت بغض النظر عمّا يفعله
+# hexrdp_jni.c. الإصلاح: إضافة -DWITH_OPENSLES=ON — FreeRDP already
+# tأتي بـ backend Android جاهز (channels/rdpsnd/client/opensles/ +
+# channels/audin/client/opensles/) مبني على OpenSL ES (واجهة NDK ثابتة
+# موجودة على كل جهاز/إصدار API)، فقط لم يكن مُفعَّلاً. بعد هذا التعديل
+# لا حاجة لأي تغيير في hexrdp_jni.c — الصوت يُشغَّل تلقائياً داخل
+# libfreerdp-client3.so نفسها. لأن تغيير علم CMake وحده لا يُبطل
+# الـ cache (مفتاحه لا يتضمن قائمة WITH_*)، أُضيف "-opensles-v1" لمفتاح
+# freerdp-prebuilt-cache في كلا الموضعين (job build و job release) كي
+# يُعاد بناء FreeRDP فعلياً بالعلم الجديد بدل استخدام cache قديم بلا صوت.
+#
+# ── WEBCAM-REDIRECT FIX (هذا الملف) ─────────────────────────────────
+# المشكلة: HEXRDP_WEBCAM_BACKEND_AVAILABLE في CMakeLists.txt كان OFF لأن
+# FREERDP_TAG المثبَّت هنا (3.24.2) أُصدر قبل أن يضيف FreeRDP أي backend
+# فعلي لقناة rdpecam (MS-RDPECAM) على أندرويد — راجع تعليق hexrdp_jni.c
+# "No equivalent block exists for a camera/webcam toggle" (لم يعد صحيحاً
+# بعد هذا التعديل). PR أعلى المصدر (#12894, "[client,rdpecam,android]
+# Add camera redirection support") أُدمج ونُشر أول مرة في FreeRDP 3.27.1
+# (سجل الإصدار: "Android client RDPECAM support"). الإصلاح هنا بجزءين:
+#   1. رفع FREERDP_TAG من 3.24.2 إلى 3.27.1 (أول تاغ فيه دعم rdpecam
+#      لأندرويد فعلياً — تثبيته على تاغ أقدم لن يبني الـ backend مهما
+#      كانت أعلام CMake).
+#   2. إضافة -DCHANNEL_RDPECAM_CLIENT=ON لخطوة "Build FreeRDP prebuilt"
+#      في كلا الـ job (نفس نمط -DWITH_OPENSLES=ON أعلاه) — هذا هو علم
+#      CMake الرسمي لتفعيل القناة (وليس -DWITH_RDPECAM أو -DCHANNEL_RDPECAM
+#      المذكورين أحياناً في نقاشات قديمة؛ راجع AUR freerdp-git package:
+#      "-DWITH_RDPECAM=ON flag is not used now... sets
+#      -DCHANNEL_RDPECAM_CLIENT=ON"). على عكس CUPS/PCSC، لا حاجة لأي
+#      مكتبة أصلية خارجية إضافية على أندرويد تحديداً — الـ backend الجديد
+#      في #12894 مكتوب فوق Camera2 NDK مباشرة (نفس فلسفة WITH_OPENSLES:
+#      واجهة NDK ثابتة، ليست مكتبة desktop/Linux تحتاج cross-compile كما
+#      كانت محاولة CUPS الموثّقة سابقاً في SETUP.md).
+#   3. رفع FREERDP_TAG وحده يُبطل مفتاح الـ cache تلقائياً (المفتاح
+#      يتضمن ${{ env.FREERDP_TAG }})، لكن أُضيفت أيضاً لاحقة
+#      "-rdpecam-v1" (بجانب "-opensles-v1" الموجودة) للوضوح ولمنع
+#      استعادة أي cache وسيط بُني بنفس التاغ الجديد قبل إضافة علم
+#      CHANNEL_RDPECAM_CLIENT (نفس منطق REAL-PCM FIX تماماً).
+#
+# ⚠️ يبقى هذا تجريبياً حتى تشغيل CI حقيقي يؤكد نجاح البناء لكل ABI: لا
+# توجد بيئة شبكة هنا للتحقق من نجاح تجميع channels/rdpecam/client فعلياً
+# ضد NDK r27d. إن فشل ABI معيّن، الأثر هو نفس نمط CUPS الموثّق في
+# SETUP.md: HEXRDP_WEBCAM_BACKEND_AVAILABLE قد يقرأ "متاح" على مستوى
+# التطبيق بينما تلك الـ ABI تحديداً لا تحمل الميزة فعلياً — راجع سجلّ
+# خطوة "Build FreeRDP prebuilt" لكل ABI قبل الاعتماد على الميزة في إصدار.
+# ══════════════════════════════════════════════════════════════════
+
+name: HexRDP CI/CD
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    tags:     [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# SUPPLY-CHAIN-FIX: explicit least-privilege GITHUB_TOKEN permissions.
+# Without this block, GITHUB_TOKEN falls back to whatever the repo/org
+# default is — which for many repos (especially ones created before
+# GitHub tightened the default to read-only) is broader than this
+# workflow actually needs. `contents: read` here covers checkout/build/
+# lint/baseline-profile; only the `release` job (which publishes to
+# GitHub Releases) overrides this with its own `contents: write` below.
+permissions:
+  contents: read
+
+# SUPPLY-CHAIN NOTE (not fixed in this pass — needs network access to do
+# safely): every `git clone --branch "$TAG"` in this workflow (FreeRDP,
+# CUPS, PCSC-lite, openh264 — search this file for `git clone`) resolves
+# whatever commit that tag currently points to on the upstream GitHub repo
+# at CLONE TIME. A tag is a mutable ref — if it were ever force-moved
+# (upstream compromise, or a maintainer mistake) a later build could
+# silently pull different code than a previous build of the exact same
+# workflow file. The harder-but-safer pattern is pinning each clone to a
+# full 40-char commit SHA instead of a tag name (`git clone` a SHA
+# directly, or `git checkout <sha>` after a shallow clone) and updating
+# that SHA deliberately alongside any *_TAG/*_VERSION bump above. Not done
+# here because getting the SHA wrong would silently break every build
+# until caught — that pin should be added by running
+# `git ls-remote https://github.com/<org>/<repo> refs/tags/<TAG>` yourself
+# once (network access this environment doesn't have) and reviewing the
+# result, not by trusting a SHA a language model recalls from training
+# data for a value this security-sensitive.
+
+env:
+  NDK_VERSION:    "27.3.13750724"    # r27d LTS — أحدث LTS (كان: 26.3.11579264 r26 LTS)
+  CMAKE_VERSION:  "3.22.1"
+  JAVA_VERSION:   "17"
+  FREERDP_TAG:    "3.27.1"           # أول تاغ فيه دعم rdpecam (webcam) لأندرويد (كان: 3.24.2 — راجع WEBCAM-REDIRECT FIX أعلاه)
+  FREERDP_PATH:   "app/src/main/cpp/FreeRDP"
+  OPENSSL_BUILD_DIR: "app/src/main/cpp/openssl-build"
+  OPENSSL_VERSION: "3.5.6"           # LTS حتى 2030 (كان: 3.3.2)
+  # ABI-FIX: قائمة واحدة موحّدة تُستخدم في كل خطوات البناء (OpenSSL + FreeRDP)
+  # حتى لا تتكرر القوائم وتتعارض مع abiFilters في app/build.gradle.kts.
+  BUILD_ABIS: "arm64-v8a armeabi-v7a x86_64 x86"
+  # SMARTCARD-REDIRECT FEATURE: PCSC-lite (pcsclite.apdu.fr) provides the
+  # libpcsclite client library FreeRDP's channels/smartcard/client addin
+  # links against for -DWITH_PCSC=ON. No official Android/AOSP prebuilt
+  # exists (see SETUP.md's smart-card section), so — same shape as the CUPS
+  # cross-compile attempted for printer redirection — this workflow
+  # cross-builds it from source via autotools for every ABI in BUILD_ABIS,
+  # with libudev/hotplug support disabled (no udev on Android; readers are
+  # surfaced through the app's own USB-CCID bridge instead).
+  PCSC_LITE_VERSION: "2.3.1"
+  # H264-OPENH264 FIX: openh264 (Cisco's BSD-licensed H.264 codec) provides
+  # the decoder libfreerdp/codec/h264.c needs behind -DWITH_OPENH264=ON — see
+  # HEXRDP_H264_BACKEND_AVAILABLE's comment in CMakeLists.txt. No official
+  # Android prebuilt exists, so — same shape as PCSC-lite above — this
+  # workflow cross-builds it from source for every ABI in BUILD_ABIS via its
+  # own Makefile-based Android build (not autotools like CUPS/PCSC-lite).
+  # ⚠️ UNVERIFIED: the exact Makefile variables below (OS/ARCH/NDKROOT/
+  # TARGET) were written from openh264's documented Android build
+  # convention, not confirmed against this exact OPENH264_TAG's actual
+  # Makefile/BUILD.md — no network access in the sandbox this was authored
+  # in to check. Verify against a real CI run; see the "Build openh264
+  # prebuilt" step's own comment for the fallback if it doesn't work as
+  # written.
+  OPENH264_TAG: "v2.6.0"
+  # CUPS-PRINT FIX: PRINTER-REDIRECT FEATURE's HEXRDP_PRINT_BACKEND_AVAILABLE
+  # default in CMakeLists.txt (and its doc comment) claimed this workflow
+  # already cross-builds CUPS and passes -DWITH_CUPS=ON — neither was true:
+  # no "Build CUPS prebuilt" step existed anywhere in this file, and the
+  # actual "Build FreeRDP prebuilt" step below hard-coded -DWITH_CUPS=OFF
+  # unconditionally in both jobs. That meant every real release silently
+  # shipped with the printer-redirection UI toggle visible and "reported
+  # available" while doing nothing at all when a user turned it on — the
+  # exact "advertise a channel with no backend behind it" failure mode the
+  # H.264/AV1 flags' own doc comments warn about avoiding. This step (and
+  # the matching CUPS_ABI_FLAGS wiring in the FreeRDP build step below) is
+  # the actual fix: cross-build libcups (client library only — no cupsd,
+  # no backends/filters/drivers, none of the server-side pieces this app
+  # has no use for) via autotools, same fail-soft per-ABI shape as
+  # PCSC-lite above. CUPS_VERSION pins the OpenPrinting/cups tag built.
+  # ⚠️ UNVERIFIED, same caveat as PCSC_LITE_VERSION/OPENH264_TAG above: no
+  # network access in the sandbox this was authored in to confirm this
+  # exact tag's configure flags against OpenPrinting/cups' actual
+  # configure.ac. If "Build CUPS prebuilt" fails outright, it fails soft
+  # (see the step itself) and every ABI simply falls back to
+  # -DWITH_CUPS=OFF, same safe degradation PCSC-lite/openh264 already have
+  # — it will NOT silently claim printer redirection works either way.
+  CUPS_VERSION: "v2.4.11"
+  # SPICE-PROTOCOL FEATURE (Part 2/N): mirrors the CUPS/PCSC-lite/openh264
+  # shape immediately above — no official Android prebuilt exists for any
+  # of these four, so this workflow cross-builds all of them from source,
+  # fail-soft per ABI, into app/src/main/cpp/spice-prebuilt/<ABI> (consumed
+  # by CMakeLists.txt's SPICE_ABI_DIR — see its SPICE-PROTOCOL FEATURE
+  # comment). Four pieces, built in dependency order:
+  #   1. pixman   — autotools, same shape as CUPS/PCSC-lite above.
+  #   2. GLib     — meson (GLib dropped autotools support after 2.62), needs
+  #                 a per-ABI meson "cross file" pointing at the NDK
+  #                 toolchain (see the build step's make_cross_file()).
+  #   3. spice-protocol — meson, header-only (protocol struct/constant
+  #                 definitions + a .pc file), no actual compiled code.
+  #   4. spice-client-glib (lives in the spice-gtk repo, built with
+  #      -Dgtk=disabled to skip the actual GTK widget — that widget is
+  #      Linux-desktop-only and irrelevant here; only the underlying
+  #      SpiceSession/SpiceMainChannel/SpiceDisplayChannel GObject API
+  #      hexrdp_spice_jni.c wraps is needed) — meson, several optional
+  #      backends explicitly disabled below (SASL, USB redirection,
+  #      smartcard, GStreamer, PulseAudio, WebDAV, CELT/Opus audio codecs,
+  #      introspection/vapi/gtk-doc) to keep this first cross-build's
+  #      dependency graph as small as possible; each can be revisited in a
+  #      later part once the core canvas/input path actually works.
+  # ⚠️ UNVERIFIED, same caveat as PCSC_LITE_VERSION/OPENH264_TAG/CUPS_VERSION
+  # above: authored with no network access to confirm these exact tags'
+  # meson_options.txt option names against the real source — GLib and
+  # spice-gtk both rename/add/remove meson options across releases more
+  # often than CUPS/PCSC-lite's autotools flags do. If "Build SPICE
+  # prebuilt" fails outright, it fails soft (see that step) and every ABI
+  # simply has no libspice-client-glib-2.0.so, so CMakeLists.txt's EXISTS
+  # check skips the native SPICE bridge entirely rather than shipping a
+  # broken one — same safe degradation as every prebuilt above.
+  PIXMAN_VERSION: "pixman-0.43.4"
+  GLIB_VERSION: "2.82.2"
+  SPICE_PROTOCOL_TAG: "v0.14.4"
+  SPICE_GTK_TAG: "v0.42"
+
+# ──────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── Lint (سريع، بدون native) ────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fix Gradle Wrapper JAR
+        run: |
+          JAR_SIZE=$(wc -c < gradle/wrapper/gradle-wrapper.jar)
+          echo "Current JAR size: $JAR_SIZE bytes"
+          if [ "$JAR_SIZE" -lt 10000 ]; then
+            echo "⚠️  gradle-wrapper.jar is a Git LFS pointer — downloading real JAR..."
+            GRADLE_VERSION=$(grep -oP '(?<=gradle-)\d+\.\d+(\.\d+)?(?=-)' gradle/wrapper/gradle-wrapper.properties)
+            echo "Gradle version detected: $GRADLE_VERSION"
+            curl -fsSL \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar \
+            || curl -fsSL \
+              "https://github.com/nicowillis/gradle-wrapper-jar/releases/latest/download/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar 2>/dev/null \
+            || true
+            echo "✅ New JAR size: $(wc -c < gradle/wrapper/gradle-wrapper.jar) bytes"
+          else
+            echo "✅ gradle-wrapper.jar is valid ($JAR_SIZE bytes)"
+          fi
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - run: chmod +x gradlew
+      - run: ./gradlew lint --no-daemon
+
+      # TESTS-FIX: was impossible to add before this — there was no `test`
+      # source set at all (see RdpProfileEnumsTest.kt, the first test in the
+      # project). Plain JVM unit tests only (`test`, not
+      # `connectedAndroidTest` — the latter needs a running emulator/device,
+      # which this job doesn't have; CryptoHelperInstrumentedTest.kt runs
+      # separately, manually via `./gradlew connectedAndroidTest` against a
+      # real device/emulator, since it needs a genuine AndroidKeyStore).
+      #
+      # PAC-URL-TESTABILITY FIX: PacUrlTesterTest.kt (util/PacUrlTester's
+      # unit tests, same shape as PacFileParserTest.kt) needs no separate
+      # wiring here — `testDebugUnitTest` already runs every test under
+      # app/src/test/java, so any new file dropped into that source set
+      # (this one included) is picked up by this exact task automatically.
+      - run: ./gradlew testDebugUnitTest --no-daemon
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: unit-test-results
+          path: app/build/test-results/testDebugUnitTest/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-*.html
+          retention-days: 7
+
+  # ── Build Debug APK ─────────────────────────────────────────────
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      # 1. سحب الكود
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # 2. إصلاح gradle-wrapper.jar
+      - name: Fix Gradle Wrapper JAR
+        run: |
+          JAR_SIZE=$(wc -c < gradle/wrapper/gradle-wrapper.jar)
+          if [ "$JAR_SIZE" -lt 10000 ]; then
+            GRADLE_VERSION=$(grep -oP '(?<=gradle-)\d+\.\d+(\.\d+)?(?=-)' gradle/wrapper/gradle-wrapper.properties)
+            curl -fsSL \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar \
+            || curl -fsSL \
+              "https://github.com/nicowillis/gradle-wrapper-jar/releases/latest/download/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar 2>/dev/null \
+            || true
+          fi
+
+      # 3. تثبيت Java
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      # 4. تثبيت NDK + CMake
+      - name: Install NDK & CMake
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${{ env.NDK_VERSION }}" \
+            "cmake;${{ env.CMAKE_VERSION }}"
+          # ملاحظة: لا نكتب ndk.dir في local.properties — هذا أسلوب قديم (deprecated)
+          # يصدر تحذير [CXX5106]. android.ndkVersion في app/build.gradle.kts يكفي
+          # وحده لتحديد NDK المطلوب من بين النسخ المثبتة في $ANDROID_SDK_ROOT/ndk/.
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      # 5. تثبيت تبعيات البناء
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y make perl nasm ninja-build pkg-config gettext
+          # SPICE-PROTOCOL FEATURE (Part 2/N): GLib/spice-protocol/spice-client-glib
+          # below all build with meson (Ubuntu's apt meson package is often
+          # too old for current GLib/spice-gtk meson_options.txt — installing
+          # via pip pins a known-recent one instead).
+          pip install --user "meson>=1.3.0"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # 6. سحب FreeRDP
+      - name: Clone FreeRDP source
+        run: |
+          if [ ! -d "${{ env.FREERDP_PATH }}/.git" ]; then
+            echo "📥 Cloning FreeRDP ${{ env.FREERDP_TAG }}..."
+            git clone \
+              --depth 1 \
+              --branch ${{ env.FREERDP_TAG }} \
+              --recurse-submodules \
+              --shallow-submodules \
+              https://github.com/FreeRDP/FreeRDP.git \
+              ${{ env.FREERDP_PATH }}
+            echo "✅ FreeRDP cloned successfully"
+          else
+            echo "✅ FreeRDP already present"
+          fi
+
+      # 7. تصحيح FreeRDP للبناء على Android
+      # ─ يزيل -Werror + SWScale REQUIRED + يضيف suppress لتحذيرات Clang 17
+      - name: Patch FreeRDP for Android
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          LIBFREERDP_CMAKE="$FREERDP_ROOT/libfreerdp/CMakeLists.txt"
+
+          # 1. SWScale: REQUIRED → QUIET (غير متوفر على Android)
+          sed -i 's/find_package(SWScale REQUIRED)/find_package(SWScale QUIET)/g' "$LIBFREERDP_CMAKE"
+          sed -i '/SWScale_INCLUDE_DIR/d' "$LIBFREERDP_CMAKE"
+          sed -i '/SWScale_LIBRARY/d'     "$LIBFREERDP_CMAKE"
+
+          # 2. إزالة -Werror و ENABLE_WARNINGS من كل ملفات CMake
+          find "$FREERDP_ROOT" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -print0 | \
+            xargs -0 sed -i \
+              -e 's/-Werror\b//g' \
+              -e 's/ENABLE_WARNINGS_ERROR ON/ENABLE_WARNINGS_ERROR OFF/g' \
+              -e 's/ENABLE_WARNINGS_ALL ON/ENABLE_WARNINGS_ALL OFF/g'
+
+          # 3. إضافة suppress flags في cmake/CompilerFlags.cmake إذا وُجد
+          # هذا يوقف تحذيرات Clang 17 مثل -Wcast-function-type-strict
+          COMPILER_FLAGS_CMAKE="$FREERDP_ROOT/cmake/CompilerFlags.cmake"
+          if [ -f "$COMPILER_FLAGS_CMAKE" ]; then
+            cat >> "$COMPILER_FLAGS_CMAKE" << 'CMAKE_EOF'
+
+          # HexRDP patch: suppress Clang 17 strict warnings on Android NDK
+          if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+            add_compile_options(
+              -Wno-cast-function-type-strict
+              -Wno-implicit-int-conversion
+              -Wno-shorten-64-to-32
+              -Wno-sign-conversion
+              -Wno-unused-parameter
+              -Wno-shadow
+              -Wno-tautological-unsigned-char-zero-compare
+            )
+          endif()
+          CMAKE_EOF
+          fi
+
+          echo "✅ FreeRDP patched (SWScale + Werror + Clang17 warnings)"
+
+      # 7.5 RDPDR-DEVICE-ANNOUNCE FIX: تصحيح channels/rdpdr/client/rdpdr_main.c
+      # ليبلّغ hexrdp_jni.c بنتيجة DR_CORE_DEVICE_ANNOUNCE_RSP (PAKID_CORE_DEVICE_REPLY)
+      # لكل جهاز على حدة (النوع + ResultCode) بدل الاكتفاء بحالة قناة "rdpdr" ككل.
+      # هذا هو التمييز بين الطابعة والسمارت كارد على مستوى الجهاز، لا القناة —
+      # انظر تعليق printerDeviceAnnounceSeen في hexrdp_jni.c للتفاصيل الكاملة.
+      # يفشل هذا الـ step بوضوح (بدل تعديل صامت خاطئ) لو تغيّر شكل الكود المطابَق
+      # في نسخة FreeRDP مستقبلية — نفس فلسفة "falling back... is the correct fix"
+      # المستخدمة أعلاه لـ RDPDR_SVC_CHANNEL_NAME.
+      #
+      # (كانت هذه الملاحظات موزّعة سابقًا في ملف منفصل
+      # app/src/main/cpp/freerdp-patches/0001-rdpdr-device-announce-result.patch.md
+      # — دُمجت هنا لأن هذه الخطوة هي المصدر الفعلي/المطبَّق للباتش):
+      #   - لا يضيف الباتش أي حقل جديد إلى RdpdrClientContext العام
+      #     (include/freerdp/client/rdpdr.h) تفاديًا لمخاطرة تخمين تخطيط بنية لا
+      #     تُستنسخ محليًا في هذا المشروع (فقط تُبنى في CI) — استدعاء extern بسيط
+      #     إلى hexrdp_jni.c لا يعتمد على أي تخطيط بنية.
+      #   - نوع الجهاز يُقرأ من rdpdr->devman->devices، لأن DEVICE هو دائمًا أول
+      #     عضو في أي بنية جهاز حسب اتفاقية FreeRDP نفسها (مثل DEVICE_DRIVE_EXT)،
+      #     فتحويل المؤشر إلى DEVICE* وقراءة type. آمن لأي نوع جهاز.
+      #   - البحث عن الجهاز يتم قبل استدعاء devman_unregister_device وليس بعده،
+      #     لأن الجهاز المرفوض يُحذف من القاموس مباشرة بعد هذا الشرط — وهذه بالضبط
+      #     الحالة الأهم لمعرفة نوعه (تم رفضه).
+      #   - المستهلك: hexrdp_jni.c's hexrdp_rdpdr_device_announce_result() يفلتر
+      #     على RDPDR_DTYP_PRINT / RDPDR_DTYP_SMARTCARD ويحدّث
+      #     printerDeviceAccepted/smartcardDeviceAccepted، والتي تفضّلها
+      #     hexrdp_notify_printer_channel_state()/hexrdp_notify_smartcard_channel_state()
+      #     كلما توفرت، بدل الاعتماد فقط على حالة القناة ككل.
+      - name: Patch FreeRDP rdpdr for per-device announce result
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          python3 - "$FREERDP_ROOT/channels/rdpdr/client/rdpdr_main.c" << 'PY_EOF'
+          import re, sys
+          path = sys.argv[1]
+          src = open(path, encoding="utf-8").read()
+
+          anchor = re.compile(
+              r'(case PAKID_CORE_DEVICE_REPLY:.*?Stream_Read_UINT32\(s,\s*deviceId\);'
+              r'.*?Stream_Read_UINT32\(s,\s*status\);\s*\n)'
+              r'(\s*)(if\s*\(status\s*!=\s*0\)\s*\n\s*devman_unregister_device)',
+              re.DOTALL,
+          )
+          m = anchor.search(src)
+          if not m:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find the expected "
+                  "PAKID_CORE_DEVICE_REPLY block in rdpdr_main.c (FreeRDP source "
+                  "layout changed since this patch was written for "
+                  "FREERDP_TAG=${{ env.FREERDP_TAG }}). Fix the anchor regex in "
+                  "this step before proceeding — do NOT ignore this failure, it "
+                  "means the per-device printer/smartcard live-status feature "
+                  "would silently stop working."
+              )
+
+          hook = (
+              m.group(2)
+              + "/* HEXRDP PATCH: report which device this DeviceId actually was "
+              + "(looked up before the unregister call below can remove it on "
+              + "failure) and the server's real ResultCode, so the Android app "
+              + "can distinguish printer vs smartcard acceptance instead of only "
+              + "seeing the rdpdr channel as a whole. See hexrdp_jni.c's "
+              + "hexrdp_rdpdr_device_announce_result() doc comment. */\n"
+              + m.group(2)
+              + "{\n"
+              + m.group(2)
+              + "    void* hexrdp_dev = ListDictionary_GetItemValue(rdpdr->devman->devices, (void*)(size_t)deviceId);\n"
+              + m.group(2)
+              + "    UINT32 hexrdp_dev_type = hexrdp_dev ? ((DEVICE*)hexrdp_dev)->type : 0xFFFFFFFFu;\n"
+              + m.group(2)
+              + "    extern void hexrdp_rdpdr_device_announce_result(void* rdpcontext, UINT32 deviceId, UINT32 deviceType, UINT32 status);\n"
+              + m.group(2)
+              + "    hexrdp_rdpdr_device_announce_result(rdpdr->rdpcontext, deviceId, hexrdp_dev_type, status);\n"
+              + m.group(2)
+              + "}\n"
+          )
+          new_src = src[: m.start()] + m.group(1) + hook + m.group(3) + src[m.end(3):]
+          if new_src == src:
+              sys.exit("❌ HEXRDP PATCH FAILED: regex matched but no bytes changed — investigate.")
+          open(path, "w", encoding="utf-8").write(new_src)
+          print("✅ rdpdr_main.c patched: per-device DR_CORE_DEVICE_ANNOUNCE_RSP hook inserted")
+          PY_EOF
+
+      # 7.6 HTTPS-PROXY FEATURE: تصحيح libfreerdp/core/proxy.c ليضيف
+      # PROXY_TYPE_HTTPS (=3، قيمة خاصة بهذا التطبيق، غير موجودة في FreeRDP
+      # الأصلي) — proxy جديد يعمل مصافحة TLS مع الـ outbound proxy نفسه قبل
+      # طلب CONNECT النصي العادي، لدعم الـ proxies اللي تتطلب HTTPS للوصول
+      # إليها هي نفسها (وليس فقط تمرير وجهة HTTPS عبرها، وده شغال أصلاً بـ
+      # HTTP). يفشل بوضوح لو تغيّر شكل الكود المطابَق — نفس فلسفة الخطوة اللي فوق.
+      #
+      # (كانت هذه الملاحظات في ملف منفصل
+      # app/src/main/cpp/freerdp-patches/0002-proxy-https-connect.patch.md
+      # — دُمجت هنا):
+      #   - ثقة الـ proxy الخاص عبر مخزن شهادات النظام (SSL_CTX_set_default_
+      #     verify_paths + SSL_VERIFY_PEER) — مستقلة تمامًا عن تدفق TOFU-pinning
+      #     الخاص بشهادة خادم RDP نفسه، حتى لا يُضعف قبول شهادة RDP ذاتية
+      #     التوقيع ثقة الـ proxy ضمنيًا.
+      #   - SNI مفعّل عند مصافحة TLS مع الـ proxy (بعض الـ proxies خلف CDN
+      #     مشترك تعتمد على SNI للتوجيه).
+      #   - لا يضيف الباتش مخطط "https://" إلى proxy_parse_uri() (محلّل CLI)
+      #     لأن هذا التطبيق لا يستخدمه أصلاً — hexrdp_jni.c يمرر الحقول مباشرة.
+      #   - لا يمسّ proxy_read_environment()'s HTTPS_PROXY (خاص فقط بـ TSGateway).
+      #   - لا يدعم شهادات عميل (mTLS) للـ proxy نفسه — لو احتيج لاحقًا، فالخطوة
+      #     التالية هي SSL_CTX_use_certificate_file/PrivateKey_file مربوطة بحقول
+      #     RdpProfile جديدة.
+      #   - الجانب Kotlin/JNI مكتمل بالفعل بلا أي حاجة لباتش CI: ProxyType.kt
+      #     وAFreeRdpBridge.kt يضيفان HTTPS (ordinal 3) بنفس الاسم فيتطابقان
+      #     تلقائيًا عبر toBridgeProxyType()، وhexrdp_jni.c يمرر الـ ordinal خامًا
+      #     بلا جدول تحويل. واجهة المستخدم (ProxySection في Components.kt) تعرض
+      #     الخيار HTTPS فعليًا مع نص إرشادي (proxy_https_hint) — السلسلة كاملة
+      #     من الواجهة حتى https_proxy_connect() موصولة فعليًا، لا عمل واجهة متبقٍ.
+      #   - لا يوجد اختبار آلي لمصافحة proxy حقيقي يدعم HTTPS فقط (لا توجد بيئة
+      #     كهذه في CI) — خطوة CI تتحقق فقط من نجاح تطبيق الباتش والبناء، وليس
+      #     من نجاح مصافحة حقيقية؛ يُنصح بتحقق يدوي قبل الاعتماد عليه إنتاجيًا.
+      - name: Patch FreeRDP proxy for HTTPS support
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          python3 - "$FREERDP_ROOT/libfreerdp/core/proxy.c" << 'PY_EOF'
+          import re, sys
+          path = sys.argv[1]
+          src = open(path, encoding="utf-8").read()
+
+          # --- Anchor A: insert PROXY_TYPE_HTTPS + https_proxy_connect() right
+          # before proxy_connect_impl()'s definition. ---
+          anchor_a = re.compile(
+              r'\n(BOOL proxy_connect_impl\(rdpSettings\* settings, BIO\* _bio,)',
+          )
+          m_a = anchor_a.search(src)
+          if not m_a:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find proxy_connect_impl()'s "
+                  "signature in proxy.c (FreeRDP source layout changed since this "
+                  "patch was written for FREERDP_TAG=${{ env.FREERDP_TAG }}). Fix "
+                  "the anchor regex in this step before proceeding — do NOT "
+                  "ignore this failure, it means HTTPS proxy support would "
+                  "silently stop working."
+              )
+
+          https_fn = '''
+          #define PROXY_TYPE_HTTPS 3
+
+          /* HEXRDP PATCH: TLS-to-proxy support, see the "Patch FreeRDP proxy for HTTPS support" CI step comment in .github/workflows/main.yml */
+          static BOOL https_proxy_connect(BIO* bufferedBio, const char* proxyHostname,
+                                           const char* hostname, UINT16 port)
+          {
+          	BOOL rc = FALSE;
+          	SSL_CTX* sslCtx = SSL_CTX_new(TLS_client_method());
+          	BIO* sslBio = NULL;
+          	SSL* ssl = NULL;
+
+          	if (!sslCtx)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: SSL_CTX_new failed");
+          		return FALSE;
+          	}
+
+          	SSL_CTX_set_default_verify_paths(sslCtx);
+          	SSL_CTX_set_verify(sslCtx, SSL_VERIFY_PEER, NULL);
+
+          	sslBio = BIO_new_ssl(sslCtx, TRUE);
+          	if (!sslBio)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: BIO_new_ssl failed");
+          		goto out;
+          	}
+
+          	BIO_get_ssl(sslBio, &ssl);
+          	if (!ssl)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: BIO_get_ssl returned no SSL*");
+          		goto out;
+          	}
+
+          	SSL_set_tlsext_host_name(ssl, proxyHostname);
+          	BIO_push(sslBio, bufferedBio);
+
+          	if (BIO_do_handshake(sslBio) != 1)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: TLS handshake with %s failed", proxyHostname);
+          		goto out;
+          	}
+
+          	rc = http_proxy_connect(sslBio, hostname, port);
+
+          out:
+          	if (sslBio)
+          	{
+          		BIO_pop(sslBio);
+          		BIO_free(sslBio);
+          	}
+          	if (sslCtx)
+          		SSL_CTX_free(sslCtx);
+          	return rc;
+          }
+
+          '''
+          https_fn = "\n".join(
+              (l[10:] if l.startswith(" " * 10) else l) for l in https_fn.split("\n")
+          )
+          src = src[: m_a.start()] + "\n" + https_fn + m_a.group(1) + src[m_a.end():]
+
+          # --- Anchor B: add `case PROXY_TYPE_HTTPS:` right after the
+          # existing `case PROXY_TYPE_HTTP:` arm inside proxy_connect_impl(). ---
+          anchor_b = re.compile(
+              r'(case PROXY_TYPE_HTTP:\s*\n\s*return http_proxy_connect\(bufferedBio, hostname, port\);\s*\n)'
+          )
+          m_b = anchor_b.search(src)
+          if not m_b:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find the `case PROXY_TYPE_HTTP:` "
+                  "arm inside proxy_connect_impl() (FreeRDP source layout changed "
+                  "since this patch was written for FREERDP_TAG=${{ env.FREERDP_TAG }}). "
+                  "Fix the anchor regex in this step before proceeding."
+              )
+
+          https_case = (
+              "\n\t\tcase PROXY_TYPE_HTTPS:\n"
+              "\t\t\treturn https_proxy_connect(bufferedBio,\n"
+              "\t\t\t                            freerdp_settings_get_string(settings, FreeRDP_ProxyHostname),\n"
+              "\t\t\t                            hostname, port);\n"
+          )
+          src = src[: m_b.end()] + https_case + src[m_b.end():]
+
+          # --- Ensure OpenSSL SSL headers are included (proxy.c already
+          # includes <openssl/err.h>; add <openssl/ssl.h> right after it if
+          # not already present). ---
+          if "#include <openssl/ssl.h>" not in src:
+              src = src.replace(
+                  '#include <openssl/err.h>',
+                  '#include <openssl/err.h>\n#include <openssl/ssl.h>',
+                  1,
+              )
+
+          open(path, "w", encoding="utf-8").write(src)
+          print("✅ proxy.c patched: PROXY_TYPE_HTTPS + https_proxy_connect() inserted")
+          PY_EOF
+
+      # 8. Cache لـ OpenSSL المُجمَّع
+      - name: Restore OpenSSL build cache
+        id: openssl-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.OPENSSL_BUILD_DIR }}
+          # ABI-FIX: BUILD_ABIS مضمّن في مفتاح الـ cache بحيث لو غُيّرت قائمة
+          # الـ ABIs مستقبلاً، لا يُستعاد cache قديم ناقص الـ ABIs الجديدة.
+          key: openssl-${{ env.OPENSSL_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}
+          restore-keys: openssl-${{ env.OPENSSL_VERSION }}-
+
+      # 9. بناء OpenSSL 3.5.6 LTS لـ Android
+      # ─ يستخدم --libdir=lib لضمان المسار lib/ وليس lib64/
+      # ABI-FIX: نبني الآن لكل ABI في $BUILD_ABIS (arm64-v8a, armeabi-v7a,
+      # x86_64, x86) بدل arm64-v8a/x86_64 فقط — الـ wrappers أدناه كانت
+      # موجودة لـ armv7/x86 من قبل لكن لم تُستدعَ أبداً.
+      - name: Build OpenSSL for Android
+        if: steps.openssl-cache.outputs.cache-hit != 'true'
+        run: |
+          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}
+
+          OPENSSL_TAR="openssl-${{ env.OPENSSL_VERSION }}.tar.gz"
+          curl -fsSL "https://www.openssl.org/source/${OPENSSL_TAR}" -o /tmp/${OPENSSL_TAR}
+          # SUPPLY-CHAIN-FIX: verify against OpenSSL's own published
+          # .sha256 file (fetched fresh each run — this verifies whatever
+          # OpenSSL currently publishes, not a value hardcoded in this
+          # workflow that could go stale). Catches transit corruption or a
+          # tampered download; does not by itself prove openssl.org's own
+          # publishing pipeline is uncompromised (full hardening would add
+          # GPG signature verification against OpenSSL's release-signing
+          # key — see https://openssl-library.org/source/ for its
+          # fingerprint).
+          curl -fsSL "https://www.openssl.org/source/${OPENSSL_TAR}.sha256" -o /tmp/${OPENSSL_TAR}.sha256
+          echo "$(cat /tmp/${OPENSSL_TAR}.sha256)  /tmp/${OPENSSL_TAR}" | sha256sum -c -
+          tar -xf /tmp/${OPENSSL_TAR} -C /tmp
+
+          TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
+          API=26
+          BUILD_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}
+          mkdir -p "$BUILD_ROOT"
+
+          # Wrapper scripts لأسماء GCC التقليدية التي يبحث عنها OpenSSL
+          WRAPPERS_DIR="$BUILD_ROOT/wrappers"
+          mkdir -p "$WRAPPERS_DIR"
+
+          make_wrapper() {
+            local NAME=$1
+            local CMD=$2
+            printf '#!/bin/sh\nexec "%s" "$@"\n' "$CMD" > "$WRAPPERS_DIR/$NAME"
+            chmod +x "$WRAPPERS_DIR/$NAME"
+          }
+
+          make_wrapper "aarch64-linux-android-gcc"      "$TOOLCHAIN/bin/aarch64-linux-android${API}-clang"
+          make_wrapper "aarch64-linux-android-g++"      "$TOOLCHAIN/bin/aarch64-linux-android${API}-clang++"
+          make_wrapper "aarch64-linux-android-ar"       "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "aarch64-linux-android-ranlib"   "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "aarch64-linux-android-strip"    "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "aarch64-linux-android-ld"       "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "aarch64-linux-android-nm"       "$TOOLCHAIN/bin/llvm-nm"
+
+          make_wrapper "x86_64-linux-android-gcc"       "$TOOLCHAIN/bin/x86_64-linux-android${API}-clang"
+          make_wrapper "x86_64-linux-android-g++"       "$TOOLCHAIN/bin/x86_64-linux-android${API}-clang++"
+          make_wrapper "x86_64-linux-android-ar"        "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "x86_64-linux-android-ranlib"    "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "x86_64-linux-android-strip"     "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "x86_64-linux-android-ld"        "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "x86_64-linux-android-nm"        "$TOOLCHAIN/bin/llvm-nm"
+
+          # ARMv7 (armeabi-v7a) — wrapper بالاسمين (armv7a و arm)
+          make_wrapper "armv7a-linux-androideabi-gcc"   "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang"
+          make_wrapper "armv7a-linux-androideabi-g++"   "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang++"
+          make_wrapper "arm-linux-androideabi-gcc"      "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang"
+          make_wrapper "arm-linux-androideabi-g++"      "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang++"
+          make_wrapper "arm-linux-androideabi-ar"       "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "arm-linux-androideabi-ranlib"   "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "arm-linux-androideabi-strip"    "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "arm-linux-androideabi-ld"       "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "arm-linux-androideabi-nm"       "$TOOLCHAIN/bin/llvm-nm"
+
+          # x86 (32-bit)
+          make_wrapper "i686-linux-android-gcc"         "$TOOLCHAIN/bin/i686-linux-android${API}-clang"
+          make_wrapper "i686-linux-android-g++"         "$TOOLCHAIN/bin/i686-linux-android${API}-clang++"
+          make_wrapper "i686-linux-android-ar"          "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "i686-linux-android-ranlib"      "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "i686-linux-android-strip"       "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "i686-linux-android-ld"          "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "i686-linux-android-nm"          "$TOOLCHAIN/bin/llvm-nm"
+
+          export PATH="$WRAPPERS_DIR:$TOOLCHAIN/bin:$PATH"
+
+          build_openssl() {
+            local ABI=$1
+            local ARCH=$2
+            local TARGET=$3
+
+            echo "🔨 Building OpenSSL ${{ env.OPENSSL_VERSION }} for $ABI ..."
+            cd /tmp/openssl-${{ env.OPENSSL_VERSION }}
+            make clean 2>/dev/null || true
+
+            export CC="$TOOLCHAIN/bin/${TARGET}${API}-clang"
+            export CXX="$TOOLCHAIN/bin/${TARGET}${API}-clang++"
+            export AR="$TOOLCHAIN/bin/llvm-ar"
+            export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
+            export STRIP="$TOOLCHAIN/bin/llvm-strip"
+            export LD="$TOOLCHAIN/bin/ld.lld"
+            export NM="$TOOLCHAIN/bin/llvm-nm"
+
+            local OUT="$BUILD_ROOT/openssl-${ABI}"
+            mkdir -p "$OUT"
+
+            # ملاحظة: --libdir=lib يجبر OpenSSL 3.x على الكتابة في lib/ وليس lib64/
+            ./Configure ${ARCH} \
+              -D__ANDROID_API__=${API} \
+              --prefix="$OUT" \
+              --openssldir="$OUT/ssl" \
+              --libdir=lib \
+              no-shared \
+              no-tests \
+              no-engine \
+              no-dynamic-engine
+
+            make -j$(nproc)
+            make install_sw
+            echo "✅ OpenSSL built for $ABI → $OUT"
+          }
+
+          # ABI-FIX: armeabi-v7a يستخدم "android-arm" كاسم target في Configure
+          # (وليس "android-armv7"), و"-D__ANDROID_API__" يُمرَّر كما هو أعلاه.
+          # CC للـ armv7 يُحدَّد عبر متغير CC الصريح لأن Configure's "android-arm"
+          # يبحث افتراضياً عن arm-linux-androideabi-gcc (مغطّى بالـ wrapper أعلاه)
+          # لكننا نمرره صريحاً أيضاً لضمان استخدام clang الصحيح بنفس نمط الـ ABIs الأخرى.
+          build_openssl "arm64-v8a"    "android-arm64"  "aarch64-linux-android"
+          build_openssl "armeabi-v7a"  "android-arm"    "armv7a-linux-androideabi"
+          build_openssl "x86_64"       "android-x86_64" "x86_64-linux-android"
+          build_openssl "x86"          "android-x86"    "i686-linux-android"
+
+          echo "✅ OpenSSL ${{ env.OPENSSL_VERSION }} built for all ABIs: ${{ env.BUILD_ABIS }}"
+
+      # 10. تعيين متغير البيئة ANDROID_OPENSSL_ROOT
+      - name: Set OpenSSL root environment variable
+        run: echo "ANDROID_OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}" >> $GITHUB_ENV
+
+      # CUPS-PRINT FIX: Cache لـ CUPS prebuilt (PRINTER-REDIRECT FEATURE)
+      - name: Restore CUPS build cache
+        id: cups-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/cups-build
+          key: cups-${{ env.CUPS_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # CUPS-PRINT FIX: بناء libcups (المكتبة العميلة فقط — بدون cupsd أو
+      # backends/filters/drivers الجانب-الخادم التي لا فائدة منها هنا) لكل
+      # ABI، بنفس نمط PCSC-lite أعلاه (autotools cross-compile). فشل ABI
+      # معيّن هنا لا يُفشل الـ job كله؛ تلك المعمارية فقط تسقط إلى بناء
+      # FreeRDP بـ -DWITH_CUPS=OFF (راجع CUPS_ABI_FLAGS في خطوة "Build
+      # FreeRDP prebuilt" أدناه، حيث تُفحص وجود مكتبة libcups.a لكل ABI قبل
+      # تمرير العلم). ⚠️ غير مُختبَر ضد تشغيل CI حقيقي — راجع تعليق
+      # CUPS_VERSION أعلى الملف.
+      - name: Build CUPS prebuilt
+        if: steps.cups-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          CUPS_SRC="${{ github.workspace }}/cups-src"
+          CUPS_ROOT="${{ github.workspace }}/app/src/main/cpp/cups-build"
+          mkdir -p "$CUPS_ROOT"
+
+          echo "📥 Cloning CUPS ${{ env.CUPS_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.CUPS_VERSION }}" \
+            https://github.com/OpenPrinting/cups.git "$CUPS_SRC" || {
+              echo "⚠️ CUPS clone failed — skipping printer backend for all ABIs (WITH_CUPS will fall back to OFF)."
+              exit 0
+            }
+
+          cd "$CUPS_SRC"
+          # CUPS ships a generated ./configure in release tags; ./autogen.sh
+          # is only needed for a git checkout of an unreleased commit — kept
+          # as a fallback in case this tag doesn't ship one.
+          [ -x ./configure ] || ./autogen.sh
+
+          build_cups() {
+            local ABI=$1 TRIPLE=$2 API=26
+            local OUT="$CUPS_ROOT/$ABI"
+            local TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+            mkdir -p "$OUT"
+
+            echo "🔨 Building CUPS for $ABI ..."
+            make distclean >/dev/null 2>&1 || true
+            CC="$TOOLCHAIN/${TRIPLE}${API}-clang" \
+            AR="$TOOLCHAIN/llvm-ar" \
+            RANLIB="$TOOLCHAIN/llvm-ranlib" \
+            STRIP="$TOOLCHAIN/llvm-strip" \
+            ./configure \
+              --host="$TRIPLE" \
+              --prefix="$OUT" \
+              --enable-static \
+              --disable-shared \
+              --disable-launchd \
+              --disable-systemd \
+              --disable-avahi \
+              --disable-dnssd \
+              --disable-libusb \
+              --disable-tcp-wrappers \
+              --without-perl \
+              --without-python \
+              --without-tls \
+              --disable-pam \
+              --with-components=core \
+              CFLAGS="-D__ANDROID_API__=$API -fPIC" \
+              || { echo "⚠️ CUPS configure failed for $ABI — skipping this ABI (WITH_CUPS=OFF for $ABI)."; return 0; }
+
+            make -j"$(nproc)" -C cups libcups.a 2>/dev/null || make -j"$(nproc)" \
+              || echo "⚠️ CUPS build failed for $ABI — skipping this ABI (WITH_CUPS=OFF for $ABI)."
+
+            mkdir -p "$OUT/lib" "$OUT/include/cups"
+            find . -maxdepth 2 -name "libcups.a" -exec cp -f {} "$OUT/lib/" \;
+            cp -f cups/*.h "$OUT/include/cups/" 2>/dev/null || true
+            if [ -f "$OUT/lib/libcups.a" ]; then
+              echo "✅ CUPS built for $ABI → $OUT"
+            else
+              echo "⚠️ CUPS build for $ABI produced no libcups.a — treating as failed (WITH_CUPS=OFF for $ABI)."
+            fi
+          }
+
+          build_cups "arm64-v8a"   "aarch64-linux-android"
+          build_cups "armeabi-v7a" "armv7a-linux-androideabi"
+          build_cups "x86_64"      "x86_64-linux-android"
+          build_cups "x86"         "i686-linux-android"
+
+          echo "✅ CUPS build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      # 10.5 Cache لـ PCSC-lite prebuilt (SMARTCARD-REDIRECT FEATURE)
+      - name: Restore PCSC-lite build cache
+        id: pcsc-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/pcsclite-build
+          key: pcsclite-${{ env.PCSC_LITE_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # 10.6 بناء PCSC-lite كمكتبة static لكل ABI (SMARTCARD-REDIRECT FEATURE)
+      # ⚠️ تجريبي وغير مُختبَر على تشغيل CI حقيقي — نفس تحذير CUPS في
+      # SETUP.md: autotools لم يُصمَّم رسمياً للـ cross-compile نحو Android.
+      # فشل ABI معيّن هنا لا يُفشل الـ job كله: تلك المعمارية فقط تسقط إلى
+      # بناء FreeRDP بـ -DWITH_PCSC=OFF (راجع خطوة "Build FreeRDP prebuilt"
+      # أدناه، حيث تُفحص وجود مكتبة libpcsclite.a لكل ABI قبل تمرير العلم).
+      - name: Build PCSC-lite prebuilt
+        if: steps.pcsc-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          PCSC_SRC="${{ github.workspace }}/pcsc-lite-src"
+          PCSC_ROOT="${{ github.workspace }}/app/src/main/cpp/pcsclite-build"
+          mkdir -p "$PCSC_ROOT"
+
+          echo "📥 Cloning PCSC-lite ${{ env.PCSC_LITE_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.PCSC_LITE_VERSION }}" \
+            https://github.com/LudovicRousseau/PCSC.git "$PCSC_SRC" || {
+              echo "⚠️ PCSC-lite clone failed — skipping smartcard backend for all ABIs (WITH_PCSC will fall back to OFF)."
+              exit 0
+            }
+
+          cd "$PCSC_SRC"
+          ./bootstrap
+
+          build_pcsclite() {
+            local ABI=$1 TRIPLE=$2 API=26
+            local OUT="$PCSC_ROOT/$ABI"
+            local TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+            mkdir -p "$OUT"
+
+            echo "🔨 Building PCSC-lite for $ABI ..."
+            make distclean >/dev/null 2>&1 || true
+            CC="$TOOLCHAIN/${TRIPLE}${API}-clang" \
+            AR="$TOOLCHAIN/llvm-ar" \
+            RANLIB="$TOOLCHAIN/llvm-ranlib" \
+            STRIP="$TOOLCHAIN/llvm-strip" \
+            ./configure \
+              --host="$TRIPLE" \
+              --prefix="$OUT" \
+              --enable-static \
+              --disable-shared \
+              --disable-libsystemd \
+              --disable-libudev \
+              --disable-udev \
+              --without-systemdsystemunitdir \
+              --disable-serial \
+              --disable-usb \
+              CFLAGS="-D__ANDROID_API__=$API -fPIC" \
+              || { echo "⚠️ PCSC-lite configure failed for $ABI — skipping this ABI (WITH_PCSC=OFF for $ABI)."; return 0; }
+
+            make -j"$(nproc)" \
+              && make install \
+              || echo "⚠️ PCSC-lite build/install failed for $ABI — skipping this ABI (WITH_PCSC=OFF for $ABI)."
+          }
+
+          build_pcsclite "arm64-v8a"   "aarch64-linux-android"
+          build_pcsclite "armeabi-v7a" "armv7a-linux-androideabi"
+          build_pcsclite "x86_64"      "x86_64-linux-android"
+          build_pcsclite "x86"         "i686-linux-android"
+
+          echo "✅ PCSC-lite build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      # 10.7 Cache لـ openh264 prebuilt (H264-OPENH264 FIX)
+      - name: Restore openh264 build cache
+        id: openh264-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/openh264-build
+          key: openh264-${{ env.OPENH264_TAG }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # 10.8 بناء openh264 كمكتبة static لكل ABI (H264-OPENH264 FIX)
+      # ⚠️ تجريبي وغير مُختبَر على تشغيل CI حقيقي — نفس نمط تحمّل الفشل
+      # الموثّق لـ PCSC-lite/CUPS في SETUP.md: فشل ABI معيّن هنا لا يُفشل
+      # الـ job كله، تلك المعمارية فقط تسقط إلى بناء FreeRDP بـ
+      # -DWITH_OPENH264=OFF (راجع خطوة "Build FreeRDP prebuilt" أدناه، حيث
+      # تُفحص وجود مكتبة libopenh264.a لكل ABI قبل تمرير العلم).
+      # ⚠️ متغيرات الـ Makefile أدناه (OS/ARCH/NDKROOT/TARGET/NDKLEVEL) غير
+      # مؤكدة ضد مصدر openh264 الفعلي لهذا التاغ — لا يوجد وصول شبكة في
+      # البيئة التي كُتب فيها هذا للتحقق من BUILD.md/Makefile مباشرة. إن
+      # فشلت هذه الخطوة، راجع https://github.com/cisco/openh264/blob/master/README.md
+      # (قسم Android) لتصحيح أسماء المتغيرات، أو تراجع عن هذا التعديل
+      # (أعد HEXRDP_H264_BACKEND_AVAILABLE إلى OFF في CMakeLists.txt وأزل
+      # -DWITH_OPENH264=ON من خطوة FreeRDP أدناه) بنفس مسار الرجوع الموثّق
+      # لـ CUPS.
+      - name: Build openh264 prebuilt
+        if: steps.openh264-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          OPENH264_SRC="${{ github.workspace }}/openh264-src"
+          OPENH264_ROOT="${{ github.workspace }}/app/src/main/cpp/openh264-build"
+          mkdir -p "$OPENH264_ROOT"
+
+          echo "📥 Cloning openh264 ${{ env.OPENH264_TAG }}..."
+          git clone --depth 1 --branch "${{ env.OPENH264_TAG }}" \
+            https://github.com/cisco/openh264.git "$OPENH264_SRC" || {
+              echo "⚠️ openh264 clone failed — skipping H.264 backend for all ABIs (WITH_OPENH264 will fall back to OFF)."
+              exit 0
+            }
+
+          declare -A OPENH264_ARCH=( [arm64-v8a]=arm64 [armeabi-v7a]=arm [x86_64]=x86_64 [x86]=x86 )
+
+          build_openh264() {
+            local ABI=$1
+            local ARCH=${OPENH264_ARCH[$ABI]}
+            local OUT="$OPENH264_ROOT/$ABI"
+            mkdir -p "$OUT/lib" "$OUT/include"
+
+            echo "🔨 Building openh264 for $ABI (ARCH=$ARCH) ..."
+            cd "$OPENH264_SRC"
+            make clean >/dev/null 2>&1 || true
+            make -j"$(nproc)" \
+              OS=android \
+              NDKROOT="$ANDROID_NDK_ROOT" \
+              NDKLEVEL=26 \
+              TARGET=android-26 \
+              ARCH="$ARCH" \
+              APP_ABI="$ABI" \
+              libopenh264.a \
+              || { echo "⚠️ openh264 build failed for $ABI — skipping this ABI (WITH_OPENH264=OFF for $ABI)."; return 0; }
+
+            find . -maxdepth 1 -name "libopenh264.a" -exec cp -f {} "$OUT/lib/" \;
+            cp -f codec/api/wels/*.h "$OUT/include/" 2>/dev/null || true
+            if [ -f "$OUT/lib/libopenh264.a" ]; then
+              echo "✅ openh264 built for $ABI → $OUT"
+            else
+              echo "⚠️ openh264 build for $ABI produced no libopenh264.a — treating as failed (WITH_OPENH264=OFF for $ABI)."
+            fi
+          }
+
+          for ABI in ${{ env.BUILD_ABIS }}; do
+            build_openh264 "$ABI"
+          done
+
+          echo "✅ openh264 build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      # 11. Cache لـ FreeRDP prebuilt
+      - name: Restore FreeRDP prebuilt cache
+        id: freerdp-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/freerdp-prebuilt
+          # ABI-FIX: BUILD_ABIS مضمّن في المفتاح كي لا يُستعاد cache قديم
+          # يحتوي فقط arm64-v8a/x86_64 ويتجاهل armeabi-v7a/x86 بصمت.
+          # REAL-PCM FIX: أُضيف "-opensles-v1" لأن -DWITH_OPENSLES=ON الجديد
+          # أدناه لا يُغيّر أياً من المكوّنات الأخرى للمفتاح، فبدون هذا
+          # اللاحق سيُستعاد cache قديم بُني بدون OpenSL ES رغم تعديل الأمر.
+          # SMARTCARD-REDIRECT FEATURE: أُضيفت لاحقة "-pcsc-v1" لنفس السبب.
+          key: freerdp-prebuilt-ndk${{ env.NDK_VERSION }}-${{ env.FREERDP_TAG }}-openssl${{ env.OPENSSL_VERSION }}-${{ env.BUILD_ABIS }}-opensles-v1-rdpecam-v1-pcsc-v1-rdpdr-announce-v1-h264-v1-cups-v1-server-v1-proxyhttps-v1
+
+      # 12. بناء FreeRDP 3.24.2 كـ prebuilt منفصل
+      # ─ يستخدم OpenSSL static + يُعطّل كل التبعيات غير المتوفرة على Android
+      # ABI-FIX: الحلقة تمر الآن على $BUILD_ABIS كاملة (arm64-v8a, armeabi-v7a,
+      # x86_64, x86) بدل "arm64-v8a x86_64" فقط — هذا هو الإصلاح الجوهري:
+      # بدونه، CMakeLists.txt في التطبيق لا يجد freerdp-prebuilt/armeabi-v7a/
+      # ويتجاهل البناء الأصلي بصمت على كل جهاز 32-بت.
+      # REAL-PCM FIX: -DWITH_OPENSLES=ON يفعّل backend rdpsnd/audin الجاهز
+      # لأندرويد داخل FreeRDP نفسها — انظر الملاحظة أعلى الملف.
+      - name: Build FreeRDP prebuilt
+        if: steps.freerdp-cache.outputs.cache-hit != 'true'
+        run: |
+          FREERDP_SRC=${{ github.workspace }}/${{ env.FREERDP_PATH }}
+          PREBUILT_ROOT=${{ github.workspace }}/app/src/main/cpp/freerdp-prebuilt
+          OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}
+
+          sudo apt-get install -y make perl nasm ninja-build
+
+          for ABI in ${{ env.BUILD_ABIS }}; do
+            echo "🔨 Building FreeRDP ${{ env.FREERDP_TAG }} for $ABI ..."
+            OUT="$PREBUILT_ROOT/$ABI"
+            BUILD_DIR="/tmp/freerdp-build-$ABI"
+            mkdir -p "$OUT" "$BUILD_DIR"
+
+            OPENSSL_ABI_DIR="$OPENSSL_ROOT/openssl-$ABI"
+            # SMARTCARD-REDIRECT FEATURE: only pass -DWITH_PCSC=ON for an ABI
+            # if that ABI's "Build PCSC-lite prebuilt" step actually produced
+            # libpcsclite.a — mirrors the per-ABI fail-soft contract of that
+            # step instead of failing the whole FreeRDP configure step when
+            # PCSC-lite didn't build for one ABI.
+            PCSC_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/pcsclite-build/$ABI"
+            PCSC_ABI_FLAGS=()
+            if [ -f "$PCSC_ABI_DIR/lib/libpcsclite.a" ]; then
+              echo "  ↳ PCSC-lite found for $ABI — building FreeRDP with -DWITH_PCSC=ON"
+              PCSC_ABI_FLAGS=(-DWITH_PCSC=ON \
+                -DPCSC_INCLUDE_DIRS="$PCSC_ABI_DIR/include/PCSC" \
+                -DPCSC_LIBRARIES="$PCSC_ABI_DIR/lib/libpcsclite.a")
+            else
+              echo "  ↳ PCSC-lite NOT found for $ABI — building FreeRDP with -DWITH_PCSC=OFF (smartcard redirection unavailable for this ABI)"
+              PCSC_ABI_FLAGS=(-DWITH_PCSC=OFF)
+            fi
+
+            # H264-OPENH264 FIX: same fail-soft, per-ABI contract as PCSC-lite
+            # above — only pass -DWITH_OPENH264=ON for an ABI if that ABI's
+            # "Build openh264 prebuilt" step actually produced libopenh264.a.
+            OPENH264_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/openh264-build/$ABI"
+            OPENH264_ABI_FLAGS=()
+            if [ -f "$OPENH264_ABI_DIR/lib/libopenh264.a" ]; then
+              echo "  ↳ openh264 found for $ABI — building FreeRDP with -DWITH_OPENH264=ON"
+              OPENH264_ABI_FLAGS=(-DWITH_OPENH264=ON \
+                -DOPENH264_INCLUDE_DIR="$OPENH264_ABI_DIR/include" \
+                -DOPENH264_LIBRARIES="$OPENH264_ABI_DIR/lib/libopenh264.a")
+            else
+              echo "  ↳ openh264 NOT found for $ABI — building FreeRDP with -DWITH_OPENH264=OFF (H.264 decode unavailable for this ABI)"
+              OPENH264_ABI_FLAGS=(-DWITH_OPENH264=OFF)
+            fi
+
+            # CUPS-PRINT FIX: same fail-soft, per-ABI contract as PCSC-lite/
+            # openh264 above — only pass -DWITH_CUPS=ON for an ABI if that
+            # ABI's "Build CUPS prebuilt" step actually produced libcups.a.
+            CUPS_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/cups-build/$ABI"
+            CUPS_ABI_FLAGS=()
+            if [ -f "$CUPS_ABI_DIR/lib/libcups.a" ]; then
+              echo "  ↳ CUPS found for $ABI — building FreeRDP with -DWITH_CUPS=ON"
+              CUPS_ABI_FLAGS=(-DWITH_CUPS=ON \
+                -DCUPS_INCLUDE_DIR="$CUPS_ABI_DIR/include" \
+                -DCUPS_LIBRARIES="$CUPS_ABI_DIR/lib/libcups.a")
+            else
+              echo "  ↳ CUPS NOT found for $ABI — building FreeRDP with -DWITH_CUPS=OFF (printer redirection unavailable for this ABI)"
+              CUPS_ABI_FLAGS=(-DWITH_CUPS=OFF)
+            fi
+
+              # PROXY-RELAY FEATURE FIX: was OFF — this flag gates the whole
+              # "RDP-SERVER-API FEATURE" (see CMakeLists.txt's libfreerdp-server3.so
+              # check and hexrdp_server_jni.c), which both Shadow Server and the new
+              # RdpProxyRelay/RdpProxyService (com.systemsgo.hex.proxy) depend on via
+              # AFreeRdpServerBridge.isAvailable. With this OFF, that whole library was
+              # never produced, so AFreeRdpServerBridge.isAvailable was silently false —
+              # Shadow Server was already non-functional in CI builds before this fix,
+              # not just the new proxy relay. WITH_SHADOW stays OFF on purpose: this
+              # project's own Shadow Server (ShadowScreenCaptureService +
+              # RemoteInputAccessibilityService) is built on the raw freerdp_listener/
+              # freerdp_peer API from libfreerdp-server3.so directly, not on FreeRDP's
+              # own shadow_subsystem — see AFreeRdpServerBridge.kt's MILESTONE doc.
+            cmake -S "$FREERDP_SRC" -B "$BUILD_DIR" \
+              --no-warn-unused-cli \
+              -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI="$ABI" \
+              -DANDROID_PLATFORM="android-26" \
+              -DANDROID_STL="c++_shared" \
+              -DCMAKE_BUILD_TYPE=MinSizeRel \
+              -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
+              -DCMAKE_INSTALL_PREFIX="$OUT" \
+              \
+              -DOPENSSL_ROOT_DIR="$OPENSSL_ABI_DIR" \
+              -DOPENSSL_INCLUDE_DIR="$OPENSSL_ABI_DIR/include" \
+              -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ABI_DIR/lib/libcrypto.a" \
+              -DOPENSSL_SSL_LIBRARY="$OPENSSL_ABI_DIR/lib/libssl.a" \
+              -DOPENSSL_USE_STATIC_LIBS=ON \
+              -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
+              \
+              -DWITH_CLIENT=ON \
+              -DWITH_SERVER=ON \
+              -DWITH_SHADOW=OFF \
+              -DWITH_PLATFORM_SERVER=OFF \
+              -DWITH_SAMPLE=OFF \
+              -DWITH_FFMPEG=OFF \
+              -DWITH_DSP_FFMPEG=OFF \
+              -DWITH_VIDEO_FFMPEG=OFF \
+              -DWITH_PULSE=OFF \
+              -DWITH_OPENSLES=ON \
+              -DCHANNEL_RDPECAM_CLIENT=ON \
+              -DWITH_X11=OFF \
+              -DWITH_WAYLAND=OFF \
+              -DWITH_SWSCALE=OFF \
+              -DWITH_LIBSYSTEMD=OFF \
+              "${PCSC_ABI_FLAGS[@]}" \
+              "${OPENH264_ABI_FLAGS[@]}" \
+              "${CUPS_ABI_FLAGS[@]}" \
+              -DWITH_FUSE=OFF \
+              -DWITH_MANPAGES=OFF \
+              -DBUILD_TESTING=OFF \
+              -DBUILD_SHARED_LIBS=ON \
+              \
+              -DENABLE_WARNINGS_ALL=OFF \
+              -DENABLE_WARNINGS_ERROR=OFF \
+              -DCMAKE_C_FLAGS_INIT="-w" \
+              -DCMAKE_CXX_FLAGS_INIT="-w" \
+              -DCMAKE_SHARED_LINKER_FLAGS_INIT="-Wno-pass-failed -latomic" \
+              -DCMAKE_EXE_LINKER_FLAGS_INIT="-Wno-pass-failed -latomic" \
+              -GNinja
+
+            cmake --build "$BUILD_DIR" --parallel $(nproc)
+            cmake --install "$BUILD_DIR"
+
+            # نسخ المكتبات المبنية
+            mkdir -p "$PREBUILT_ROOT/$ABI/lib" "$PREBUILT_ROOT/$ABI/include"
+            find "$BUILD_DIR" -name "*.so" -exec cp -f {} "$PREBUILT_ROOT/$ABI/lib/" \;
+            cp -rf "$OUT/include/"* "$PREBUILT_ROOT/$ABI/include/" 2>/dev/null || true
+            echo "✅ Done $ABI"
+          done
+          echo "✅ FreeRDP prebuilt complete for: ${{ env.BUILD_ABIS }}"
+
+      # SPICE-PROTOCOL FEATURE (Part 2/N): Cache لمخرجات pixman + GLib +
+      # spice-protocol + spice-client-glib — راجع تعليق كتلة الـ env أعلاه
+      # (PIXMAN_VERSION/GLIB_VERSION/...) لخريطة كل مكوّن وتحذير UNVERIFIED.
+      - name: Restore SPICE build cache
+        id: spice-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/spice-prebuilt
+          key: spice-${{ env.PIXMAN_VERSION }}-${{ env.GLIB_VERSION }}-${{ env.SPICE_PROTOCOL_TAG }}-${{ env.SPICE_GTK_TAG }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # يبني أربعة مكونات بالترتيب (pixman → GLib → spice-protocol →
+      # spice-client-glib) لكل ABI، ويفشل بأمان لكل ABI على حدة — فشل مكوّن
+      # واحد يعني فقط عدم وجود libspice-client-glib-2.0.so لذلك الـ ABI،
+      # وفحص EXISTS في CMakeLists.txt يتخطى جسر SPICE الأصلي بأمان عندها
+      # (بدل بناء APK فيه SPICE "متاح" لكن معطّل فعلياً). ⚠️ غير مُختبَر ضد
+      # تشغيل CI حقيقي — راجع تحذير UNVERIFIED في كتلة الـ env أعلاه (أسماء
+      # خيارات meson تحديداً عرضة للتغيير بين إصدارات GLib/spice-gtk).
+      - name: Build SPICE prebuilt
+        if: steps.spice-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          API=26
+          NDK_TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          SPICE_ROOT="${{ github.workspace }}/app/src/main/cpp/spice-prebuilt"
+          SRC="${{ github.workspace }}/spice-src"
+          mkdir -p "$SPICE_ROOT" "$SRC"
+
+          echo "📥 Cloning pixman ${{ env.PIXMAN_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.PIXMAN_VERSION }}" \
+            https://gitlab.freedesktop.org/pixman/pixman.git "$SRC/pixman" \
+            || { echo "⚠️ pixman clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning GLib ${{ env.GLIB_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.GLIB_VERSION }}" \
+            https://gitlab.gnome.org/GNOME/glib.git "$SRC/glib" \
+            || { echo "⚠️ GLib clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning spice-protocol ${{ env.SPICE_PROTOCOL_TAG }}..."
+          git clone --depth 1 --branch "${{ env.SPICE_PROTOCOL_TAG }}" \
+            https://gitlab.freedesktop.org/spice/spice-protocol.git "$SRC/spice-protocol" \
+            || { echo "⚠️ spice-protocol clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning spice-gtk ${{ env.SPICE_GTK_TAG }}..."
+          git clone --depth 1 --branch "${{ env.SPICE_GTK_TAG }}" \
+            --recurse-submodules --shallow-submodules \
+            https://gitlab.freedesktop.org/spice/spice-gtk.git "$SRC/spice-gtk" \
+            || { echo "⚠️ spice-gtk clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          build_one_abi() {
+            local ABI=$1 TRIPLE=$2 MESON_CPU_FAMILY=$3 MESON_CPU=$4
+            local PREFIX="$SPICE_ROOT/$ABI"
+            mkdir -p "$PREFIX"
+            echo "🔨 [$ABI] SPICE dependency stack starting..."
+
+            local CC="$NDK_TOOLCHAIN/${TRIPLE}${API}-clang"
+            local CXX="$NDK_TOOLCHAIN/${TRIPLE}${API}-clang++"
+            local AR="$NDK_TOOLCHAIN/llvm-ar"
+            local STRIP="$NDK_TOOLCHAIN/llvm-strip"
+            local RANLIB="$NDK_TOOLCHAIN/llvm-ranlib"
+
+            # pkg-config wrapper: restricts discovery to this ABI's own
+            # prefix only, so glib/spice-gtk's meson build never picks up
+            # the CI runner's host-machine glib/pixman by mistake.
+            local PKGCONF_WRAP="$PREFIX/pkg-config-wrapper.sh"
+            printf '%s\n' \
+              '#!/bin/sh' \
+              'export PKG_CONFIG_LIBDIR="'"$PREFIX"'/lib/pkgconfig:'"$PREFIX"'/share/pkgconfig"' \
+              'export PKG_CONFIG_PATH=' \
+              'export PKG_CONFIG_SYSROOT_DIR=' \
+              'exec pkg-config "$@"' \
+              > "$PKGCONF_WRAP"
+            chmod +x "$PKGCONF_WRAP"
+
+            # ── pixman (autotools) ──────────────────────────────────────
+            ( cd "$SRC/pixman" && make distclean >/dev/null 2>&1 || true
+              CC="$CC" AR="$AR" RANLIB="$RANLIB" STRIP="$STRIP" \
+              ./autogen.sh --host="$TRIPLE" --prefix="$PREFIX" \
+                --enable-static --disable-shared --disable-gtk --disable-tests \
+                CFLAGS="-D__ANDROID_API__=$API -fPIC -O2" \
+              && make -j"$(nproc)" && make install ) \
+              || { echo "⚠️ [$ABI] pixman build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── meson cross file ─────────────────────────────────────────
+            local CROSS="$PREFIX/cross.ini"
+            printf '%s\n' \
+              '[binaries]' \
+              "c = '$CC'" \
+              "cpp = '$CXX'" \
+              "ar = '$AR'" \
+              "strip = '$STRIP'" \
+              "pkgconfig = '$PKGCONF_WRAP'" \
+              '' \
+              '[built-in options]' \
+              "c_args = ['-D__ANDROID_API__=$API']" \
+              '' \
+              '[host_machine]' \
+              "system = 'android'" \
+              "cpu_family = '$MESON_CPU_FAMILY'" \
+              "cpu = '$MESON_CPU'" \
+              "endian = 'little'" \
+              > "$CROSS"
+
+            # ── GLib (meson) ─────────────────────────────────────────────
+            rm -rf "$SRC/glib/build-$ABI"
+            ( cd "$SRC/glib" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+                --default-library=shared --buildtype=release \
+                -Dtests=false -Dinstalled_tests=false -Dnls=disabled \
+                -Dlibmount=disabled -Dselinux=disabled -Dxattr=false \
+                -Ddtrace=false -Dsystemtap=false -Dfam=disabled \
+              && ninja -C "build-$ABI" && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] GLib build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── spice-protocol (meson, header-only — no compiled code) ──
+            rm -rf "$SRC/spice-protocol/build-$ABI"
+            ( cd "$SRC/spice-protocol" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+              && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] spice-protocol install failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── spice-client-glib (meson, lives inside the spice-gtk repo)
+            rm -rf "$SRC/spice-gtk/build-$ABI"
+            ( cd "$SRC/spice-gtk" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+                --default-library=shared --buildtype=release \
+                -Dgtk=disabled -Dvapi=disabled -Dintrospection=disabled \
+                -Dgtk_doc=false -Dsasl=disabled -Dpolkit=disabled \
+                -Dusbredir=disabled -Dsmartcard=disabled \
+                -Dgstaudio=disabled -Dgstvideo=disabled -Dpulse=disabled \
+                -Dcelt051=disabled -Dopus=disabled -Dwebdav=disabled \
+                -Dlz4=disabled -Dcoroutine=gthread \
+              && ninja -C "build-$ABI" && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] spice-client-glib build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            if [ -f "$PREFIX/lib/libspice-client-glib-2.0.so" ]; then
+              echo "✅ [$ABI] SPICE dependency stack complete → $PREFIX"
+            else
+              echo "⚠️ [$ABI] no libspice-client-glib-2.0.so produced — treating as failed for this ABI."
+            fi
+          }
+
+          build_one_abi "arm64-v8a"   "aarch64-linux-android"    "aarch64" "aarch64"
+          build_one_abi "armeabi-v7a" "armv7a-linux-androideabi" "arm"     "armv7"
+          build_one_abi "x86_64"      "x86_64-linux-android"     "x86_64"  "x86_64"
+          build_one_abi "x86"         "i686-linux-android"       "x86"     "i686"
+
+          echo "✅ SPICE prebuilt step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+
+      # 13. بناء APK
+      - name: Build Debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug \
+            --no-daemon --stacktrace
+
+      # 14. رفع كل APK كـ artifact منفصل — كل معمارية بأرشيف خاص بها
+      # بدل رفعها كلها تحت اسم واحد (الذي كان يجعل GitHub يضغطها سويةً
+      # في ملف zip واحد يحوي الثلاث نسخ معاً عند التنزيل).
+      - name: Upload Debug APK (arm64-v8a)
+        uses: actions/upload-artifact@v6
+        with:
+          name: HexRDP-debug-arm64-v8a-${{ github.sha }}
+          path: app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+          retention-days: 14
+
+      - name: Upload Debug APK (armeabi-v7a)
+        uses: actions/upload-artifact@v6
+        with:
+          name: HexRDP-debug-armeabi-v7a-${{ github.sha }}
+          path: app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
+          retention-days: 14
+
+      - name: Upload Debug APK (universal)
+        uses: actions/upload-artifact@v6
+        with:
+          name: HexRDP-debug-universal-${{ github.sha }}
+          path: app/build/outputs/apk/debug/app-universal-debug.apk
+          retention-days: 14
+
+      # PERF-FIX: هذا ينتج من composeCompiler { } المضافة في
+      # app/build.gradle.kts (انظر التعليق هناك) — تقرير حقيقي لكل composable
+      # فالمشروع: stable/unstable، skippable/restartable، ومن أي parameter
+      # بالضبط جات المشكلة. حمّليه من الـ Artifacts بعد كل build وافتحي
+      # app-composables.txt، فلترة على "unstable" أو "not skippable" كتبين
+      # مباشرة وين بالضبط الملفات/الدوال اللي محتاجة إعادة ترتيب — بلا تخمين.
+      - name: Upload Compose compiler stability reports
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: compose-compiler-reports-${{ github.sha }}
+          path: |
+            app/build/compose_compiler_reports/**
+            app/build/compose_metrics/**
+          retention-days: 30
+          if-no-files-found: warn
+
+  # ── Baseline Profile (PERF-FIX) ──────────────────────────────────
+  # المشكلة: موديول :baselineprofile موجود ومربوط، لكن توليد الملف
+  # الفعلي (app/src/main/generated/baselineProfiles/baseline-prof.txt)
+  # كان يحتاج جهاز/emulator متصل فعلياً — وهذا وحده كان مستحيلاً بدون
+  # Android Studio + جهاز فعلي، بالضبط الوضع اللي واجهه صاحب المشروع
+  # (بناء عبر GitHub فقط). بدون هذا الملف، release APK يستفيد فقط من
+  # R8، وليس من الـ 20-30% إضافية على cold start اللي يوفرها بروفايل
+  # مخصص لمسارات هذا التطبيق نفسه (انظر تعليق baselineprofile/build.gradle.kts).
+  # الحل: reactivecircus/android-emulator-runner يشغّل emulator حقيقي
+  # (KVM) داخل GitHub Actions نفسه — بلا أي جهاز محلي أو Android Studio
+  # — وينفّذ generateReleaseBaselineProfile، ثم يرفع الملف كـ artifact
+  # ويُلزّمه (commit) تلقائياً في المستودع كي يستفيد منه كل بناء
+  # release لاحق تلقائياً (androidx.baselineprofile plugin يحزّمه في
+  # الـ APK وحده بمجرد وجوده في app/src/main/).
+  baseline-profile:
+    name: Generate Baseline Profile
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Fix Gradle Wrapper JAR
+        run: |
+          JAR_SIZE=$(wc -c < gradle/wrapper/gradle-wrapper.jar)
+          if [ "$JAR_SIZE" -lt 10000 ]; then
+            GRADLE_VERSION=$(grep -oP '(?<=gradle-)\d+\.\d+(\.\d+)?(?=-)' gradle/wrapper/gradle-wrapper.properties)
+            curl -fsSL \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar \
+            || true
+          fi
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Install NDK & CMake
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${{ env.NDK_VERSION }}" \
+            "cmake;${{ env.CMAKE_VERSION }}"
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y make perl nasm ninja-build
+
+      # نعيد استخدام نفس مفاتيح الـ cache التي بناها job "build" أعلاه —
+      # لا حاجة لإعادة بناء OpenSSL/FreeRDP من الصفر هنا.
+      - name: Restore OpenSSL build cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.OPENSSL_BUILD_DIR }}
+          key: openssl-${{ env.OPENSSL_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}
+          restore-keys: openssl-${{ env.OPENSSL_VERSION }}-
+
+      - name: Set OpenSSL root environment variable
+        run: echo "ANDROID_OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}" >> $GITHUB_ENV
+
+      - name: Restore FreeRDP prebuilt cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/freerdp-prebuilt
+          key: freerdp-prebuilt-ndk${{ env.NDK_VERSION }}-${{ env.FREERDP_TAG }}-openssl${{ env.OPENSSL_VERSION }}-${{ env.BUILD_ABIS }}-opensles-v1-rdpecam-v1-pcsc-v1-rdpdr-announce-v1-h264-v1-cups-v1-server-v1-proxyhttps-v1
+
+      # KVM مفعّل افتراضياً على GitHub-hosted Ubuntu runners منذ 2023 —
+      # هذا فقط يضمن صلاحيات الجهاز، بدونه الـ emulator يعمل بمحاكاة
+      # برمجية بطيئة جداً أو يفشل.
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cache AVD
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api34-${{ runner.os }}
+
+      - name: Run emulator & generate baseline profile
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          disk-size: 6000M
+          heap-size: 2048M
+          emulator-options: >-
+            -no-window -gpu swiftshader_indirect -no-snapshot -noaudio
+            -no-boot-anim -camera-back none -accel on
+          script: |
+            chmod +x gradlew
+            ./gradlew :app:generateReleaseBaselineProfile --no-daemon --stacktrace
+
+      - name: Upload generated baseline profile (artifact)
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: baseline-profile-${{ github.sha }}
+          path: app/src/main/**/generated/baselineProfiles/**
+          retention-days: 30
+          if-no-files-found: warn
+
+      # يُلزّم الملف المولَّد مباشرة في نفس الفرع كي يستفيد منه أي
+      # `assembleRelease` لاحق (محلي أو عبر job release) بلا أي خطوة
+      # يدوية إضافية من صاحب المشروع. لا يعمل على pull_request (لا
+      # صلاحية push) ولا على وسم release (الفرع منفصل عن الوسم).
+      - name: Commit baseline profile to repo
+        if: github.event_name == 'push'
+        run: |
+          PROFILE_DIR="app/src/main/generated/baselineProfiles"
+          if [ -d "$PROFILE_DIR" ] && [ -n "$(find "$PROFILE_DIR" -name '*.txt' 2>/dev/null)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add "$PROFILE_DIR"
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(perf): update baseline profile [skip ci]"
+              git push
+            else
+              echo "No change in generated baseline profile."
+            fi
+          else
+            echo "⚠️ No baseline profile file was generated — check the previous step's logs."
+          fi
+
+  # ── Instrumented Tests — Form Factors (TABLET-CI FEATURE, Part 4/4) ─────
+  # PROBLEM: app/src/androidTest/ (CryptoHelperInstrumentedTest.kt, and any
+  # future UI-level instrumented test — e.g. one exercising
+  # RestconfExplorerScreen's isLargeScreen split-pane layout or
+  # RestconfConfigurationScreen's two-column layout) was never actually run
+  # by CI: no job in this file ever called `connectedAndroidTest`, it only
+  # ever existed in the source tree. `lint`'s testDebugUnitTest step above
+  # (see its "TESTS-FIX" comment) explicitly calls this out and defers
+  # instrumented tests to "manually via `./gradlew connectedAndroidTest`
+  # against a real device/emulator" — i.e. never, in an automated sense. That
+  # meant CI's only signal on whether the app actually opens and works was
+  # `assembleDebug`'s static compile step: never a real boot-and-run, and
+  # never on more than one screen class.
+  #
+  # FIX: reuses the exact `reactivecircus/android-emulator-runner` + KVM
+  # approach `baseline-profile` above already established (real emulators
+  # inside GitHub Actions, no Android Studio/local device needed) as a
+  # 3-way `strategy.matrix` across device profiles instead of one fixed
+  # `pixel_6`:
+  #   - pixel_6         — phone control (sw~411dp; RestconfExplorerScreen's
+  #                       stacked, single-column layout path).
+  #   - pixel_tablet    — real tablet, sw600dp+, so
+  #                       DeviceFormFactor.supportsDesktopFeatures() is true
+  #                       and the request/response split-pane (and
+  #                       Configuration screen's two-column) layout runs.
+  #   - "7.6in Foldable" — unfolded foldable, also sw600dp+ once unfolded;
+  #                       exercises the same isLargeScreen branch through a
+  #                       different device class than a fixed-size tablet,
+  #                       since a foldable's window size can change at
+  #                       runtime (fold/unfold) in a way a tablet's never
+  #                       does.
+  # `fail-fast: false` so one profile failing doesn't cancel the other two
+  # mid-run — each profile's result is independently useful signal, and a
+  # foldable-only regression shouldn't hide a clean phone/tablet result.
+  #
+  # ⚠️ SCOPE, STATED HONESTLY: as of this fix, app/src/androidTest/ holds
+  # exactly one instrumented test (CryptoHelperInstrumentedTest.kt — real
+  # AndroidKeyStore behaviour, not screen-size-dependent). This job's value
+  # today is making sure that test — and the app's install/boot path itself,
+  # since `connectedAndroidTest` fails outright if the APK won't even launch
+  # — passes on all three device classes, not yet a form-factor-specific UI
+  # assertion on the split-pane layouts themselves. It is real
+  # infrastructure, not a placeholder: any future instrumented test added
+  # under app/src/androidTest/ (e.g. a Compose UI test asserting the
+  # request/response panes actually render side-by-side once
+  # DeviceFormFactor.supportsDesktopFeatures() is true) is picked up by this
+  # exact matrix automatically, the same way testDebugUnitTest above already
+  # auto-picks-up new JVM unit tests.
+  instrumented-tests-formfactors:
+    name: Instrumented Tests (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # slug: filesystem/artifact/cache-key-safe stand-in for `profile`
+          # (which for the foldable row contains a space and a dot) — used
+          # everywhere a GitHub Actions cache key or artifact name is built
+          # below instead of interpolating matrix.profile directly.
+          - profile: pixel_6
+            slug: pixel_6
+            api-level: 34
+            arch: x86_64
+            target: google_apis
+          - profile: pixel_tablet
+            slug: pixel_tablet
+            api-level: 34
+            arch: x86_64
+            target: google_apis
+          - profile: "7.6in Foldable"
+            slug: foldable-7-6in
+            api-level: 34
+            arch: x86_64
+            target: google_apis
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Fix Gradle Wrapper JAR
+        run: |
+          JAR_SIZE=$(wc -c < gradle/wrapper/gradle-wrapper.jar)
+          if [ "$JAR_SIZE" -lt 10000 ]; then
+            GRADLE_VERSION=$(grep -oP '(?<=gradle-)\d+\.\d+(\.\d+)?(?=-)' gradle/wrapper/gradle-wrapper.properties)
+            curl -fsSL \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar \
+            || true
+          fi
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Install NDK & CMake
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${{ env.NDK_VERSION }}" \
+            "cmake;${{ env.CMAKE_VERSION }}"
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y make perl nasm ninja-build
+
+      # Reuses the exact OpenSSL/FreeRDP cache keys the `build` job above
+      # populated earlier in this same workflow run — no rebuild from source
+      # needed here, same as `baseline-profile` above. CUPS/PCSC-lite/
+      # openh264/SPICE prebuilts are intentionally NOT restored here: every
+      # one of those backends fails soft to its OFF flag when its prebuilt
+      # directory is absent (see each one's own "Build ... prebuilt" step
+      # comment earlier in this file), so the debug + androidTest APKs this
+      # job installs still build and run correctly without them — exactly
+      # the same tradeoff `baseline-profile` already makes.
+      - name: Restore OpenSSL build cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.OPENSSL_BUILD_DIR }}
+          key: openssl-${{ env.OPENSSL_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}
+          restore-keys: openssl-${{ env.OPENSSL_VERSION }}-
+
+      - name: Set OpenSSL root environment variable
+        run: echo "ANDROID_OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}" >> $GITHUB_ENV
+
+      - name: Restore FreeRDP prebuilt cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/freerdp-prebuilt
+          key: freerdp-prebuilt-ndk${{ env.NDK_VERSION }}-${{ env.FREERDP_TAG }}-openssl${{ env.OPENSSL_VERSION }}-${{ env.BUILD_ABIS }}-opensles-v1-rdpecam-v1-pcsc-v1-rdpdr-announce-v1-h264-v1-cups-v1-server-v1-proxyhttps-v1
+
+      # KVM is enabled by default on GitHub-hosted Ubuntu runners since 2023
+      # — this just ensures device permissions; without it the emulator
+      # falls back to slow software emulation or fails outright. Same step
+      # as `baseline-profile` above, repeated here since this is a separate
+      # job/runner.
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Cache key includes matrix.slug: each device profile gets its own AVD
+      # snapshot, so the tablet/foldable runs never silently reuse (or
+      # thrash) the pixel_6 row's cache.
+      - name: Cache AVD (${{ matrix.profile }})
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api${{ matrix.api-level }}-${{ matrix.slug }}-${{ runner.os }}
+
+      # ⚠️ UNVERIFIED — same caveat this file already carries for other
+      # values authored without network access to confirm them (see
+      # OPENH264_TAG/CUPS_VERSION/etc. above): "7.6in Foldable" is expected
+      # to match `avdmanager list device`'s built-in device-definition ID for
+      # a large unfolded foldable, which reactivecircus/android-emulator-
+      # runner's `profile` input passes straight through to `avdmanager
+      # create avd --device`. If this exact string doesn't match on a real
+      # CI run, check that step's log for `avdmanager list device` output and
+      # correct the `profile` value in the matrix above — the
+      # pixel_6/pixel_tablet rows are the well-established, low-risk ones
+      # either way, and `fail-fast: false` means a wrong foldable string
+      # fails only that one matrix row, not the whole job.
+      - name: Run instrumented tests on ${{ matrix.profile }}
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          target: ${{ matrix.target }}
+          profile: ${{ matrix.profile }}
+          disable-animations: true
+          disk-size: 6000M
+          heap-size: 2048M
+          emulator-options: >-
+            -no-window -gpu swiftshader_indirect -no-snapshot -noaudio
+            -no-boot-anim -camera-back none -accel on
+          script: |
+            chmod +x gradlew
+            ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace
+
+      - name: Upload instrumented test results (${{ matrix.profile }})
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: instrumented-test-results-${{ matrix.slug }}-${{ github.sha }}
+          path: app/build/outputs/androidTest-results/connected/**
+          retention-days: 14
+          if-no-files-found: warn
+
+  # ── Release (APK موقّع + GitHub Release) ────────────────────────
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    # SUPPLY-CHAIN-FIX: this job (only) needs write access to publish a
+    # GitHub Release (softprops/action-gh-release below) — every other
+    # job keeps the workflow-level `contents: read` default above.
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Fix Gradle Wrapper JAR
+        run: |
+          JAR_SIZE=$(wc -c < gradle/wrapper/gradle-wrapper.jar)
+          if [ "$JAR_SIZE" -lt 10000 ]; then
+            GRADLE_VERSION=$(grep -oP '(?<=gradle-)\d+\.\d+(\.\d+)?(?=-)' gradle/wrapper/gradle-wrapper.properties)
+            curl -fsSL \
+              "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}/gradle/wrapper/gradle-wrapper.jar" \
+              -o gradle/wrapper/gradle-wrapper.jar \
+            || true
+          fi
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Install NDK & CMake
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${{ env.NDK_VERSION }}" \
+            "cmake;${{ env.CMAKE_VERSION }}"
+          # ملاحظة: لا نكتب ndk.dir في local.properties — هذا أسلوب قديم (deprecated)
+          # يصدر تحذير [CXX5106]. android.ndkVersion في app/build.gradle.kts يكفي
+          # وحده لتحديد NDK المطلوب من بين النسخ المثبتة في $ANDROID_SDK_ROOT/ndk/.
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y make perl nasm ninja-build pkg-config gettext
+          # SPICE-PROTOCOL FEATURE (Part 2/N): GLib/spice-protocol/spice-client-glib
+          # below all build with meson (Ubuntu's apt meson package is often
+          # too old for current GLib/spice-gtk meson_options.txt — installing
+          # via pip pins a known-recent one instead).
+          pip install --user "meson>=1.3.0"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Clone FreeRDP source
+        run: |
+          if [ ! -d "${{ env.FREERDP_PATH }}/.git" ]; then
+            git clone \
+              --depth 1 \
+              --branch ${{ env.FREERDP_TAG }} \
+              --recurse-submodules \
+              --shallow-submodules \
+              https://github.com/FreeRDP/FreeRDP.git \
+              ${{ env.FREERDP_PATH }}
+          fi
+
+      - name: Patch FreeRDP for Android
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          LIBFREERDP_CMAKE="$FREERDP_ROOT/libfreerdp/CMakeLists.txt"
+
+          sed -i 's/find_package(SWScale REQUIRED)/find_package(SWScale QUIET)/g' "$LIBFREERDP_CMAKE"
+          sed -i '/SWScale_INCLUDE_DIR/d' "$LIBFREERDP_CMAKE"
+          sed -i '/SWScale_LIBRARY/d'     "$LIBFREERDP_CMAKE"
+
+          find "$FREERDP_ROOT" \( -name "CMakeLists.txt" -o -name "*.cmake" \) -print0 | \
+            xargs -0 sed -i \
+              -e 's/-Werror\b//g' \
+              -e 's/ENABLE_WARNINGS_ERROR ON/ENABLE_WARNINGS_ERROR OFF/g' \
+              -e 's/ENABLE_WARNINGS_ALL ON/ENABLE_WARNINGS_ALL OFF/g'
+
+          COMPILER_FLAGS_CMAKE="$FREERDP_ROOT/cmake/CompilerFlags.cmake"
+          if [ -f "$COMPILER_FLAGS_CMAKE" ]; then
+            cat >> "$COMPILER_FLAGS_CMAKE" << 'CMAKE_EOF'
+
+          if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+            add_compile_options(
+              -Wno-cast-function-type-strict
+              -Wno-implicit-int-conversion
+              -Wno-shorten-64-to-32
+              -Wno-sign-conversion
+              -Wno-unused-parameter
+              -Wno-shadow
+              -Wno-tautological-unsigned-char-zero-compare
+            )
+          endif()
+          CMAKE_EOF
+          fi
+
+          echo "✅ FreeRDP patched"
+
+      # RDPDR-DEVICE-ANNOUNCE FIX: نفس الإصلاح المطبَّق في job "build" —
+      # انظر تعليقات الـ step المطابق هناك للتفاصيل الكاملة.
+      - name: Patch FreeRDP rdpdr for per-device announce result
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          python3 - "$FREERDP_ROOT/channels/rdpdr/client/rdpdr_main.c" << 'PY_EOF'
+          import re, sys
+          path = sys.argv[1]
+          src = open(path, encoding="utf-8").read()
+
+          anchor = re.compile(
+              r'(case PAKID_CORE_DEVICE_REPLY:.*?Stream_Read_UINT32\(s,\s*deviceId\);'
+              r'.*?Stream_Read_UINT32\(s,\s*status\);\s*\n)'
+              r'(\s*)(if\s*\(status\s*!=\s*0\)\s*\n\s*devman_unregister_device)',
+              re.DOTALL,
+          )
+          m = anchor.search(src)
+          if not m:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find the expected "
+                  "PAKID_CORE_DEVICE_REPLY block in rdpdr_main.c (FreeRDP source "
+                  "layout changed since this patch was written for "
+                  "FREERDP_TAG=${{ env.FREERDP_TAG }}). Fix the anchor regex in "
+                  "this step before proceeding — do NOT ignore this failure."
+              )
+
+          hook = (
+              m.group(2)
+              + "/* HEXRDP PATCH: see the matching step in the \"build\" job. */\n"
+              + m.group(2)
+              + "{\n"
+              + m.group(2)
+              + "    void* hexrdp_dev = ListDictionary_GetItemValue(rdpdr->devman->devices, (void*)(size_t)deviceId);\n"
+              + m.group(2)
+              + "    UINT32 hexrdp_dev_type = hexrdp_dev ? ((DEVICE*)hexrdp_dev)->type : 0xFFFFFFFFu;\n"
+              + m.group(2)
+              + "    extern void hexrdp_rdpdr_device_announce_result(void* rdpcontext, UINT32 deviceId, UINT32 deviceType, UINT32 status);\n"
+              + m.group(2)
+              + "    hexrdp_rdpdr_device_announce_result(rdpdr->rdpcontext, deviceId, hexrdp_dev_type, status);\n"
+              + m.group(2)
+              + "}\n"
+          )
+          new_src = src[: m.start()] + m.group(1) + hook + m.group(3) + src[m.end(3):]
+          if new_src == src:
+              sys.exit("❌ HEXRDP PATCH FAILED: regex matched but no bytes changed.")
+          open(path, "w", encoding="utf-8").write(new_src)
+          print("✅ rdpdr_main.c patched: per-device DR_CORE_DEVICE_ANNOUNCE_RSP hook inserted")
+          PY_EOF
+
+      # HTTPS-PROXY FEATURE: نفس الخطوة الموجودة بـ job "build" — راجعها هناك
+      # للتعليق الكامل.
+      - name: Patch FreeRDP proxy for HTTPS support
+        run: |
+          FREERDP_ROOT="${{ github.workspace }}/${{ env.FREERDP_PATH }}"
+          python3 - "$FREERDP_ROOT/libfreerdp/core/proxy.c" << 'PY_EOF'
+          import re, sys
+          path = sys.argv[1]
+          src = open(path, encoding="utf-8").read()
+
+          anchor_a = re.compile(
+              r'\n(BOOL proxy_connect_impl\(rdpSettings\* settings, BIO\* _bio,)',
+          )
+          m_a = anchor_a.search(src)
+          if not m_a:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find proxy_connect_impl()'s "
+                  "signature in proxy.c (see the matching step in the \"build\" job)."
+              )
+
+          https_fn = '''
+          #define PROXY_TYPE_HTTPS 3
+
+          /* HEXRDP PATCH: TLS-to-proxy support, see the "Patch FreeRDP proxy for HTTPS support" CI step comment in .github/workflows/main.yml */
+          static BOOL https_proxy_connect(BIO* bufferedBio, const char* proxyHostname,
+                                           const char* hostname, UINT16 port)
+          {
+          	BOOL rc = FALSE;
+          	SSL_CTX* sslCtx = SSL_CTX_new(TLS_client_method());
+          	BIO* sslBio = NULL;
+          	SSL* ssl = NULL;
+
+          	if (!sslCtx)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: SSL_CTX_new failed");
+          		return FALSE;
+          	}
+
+          	SSL_CTX_set_default_verify_paths(sslCtx);
+          	SSL_CTX_set_verify(sslCtx, SSL_VERIFY_PEER, NULL);
+
+          	sslBio = BIO_new_ssl(sslCtx, TRUE);
+          	if (!sslBio)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: BIO_new_ssl failed");
+          		goto out;
+          	}
+
+          	BIO_get_ssl(sslBio, &ssl);
+          	if (!ssl)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: BIO_get_ssl returned no SSL*");
+          		goto out;
+          	}
+
+          	SSL_set_tlsext_host_name(ssl, proxyHostname);
+          	BIO_push(sslBio, bufferedBio);
+
+          	if (BIO_do_handshake(sslBio) != 1)
+          	{
+          		WLog_ERR(TAG, "HTTPS proxy: TLS handshake with %s failed", proxyHostname);
+          		goto out;
+          	}
+
+          	rc = http_proxy_connect(sslBio, hostname, port);
+
+          out:
+          	if (sslBio)
+          	{
+          		BIO_pop(sslBio);
+          		BIO_free(sslBio);
+          	}
+          	if (sslCtx)
+          		SSL_CTX_free(sslCtx);
+          	return rc;
+          }
+
+          '''
+          https_fn = "\n".join(
+              (l[10:] if l.startswith(" " * 10) else l) for l in https_fn.split("\n")
+          )
+          src = src[: m_a.start()] + "\n" + https_fn + m_a.group(1) + src[m_a.end():]
+
+          anchor_b = re.compile(
+              r'(case PROXY_TYPE_HTTP:\s*\n\s*return http_proxy_connect\(bufferedBio, hostname, port\);\s*\n)'
+          )
+          m_b = anchor_b.search(src)
+          if not m_b:
+              sys.exit(
+                  "❌ HEXRDP PATCH FAILED: couldn't find the `case PROXY_TYPE_HTTP:` "
+                  "arm inside proxy_connect_impl() (see the matching step in the \"build\" job)."
+              )
+
+          https_case = (
+              "\n\t\tcase PROXY_TYPE_HTTPS:\n"
+              "\t\t\treturn https_proxy_connect(bufferedBio,\n"
+              "\t\t\t                            freerdp_settings_get_string(settings, FreeRDP_ProxyHostname),\n"
+              "\t\t\t                            hostname, port);\n"
+          )
+          src = src[: m_b.end()] + https_case + src[m_b.end():]
+
+          if "#include <openssl/ssl.h>" not in src:
+              src = src.replace(
+                  '#include <openssl/err.h>',
+                  '#include <openssl/err.h>\n#include <openssl/ssl.h>',
+                  1,
+              )
+
+          open(path, "w", encoding="utf-8").write(src)
+          print("✅ proxy.c patched: PROXY_TYPE_HTTPS + https_proxy_connect() inserted")
+          PY_EOF
+
+      - name: Restore OpenSSL build cache
+        id: openssl-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.OPENSSL_BUILD_DIR }}
+          key: openssl-${{ env.OPENSSL_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}
+          restore-keys: openssl-${{ env.OPENSSL_VERSION }}-
+
+      # ABI-FIX: نفس الإصلاح المطبَّق في job "build" — أربع استدعاءات
+      # build_openssl بدل اثنتين.
+      - name: Build OpenSSL for Android
+        if: steps.openssl-cache.outputs.cache-hit != 'true'
+        run: |
+          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}
+
+          OPENSSL_TAR="openssl-${{ env.OPENSSL_VERSION }}.tar.gz"
+          curl -fsSL "https://www.openssl.org/source/${OPENSSL_TAR}" -o /tmp/${OPENSSL_TAR}
+          # SUPPLY-CHAIN-FIX: verify against OpenSSL's own published
+          # .sha256 file (fetched fresh each run — this verifies whatever
+          # OpenSSL currently publishes, not a value hardcoded in this
+          # workflow that could go stale). Catches transit corruption or a
+          # tampered download; does not by itself prove openssl.org's own
+          # publishing pipeline is uncompromised (full hardening would add
+          # GPG signature verification against OpenSSL's release-signing
+          # key — see https://openssl-library.org/source/ for its
+          # fingerprint).
+          curl -fsSL "https://www.openssl.org/source/${OPENSSL_TAR}.sha256" -o /tmp/${OPENSSL_TAR}.sha256
+          echo "$(cat /tmp/${OPENSSL_TAR}.sha256)  /tmp/${OPENSSL_TAR}" | sha256sum -c -
+          tar -xf /tmp/${OPENSSL_TAR} -C /tmp
+
+          TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
+          API=26
+          BUILD_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}
+          mkdir -p "$BUILD_ROOT"
+
+          WRAPPERS_DIR="$BUILD_ROOT/wrappers"
+          mkdir -p "$WRAPPERS_DIR"
+
+          make_wrapper() {
+            local NAME=$1
+            local CMD=$2
+            printf '#!/bin/sh\nexec "%s" "$@"\n' "$CMD" > "$WRAPPERS_DIR/$NAME"
+            chmod +x "$WRAPPERS_DIR/$NAME"
+          }
+
+          make_wrapper "aarch64-linux-android-gcc"      "$TOOLCHAIN/bin/aarch64-linux-android${API}-clang"
+          make_wrapper "aarch64-linux-android-g++"      "$TOOLCHAIN/bin/aarch64-linux-android${API}-clang++"
+          make_wrapper "aarch64-linux-android-ar"       "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "aarch64-linux-android-ranlib"   "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "aarch64-linux-android-strip"    "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "aarch64-linux-android-ld"       "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "aarch64-linux-android-nm"       "$TOOLCHAIN/bin/llvm-nm"
+
+          make_wrapper "x86_64-linux-android-gcc"       "$TOOLCHAIN/bin/x86_64-linux-android${API}-clang"
+          make_wrapper "x86_64-linux-android-g++"       "$TOOLCHAIN/bin/x86_64-linux-android${API}-clang++"
+          make_wrapper "x86_64-linux-android-ar"        "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "x86_64-linux-android-ranlib"    "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "x86_64-linux-android-strip"     "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "x86_64-linux-android-ld"        "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "x86_64-linux-android-nm"        "$TOOLCHAIN/bin/llvm-nm"
+
+          # ARMv7 (armeabi-v7a) — wrapper بالاسمين (armv7a و arm)
+          make_wrapper "armv7a-linux-androideabi-gcc"   "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang"
+          make_wrapper "armv7a-linux-androideabi-g++"   "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang++"
+          make_wrapper "arm-linux-androideabi-gcc"      "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang"
+          make_wrapper "arm-linux-androideabi-g++"      "$TOOLCHAIN/bin/armv7a-linux-androideabi${API}-clang++"
+          make_wrapper "arm-linux-androideabi-ar"       "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "arm-linux-androideabi-ranlib"   "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "arm-linux-androideabi-strip"    "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "arm-linux-androideabi-ld"       "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "arm-linux-androideabi-nm"       "$TOOLCHAIN/bin/llvm-nm"
+
+          # x86 (32-bit)
+          make_wrapper "i686-linux-android-gcc"         "$TOOLCHAIN/bin/i686-linux-android${API}-clang"
+          make_wrapper "i686-linux-android-g++"         "$TOOLCHAIN/bin/i686-linux-android${API}-clang++"
+          make_wrapper "i686-linux-android-ar"          "$TOOLCHAIN/bin/llvm-ar"
+          make_wrapper "i686-linux-android-ranlib"      "$TOOLCHAIN/bin/llvm-ranlib"
+          make_wrapper "i686-linux-android-strip"       "$TOOLCHAIN/bin/llvm-strip"
+          make_wrapper "i686-linux-android-ld"          "$TOOLCHAIN/bin/ld.lld"
+          make_wrapper "i686-linux-android-nm"          "$TOOLCHAIN/bin/llvm-nm"
+
+          export PATH="$WRAPPERS_DIR:$TOOLCHAIN/bin:$PATH"
+
+          build_openssl() {
+            local ABI=$1
+            local ARCH=$2
+            local TARGET=$3
+
+            echo "🔨 Building OpenSSL ${{ env.OPENSSL_VERSION }} for $ABI ..."
+            cd /tmp/openssl-${{ env.OPENSSL_VERSION }}
+            make clean 2>/dev/null || true
+
+            export CC="$TOOLCHAIN/bin/${TARGET}${API}-clang"
+            export CXX="$TOOLCHAIN/bin/${TARGET}${API}-clang++"
+            export AR="$TOOLCHAIN/bin/llvm-ar"
+            export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
+            export STRIP="$TOOLCHAIN/bin/llvm-strip"
+            export LD="$TOOLCHAIN/bin/ld.lld"
+            export NM="$TOOLCHAIN/bin/llvm-nm"
+
+            local OUT="$BUILD_ROOT/openssl-${ABI}"
+            mkdir -p "$OUT"
+
+            ./Configure ${ARCH} \
+              -D__ANDROID_API__=${API} \
+              --prefix="$OUT" \
+              --openssldir="$OUT/ssl" \
+              --libdir=lib \
+              no-shared \
+              no-tests \
+              no-engine \
+              no-dynamic-engine
+
+            make -j$(nproc)
+            make install_sw
+            echo "✅ OpenSSL built for $ABI → $OUT"
+          }
+
+          build_openssl "arm64-v8a"    "android-arm64"  "aarch64-linux-android"
+          build_openssl "armeabi-v7a"  "android-arm"    "armv7a-linux-androideabi"
+          build_openssl "x86_64"       "android-x86_64" "x86_64-linux-android"
+          build_openssl "x86"          "android-x86"    "i686-linux-android"
+
+      - name: Set OpenSSL root environment variable
+        run: echo "ANDROID_OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}" >> $GITHUB_ENV
+
+      # SMARTCARD-REDIRECT FEATURE: same PCSC-lite cache key as job "build" —
+      # if that job already populated it in this workflow run, this just
+      # restores it; only rebuilds here if release runs standalone (e.g. a
+      # CUPS-PRINT FIX: Cache لـ CUPS prebuilt (PRINTER-REDIRECT FEATURE)
+      - name: Restore CUPS build cache
+        id: cups-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/cups-build
+          key: cups-${{ env.CUPS_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # CUPS-PRINT FIX: بناء libcups (المكتبة العميلة فقط — بدون cupsd أو
+      # backends/filters/drivers الجانب-الخادم التي لا فائدة منها هنا) لكل
+      # ABI، بنفس نمط PCSC-lite أعلاه (autotools cross-compile). فشل ABI
+      # معيّن هنا لا يُفشل الـ job كله؛ تلك المعمارية فقط تسقط إلى بناء
+      # FreeRDP بـ -DWITH_CUPS=OFF (راجع CUPS_ABI_FLAGS في خطوة "Build
+      # FreeRDP prebuilt" أدناه، حيث تُفحص وجود مكتبة libcups.a لكل ABI قبل
+      # تمرير العلم). ⚠️ غير مُختبَر ضد تشغيل CI حقيقي — راجع تعليق
+      # CUPS_VERSION أعلى الملف.
+      - name: Build CUPS prebuilt
+        if: steps.cups-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          CUPS_SRC="${{ github.workspace }}/cups-src"
+          CUPS_ROOT="${{ github.workspace }}/app/src/main/cpp/cups-build"
+          mkdir -p "$CUPS_ROOT"
+
+          echo "📥 Cloning CUPS ${{ env.CUPS_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.CUPS_VERSION }}" \
+            https://github.com/OpenPrinting/cups.git "$CUPS_SRC" || {
+              echo "⚠️ CUPS clone failed — skipping printer backend for all ABIs (WITH_CUPS will fall back to OFF)."
+              exit 0
+            }
+
+          cd "$CUPS_SRC"
+          # CUPS ships a generated ./configure in release tags; ./autogen.sh
+          # is only needed for a git checkout of an unreleased commit — kept
+          # as a fallback in case this tag doesn't ship one.
+          [ -x ./configure ] || ./autogen.sh
+
+          build_cups() {
+            local ABI=$1 TRIPLE=$2 API=26
+            local OUT="$CUPS_ROOT/$ABI"
+            local TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+            mkdir -p "$OUT"
+
+            echo "🔨 Building CUPS for $ABI ..."
+            make distclean >/dev/null 2>&1 || true
+            CC="$TOOLCHAIN/${TRIPLE}${API}-clang" \
+            AR="$TOOLCHAIN/llvm-ar" \
+            RANLIB="$TOOLCHAIN/llvm-ranlib" \
+            STRIP="$TOOLCHAIN/llvm-strip" \
+            ./configure \
+              --host="$TRIPLE" \
+              --prefix="$OUT" \
+              --enable-static \
+              --disable-shared \
+              --disable-launchd \
+              --disable-systemd \
+              --disable-avahi \
+              --disable-dnssd \
+              --disable-libusb \
+              --disable-tcp-wrappers \
+              --without-perl \
+              --without-python \
+              --without-tls \
+              --disable-pam \
+              --with-components=core \
+              CFLAGS="-D__ANDROID_API__=$API -fPIC" \
+              || { echo "⚠️ CUPS configure failed for $ABI — skipping this ABI (WITH_CUPS=OFF for $ABI)."; return 0; }
+
+            make -j"$(nproc)" -C cups libcups.a 2>/dev/null || make -j"$(nproc)" \
+              || echo "⚠️ CUPS build failed for $ABI — skipping this ABI (WITH_CUPS=OFF for $ABI)."
+
+            mkdir -p "$OUT/lib" "$OUT/include/cups"
+            find . -maxdepth 2 -name "libcups.a" -exec cp -f {} "$OUT/lib/" \;
+            cp -f cups/*.h "$OUT/include/cups/" 2>/dev/null || true
+            if [ -f "$OUT/lib/libcups.a" ]; then
+              echo "✅ CUPS built for $ABI → $OUT"
+            else
+              echo "⚠️ CUPS build for $ABI produced no libcups.a — treating as failed (WITH_CUPS=OFF for $ABI)."
+            fi
+          }
+
+          build_cups "arm64-v8a"   "aarch64-linux-android"
+          build_cups "armeabi-v7a" "armv7a-linux-androideabi"
+          build_cups "x86_64"      "x86_64-linux-android"
+          build_cups "x86"         "i686-linux-android"
+
+          echo "✅ CUPS build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      # tag push straight into a fresh cache).
+      - name: Restore PCSC-lite build cache
+        id: pcsc-cache-release
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/pcsclite-build
+          key: pcsclite-${{ env.PCSC_LITE_VERSION }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      - name: Build PCSC-lite prebuilt
+        if: steps.pcsc-cache-release.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          PCSC_SRC="${{ github.workspace }}/pcsc-lite-src"
+          PCSC_ROOT="${{ github.workspace }}/app/src/main/cpp/pcsclite-build"
+          mkdir -p "$PCSC_ROOT"
+
+          echo "📥 Cloning PCSC-lite ${{ env.PCSC_LITE_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.PCSC_LITE_VERSION }}" \
+            https://github.com/LudovicRousseau/PCSC.git "$PCSC_SRC" || {
+              echo "⚠️ PCSC-lite clone failed — skipping smartcard backend for all ABIs (WITH_PCSC will fall back to OFF)."
+              exit 0
+            }
+
+          cd "$PCSC_SRC"
+          ./bootstrap
+
+          build_pcsclite() {
+            local ABI=$1 TRIPLE=$2 API=26
+            local OUT="$PCSC_ROOT/$ABI"
+            local TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+            mkdir -p "$OUT"
+
+            echo "🔨 Building PCSC-lite for $ABI ..."
+            make distclean >/dev/null 2>&1 || true
+            CC="$TOOLCHAIN/${TRIPLE}${API}-clang" \
+            AR="$TOOLCHAIN/llvm-ar" \
+            RANLIB="$TOOLCHAIN/llvm-ranlib" \
+            STRIP="$TOOLCHAIN/llvm-strip" \
+            ./configure \
+              --host="$TRIPLE" \
+              --prefix="$OUT" \
+              --enable-static \
+              --disable-shared \
+              --disable-libsystemd \
+              --disable-libudev \
+              --disable-udev \
+              --without-systemdsystemunitdir \
+              --disable-serial \
+              --disable-usb \
+              CFLAGS="-D__ANDROID_API__=$API -fPIC" \
+              || { echo "⚠️ PCSC-lite configure failed for $ABI — skipping this ABI (WITH_PCSC=OFF for $ABI)."; return 0; }
+
+            make -j"$(nproc)" \
+              && make install \
+              || echo "⚠️ PCSC-lite build/install failed for $ABI — skipping this ABI (WITH_PCSC=OFF for $ABI)."
+          }
+
+          build_pcsclite "arm64-v8a"   "aarch64-linux-android"
+          build_pcsclite "armeabi-v7a" "armv7a-linux-androideabi"
+          build_pcsclite "x86_64"      "x86_64-linux-android"
+          build_pcsclite "x86"         "i686-linux-android"
+
+          echo "✅ PCSC-lite build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      # H264-OPENH264 FIX: same cache key/step as job "build" — if that job
+      # already populated it in this workflow run, this just restores it.
+      - name: Restore openh264 build cache
+        id: openh264-cache-release
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/openh264-build
+          key: openh264-${{ env.OPENH264_TAG }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      - name: Build openh264 prebuilt
+        if: steps.openh264-cache-release.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          OPENH264_SRC="${{ github.workspace }}/openh264-src"
+          OPENH264_ROOT="${{ github.workspace }}/app/src/main/cpp/openh264-build"
+          mkdir -p "$OPENH264_ROOT"
+
+          echo "📥 Cloning openh264 ${{ env.OPENH264_TAG }}..."
+          git clone --depth 1 --branch "${{ env.OPENH264_TAG }}" \
+            https://github.com/cisco/openh264.git "$OPENH264_SRC" || {
+              echo "⚠️ openh264 clone failed — skipping H.264 backend for all ABIs (WITH_OPENH264 will fall back to OFF)."
+              exit 0
+            }
+
+          declare -A OPENH264_ARCH=( [arm64-v8a]=arm64 [armeabi-v7a]=arm [x86_64]=x86_64 [x86]=x86 )
+
+          build_openh264() {
+            local ABI=$1
+            local ARCH=${OPENH264_ARCH[$ABI]}
+            local OUT="$OPENH264_ROOT/$ABI"
+            mkdir -p "$OUT/lib" "$OUT/include"
+
+            echo "🔨 Building openh264 for $ABI (ARCH=$ARCH) ..."
+            cd "$OPENH264_SRC"
+            make clean >/dev/null 2>&1 || true
+            make -j"$(nproc)" \
+              OS=android \
+              NDKROOT="$ANDROID_NDK_ROOT" \
+              NDKLEVEL=26 \
+              TARGET=android-26 \
+              ARCH="$ARCH" \
+              APP_ABI="$ABI" \
+              libopenh264.a \
+              || { echo "⚠️ openh264 build failed for $ABI — skipping this ABI (WITH_OPENH264=OFF for $ABI)."; return 0; }
+
+            find . -maxdepth 1 -name "libopenh264.a" -exec cp -f {} "$OUT/lib/" \;
+            cp -f codec/api/wels/*.h "$OUT/include/" 2>/dev/null || true
+            if [ -f "$OUT/lib/libopenh264.a" ]; then
+              echo "✅ openh264 built for $ABI → $OUT"
+            else
+              echo "⚠️ openh264 build for $ABI produced no libopenh264.a — treating as failed (WITH_OPENH264=OFF for $ABI)."
+            fi
+          }
+
+          for ABI in ${{ env.BUILD_ABIS }}; do
+            build_openh264 "$ABI"
+          done
+
+          echo "✅ openh264 build step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+      - name: Restore FreeRDP prebuilt cache
+        id: freerdp-cache-release
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/freerdp-prebuilt
+          # REAL-PCM FIX: نفس اللاحق "-opensles-v1" المُضاف في job build — يجب
+          # أن يتطابق المفتاحان تماماً وإلا لن يستفيد release أبداً من الـ
+          # cache الذي بناه job build (ولن يُبنى FreeRDP بصوت فعلي في الإصدار
+          # الموقَّع رغم عمله في نسخة الـ debug).
+          key: freerdp-prebuilt-ndk${{ env.NDK_VERSION }}-${{ env.FREERDP_TAG }}-openssl${{ env.OPENSSL_VERSION }}-${{ env.BUILD_ABIS }}-opensles-v1-rdpecam-v1-pcsc-v1-rdpdr-announce-v1-h264-v1-cups-v1-server-v1-proxyhttps-v1
+
+      # ABI-FIX: نفس الإصلاح — حلقة على $BUILD_ABIS كاملة بدل "arm64-v8a x86_64".
+      # REAL-PCM FIX: -DWITH_OPENSLES=ON مُضاف هنا أيضاً — يجب أن يبقى مطابقاً
+      # لما في job build (نفس القاعدة المتّبعة أعلاه مع WITH_CUPS/WITH_PCSC
+      # في SETUP.md: الأعلام مكرَّرة يدوياً بين الموضعين، لا مصدر واحد مشترك).
+      - name: Build FreeRDP prebuilt
+        if: steps.freerdp-cache-release.outputs.cache-hit != 'true'
+        run: |
+          FREERDP_SRC=${{ github.workspace }}/${{ env.FREERDP_PATH }}
+          PREBUILT_ROOT=${{ github.workspace }}/app/src/main/cpp/freerdp-prebuilt
+          OPENSSL_ROOT=${{ github.workspace }}/${{ env.OPENSSL_BUILD_DIR }}
+
+          for ABI in ${{ env.BUILD_ABIS }}; do
+            echo "🔨 Building FreeRDP ${{ env.FREERDP_TAG }} for $ABI ..."
+            OUT="$PREBUILT_ROOT/$ABI"
+            BUILD_DIR="/tmp/freerdp-build-$ABI"
+            mkdir -p "$OUT" "$BUILD_DIR"
+
+            OPENSSL_ABI_DIR="$OPENSSL_ROOT/openssl-$ABI"
+            # SMARTCARD-REDIRECT FEATURE: only pass -DWITH_PCSC=ON for an ABI
+            # if that ABI's "Build PCSC-lite prebuilt" step actually produced
+            # libpcsclite.a — mirrors the per-ABI fail-soft contract of that
+            # step instead of failing the whole FreeRDP configure step when
+            # PCSC-lite didn't build for one ABI.
+            PCSC_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/pcsclite-build/$ABI"
+            PCSC_ABI_FLAGS=()
+            if [ -f "$PCSC_ABI_DIR/lib/libpcsclite.a" ]; then
+              echo "  ↳ PCSC-lite found for $ABI — building FreeRDP with -DWITH_PCSC=ON"
+              PCSC_ABI_FLAGS=(-DWITH_PCSC=ON \
+                -DPCSC_INCLUDE_DIRS="$PCSC_ABI_DIR/include/PCSC" \
+                -DPCSC_LIBRARIES="$PCSC_ABI_DIR/lib/libpcsclite.a")
+            else
+              echo "  ↳ PCSC-lite NOT found for $ABI — building FreeRDP with -DWITH_PCSC=OFF (smartcard redirection unavailable for this ABI)"
+              PCSC_ABI_FLAGS=(-DWITH_PCSC=OFF)
+            fi
+
+            # H264-OPENH264 FIX: same fail-soft, per-ABI contract as PCSC-lite
+            # above — only pass -DWITH_OPENH264=ON for an ABI if that ABI's
+            # "Build openh264 prebuilt" step actually produced libopenh264.a.
+            OPENH264_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/openh264-build/$ABI"
+            OPENH264_ABI_FLAGS=()
+            if [ -f "$OPENH264_ABI_DIR/lib/libopenh264.a" ]; then
+              echo "  ↳ openh264 found for $ABI — building FreeRDP with -DWITH_OPENH264=ON"
+              OPENH264_ABI_FLAGS=(-DWITH_OPENH264=ON \
+                -DOPENH264_INCLUDE_DIR="$OPENH264_ABI_DIR/include" \
+                -DOPENH264_LIBRARIES="$OPENH264_ABI_DIR/lib/libopenh264.a")
+            else
+              echo "  ↳ openh264 NOT found for $ABI — building FreeRDP with -DWITH_OPENH264=OFF (H.264 decode unavailable for this ABI)"
+              OPENH264_ABI_FLAGS=(-DWITH_OPENH264=OFF)
+            fi
+
+
+            # CUPS-PRINT FIX: same fail-soft, per-ABI contract as PCSC-lite/
+            # openh264 above — only pass -DWITH_CUPS=ON for an ABI if that
+            # ABI's "Build CUPS prebuilt" step actually produced libcups.a.
+            CUPS_ABI_DIR="${{ github.workspace }}/app/src/main/cpp/cups-build/$ABI"
+            CUPS_ABI_FLAGS=()
+            if [ -f "$CUPS_ABI_DIR/lib/libcups.a" ]; then
+              echo "  ↳ CUPS found for $ABI — building FreeRDP with -DWITH_CUPS=ON"
+              CUPS_ABI_FLAGS=(-DWITH_CUPS=ON \
+                -DCUPS_INCLUDE_DIR="$CUPS_ABI_DIR/include" \
+                -DCUPS_LIBRARIES="$CUPS_ABI_DIR/lib/libcups.a")
+            else
+              echo "  ↳ CUPS NOT found for $ABI — building FreeRDP with -DWITH_CUPS=OFF (printer redirection unavailable for this ABI)"
+              CUPS_ABI_FLAGS=(-DWITH_CUPS=OFF)
+            fi
+
+              # PROXY-RELAY FEATURE FIX: was OFF — this flag gates the whole
+              # "RDP-SERVER-API FEATURE" (see CMakeLists.txt's libfreerdp-server3.so
+              # check and hexrdp_server_jni.c), which both Shadow Server and the new
+              # RdpProxyRelay/RdpProxyService (com.systemsgo.hex.proxy) depend on via
+              # AFreeRdpServerBridge.isAvailable. With this OFF, that whole library was
+              # never produced, so AFreeRdpServerBridge.isAvailable was silently false —
+              # Shadow Server was already non-functional in CI builds before this fix,
+              # not just the new proxy relay. WITH_SHADOW stays OFF on purpose: this
+              # project's own Shadow Server (ShadowScreenCaptureService +
+              # RemoteInputAccessibilityService) is built on the raw freerdp_listener/
+              # freerdp_peer API from libfreerdp-server3.so directly, not on FreeRDP's
+              # own shadow_subsystem — see AFreeRdpServerBridge.kt's MILESTONE doc.
+            cmake -S "$FREERDP_SRC" -B "$BUILD_DIR" \
+              --no-warn-unused-cli \
+              -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI="$ABI" \
+              -DANDROID_PLATFORM="android-26" \
+              -DANDROID_STL="c++_shared" \
+              -DCMAKE_BUILD_TYPE=MinSizeRel \
+              -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
+              -DCMAKE_INSTALL_PREFIX="$OUT" \
+              \
+              -DOPENSSL_ROOT_DIR="$OPENSSL_ABI_DIR" \
+              -DOPENSSL_INCLUDE_DIR="$OPENSSL_ABI_DIR/include" \
+              -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ABI_DIR/lib/libcrypto.a" \
+              -DOPENSSL_SSL_LIBRARY="$OPENSSL_ABI_DIR/lib/libssl.a" \
+              -DOPENSSL_USE_STATIC_LIBS=ON \
+              -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
+              \
+              -DWITH_CLIENT=ON \
+              -DWITH_SERVER=ON \
+              -DWITH_SHADOW=OFF \
+              -DWITH_PLATFORM_SERVER=OFF \
+              -DWITH_SAMPLE=OFF \
+              -DWITH_FFMPEG=OFF \
+              -DWITH_DSP_FFMPEG=OFF \
+              -DWITH_VIDEO_FFMPEG=OFF \
+              -DWITH_PULSE=OFF \
+              -DWITH_OPENSLES=ON \
+              -DCHANNEL_RDPECAM_CLIENT=ON \
+              -DWITH_X11=OFF \
+              -DWITH_WAYLAND=OFF \
+              -DWITH_SWSCALE=OFF \
+              -DWITH_LIBSYSTEMD=OFF \
+              "${PCSC_ABI_FLAGS[@]}" \
+              "${OPENH264_ABI_FLAGS[@]}" \
+              "${CUPS_ABI_FLAGS[@]}" \
+              -DWITH_FUSE=OFF \
+              -DWITH_MANPAGES=OFF \
+              -DBUILD_TESTING=OFF \
+              -DBUILD_SHARED_LIBS=ON \
+              \
+              -DENABLE_WARNINGS_ALL=OFF \
+              -DENABLE_WARNINGS_ERROR=OFF \
+              -DCMAKE_C_FLAGS_INIT="-w" \
+              -DCMAKE_CXX_FLAGS_INIT="-w" \
+              -DCMAKE_SHARED_LINKER_FLAGS_INIT="-Wno-pass-failed -latomic" \
+              -DCMAKE_EXE_LINKER_FLAGS_INIT="-Wno-pass-failed -latomic" \
+              -GNinja
+
+            cmake --build "$BUILD_DIR" --parallel $(nproc)
+            cmake --install "$BUILD_DIR"
+            mkdir -p "$PREBUILT_ROOT/$ABI/lib" "$PREBUILT_ROOT/$ABI/include"
+            find "$BUILD_DIR" -name "*.so" -exec cp -f {} "$PREBUILT_ROOT/$ABI/lib/" \;
+            cp -rf "$OUT/include/"* "$PREBUILT_ROOT/$ABI/include/" 2>/dev/null || true
+            echo "✅ Done $ABI"
+          done
+
+      # SPICE-PROTOCOL FEATURE (Part 2/N): Cache لمخرجات pixman + GLib +
+      # spice-protocol + spice-client-glib — راجع تعليق كتلة الـ env أعلاه
+      # (PIXMAN_VERSION/GLIB_VERSION/...) لخريطة كل مكوّن وتحذير UNVERIFIED.
+      - name: Restore SPICE build cache
+        id: spice-cache
+        uses: actions/cache@v5
+        with:
+          path: app/src/main/cpp/spice-prebuilt
+          key: spice-${{ env.PIXMAN_VERSION }}-${{ env.GLIB_VERSION }}-${{ env.SPICE_PROTOCOL_TAG }}-${{ env.SPICE_GTK_TAG }}-ndk${{ env.NDK_VERSION }}-${{ env.BUILD_ABIS }}-v1
+
+      # يبني أربعة مكونات بالترتيب (pixman → GLib → spice-protocol →
+      # spice-client-glib) لكل ABI، ويفشل بأمان لكل ABI على حدة — فشل مكوّن
+      # واحد يعني فقط عدم وجود libspice-client-glib-2.0.so لذلك الـ ABI،
+      # وفحص EXISTS في CMakeLists.txt يتخطى جسر SPICE الأصلي بأمان عندها
+      # (بدل بناء APK فيه SPICE "متاح" لكن معطّل فعلياً). ⚠️ غير مُختبَر ضد
+      # تشغيل CI حقيقي — راجع تحذير UNVERIFIED في كتلة الـ env أعلاه (أسماء
+      # خيارات meson تحديداً عرضة للتغيير بين إصدارات GLib/spice-gtk).
+      - name: Build SPICE prebuilt
+        if: steps.spice-cache.outputs.cache-hit != 'true'
+        run: |
+          set -uo pipefail
+          API=26
+          NDK_TOOLCHAIN="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          SPICE_ROOT="${{ github.workspace }}/app/src/main/cpp/spice-prebuilt"
+          SRC="${{ github.workspace }}/spice-src"
+          mkdir -p "$SPICE_ROOT" "$SRC"
+
+          echo "📥 Cloning pixman ${{ env.PIXMAN_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.PIXMAN_VERSION }}" \
+            https://gitlab.freedesktop.org/pixman/pixman.git "$SRC/pixman" \
+            || { echo "⚠️ pixman clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning GLib ${{ env.GLIB_VERSION }}..."
+          git clone --depth 1 --branch "${{ env.GLIB_VERSION }}" \
+            https://gitlab.gnome.org/GNOME/glib.git "$SRC/glib" \
+            || { echo "⚠️ GLib clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning spice-protocol ${{ env.SPICE_PROTOCOL_TAG }}..."
+          git clone --depth 1 --branch "${{ env.SPICE_PROTOCOL_TAG }}" \
+            https://gitlab.freedesktop.org/spice/spice-protocol.git "$SRC/spice-protocol" \
+            || { echo "⚠️ spice-protocol clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          echo "📥 Cloning spice-gtk ${{ env.SPICE_GTK_TAG }}..."
+          git clone --depth 1 --branch "${{ env.SPICE_GTK_TAG }}" \
+            --recurse-submodules --shallow-submodules \
+            https://gitlab.freedesktop.org/spice/spice-gtk.git "$SRC/spice-gtk" \
+            || { echo "⚠️ spice-gtk clone failed — skipping SPICE prebuilt entirely this run."; exit 0; }
+
+          build_one_abi() {
+            local ABI=$1 TRIPLE=$2 MESON_CPU_FAMILY=$3 MESON_CPU=$4
+            local PREFIX="$SPICE_ROOT/$ABI"
+            mkdir -p "$PREFIX"
+            echo "🔨 [$ABI] SPICE dependency stack starting..."
+
+            local CC="$NDK_TOOLCHAIN/${TRIPLE}${API}-clang"
+            local CXX="$NDK_TOOLCHAIN/${TRIPLE}${API}-clang++"
+            local AR="$NDK_TOOLCHAIN/llvm-ar"
+            local STRIP="$NDK_TOOLCHAIN/llvm-strip"
+            local RANLIB="$NDK_TOOLCHAIN/llvm-ranlib"
+
+            # pkg-config wrapper: restricts discovery to this ABI's own
+            # prefix only, so glib/spice-gtk's meson build never picks up
+            # the CI runner's host-machine glib/pixman by mistake.
+            local PKGCONF_WRAP="$PREFIX/pkg-config-wrapper.sh"
+            printf '%s\n' \
+              '#!/bin/sh' \
+              'export PKG_CONFIG_LIBDIR="'"$PREFIX"'/lib/pkgconfig:'"$PREFIX"'/share/pkgconfig"' \
+              'export PKG_CONFIG_PATH=' \
+              'export PKG_CONFIG_SYSROOT_DIR=' \
+              'exec pkg-config "$@"' \
+              > "$PKGCONF_WRAP"
+            chmod +x "$PKGCONF_WRAP"
+
+            # ── pixman (autotools) ──────────────────────────────────────
+            ( cd "$SRC/pixman" && make distclean >/dev/null 2>&1 || true
+              CC="$CC" AR="$AR" RANLIB="$RANLIB" STRIP="$STRIP" \
+              ./autogen.sh --host="$TRIPLE" --prefix="$PREFIX" \
+                --enable-static --disable-shared --disable-gtk --disable-tests \
+                CFLAGS="-D__ANDROID_API__=$API -fPIC -O2" \
+              && make -j"$(nproc)" && make install ) \
+              || { echo "⚠️ [$ABI] pixman build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── meson cross file ─────────────────────────────────────────
+            local CROSS="$PREFIX/cross.ini"
+            printf '%s\n' \
+              '[binaries]' \
+              "c = '$CC'" \
+              "cpp = '$CXX'" \
+              "ar = '$AR'" \
+              "strip = '$STRIP'" \
+              "pkgconfig = '$PKGCONF_WRAP'" \
+              '' \
+              '[built-in options]' \
+              "c_args = ['-D__ANDROID_API__=$API']" \
+              '' \
+              '[host_machine]' \
+              "system = 'android'" \
+              "cpu_family = '$MESON_CPU_FAMILY'" \
+              "cpu = '$MESON_CPU'" \
+              "endian = 'little'" \
+              > "$CROSS"
+
+            # ── GLib (meson) ─────────────────────────────────────────────
+            rm -rf "$SRC/glib/build-$ABI"
+            ( cd "$SRC/glib" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+                --default-library=shared --buildtype=release \
+                -Dtests=false -Dinstalled_tests=false -Dnls=disabled \
+                -Dlibmount=disabled -Dselinux=disabled -Dxattr=false \
+                -Ddtrace=false -Dsystemtap=false -Dfam=disabled \
+              && ninja -C "build-$ABI" && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] GLib build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── spice-protocol (meson, header-only — no compiled code) ──
+            rm -rf "$SRC/spice-protocol/build-$ABI"
+            ( cd "$SRC/spice-protocol" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+              && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] spice-protocol install failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            # ── spice-client-glib (meson, lives inside the spice-gtk repo)
+            rm -rf "$SRC/spice-gtk/build-$ABI"
+            ( cd "$SRC/spice-gtk" && \
+              meson setup "build-$ABI" --cross-file="$CROSS" --prefix="$PREFIX" \
+                --default-library=shared --buildtype=release \
+                -Dgtk=disabled -Dvapi=disabled -Dintrospection=disabled \
+                -Dgtk_doc=false -Dsasl=disabled -Dpolkit=disabled \
+                -Dusbredir=disabled -Dsmartcard=disabled \
+                -Dgstaudio=disabled -Dgstvideo=disabled -Dpulse=disabled \
+                -Dcelt051=disabled -Dopus=disabled -Dwebdav=disabled \
+                -Dlz4=disabled -Dcoroutine=gthread \
+              && ninja -C "build-$ABI" && ninja -C "build-$ABI" install ) \
+              || { echo "⚠️ [$ABI] spice-client-glib build failed — skipping this ABI (no SPICE libs for $ABI)."; return 0; }
+
+            if [ -f "$PREFIX/lib/libspice-client-glib-2.0.so" ]; then
+              echo "✅ [$ABI] SPICE dependency stack complete → $PREFIX"
+            else
+              echo "⚠️ [$ABI] no libspice-client-glib-2.0.so produced — treating as failed for this ABI."
+            fi
+          }
+
+          build_one_abi "arm64-v8a"   "aarch64-linux-android"    "aarch64" "aarch64"
+          build_one_abi "armeabi-v7a" "armv7a-linux-androideabi" "arm"     "armv7"
+          build_one_abi "x86_64"      "x86_64-linux-android"     "x86_64"  "x86_64"
+          build_one_abi "x86"         "i686-linux-android"       "x86"     "i686"
+
+          echo "✅ SPICE prebuilt step finished (check per-ABI ⚠️ lines above for partial failures)."
+
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ runner.temp }}/release.jks
+
+      - name: Build Release APK
+        env:
+          # CRASH-REPORTING FIX: optional — if the "SENTRY_DSN" repo secret
+          # isn't set, this is just an empty string, HexRDPApp.kt's
+          # BuildConfig.SENTRY_DSN.isBlank() check skips Sentry.init(), and
+          # the release build proceeds exactly as before (crash reporting
+          # off). Set it under Settings → Secrets and variables → Actions
+          # once a Sentry project exists to turn it on for real releases.
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=${{ runner.temp }}/release.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.STORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
+            --no-daemon --stacktrace
+
+      # BUILD-FIX: assembleRelease produces 3 separate split APKs because
+      # splits.abi is enabled (armeabi-v7a, arm64-v8a, universal) — there is
+      # no single "app-release.apk" file anymore. The previous step here
+      # referenced that stale filename and would fail at runtime as soon as
+      # ABI splits were turned on. Rename all three to clear, version-tagged
+      # names and publish each as its own separate GitHub Release asset
+      # (release assets are always individual downloadable files, never
+      # bundled into one archive).
+      - name: Rename APKs
+        run: |
+          set -e
+          OUT=app/build/outputs/apk/release
+          mv "$OUT/app-arm64-v8a-release.apk"   "$OUT/HexRDP-${{ github.ref_name }}-arm64-v8a.apk"
+          mv "$OUT/app-armeabi-v7a-release.apk" "$OUT/HexRDP-${{ github.ref_name }}-armeabi-v7a.apk"
+          mv "$OUT/app-universal-release.apk"   "$OUT/HexRDP-${{ github.ref_name }}-universal.apk"
+          ls -la "$OUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: HexRDP ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/release/HexRDP-${{ github.ref_name }}-arm64-v8a.apk
+            app/build/outputs/apk/release/HexRDP-${{ github.ref_name }}-armeabi-v7a.apk
+            app/build/outputs/apk/release/HexRDP-${{ github.ref_name }}-universal.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

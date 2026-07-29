@@ -1,0 +1,69 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Weekly scan, catches new CodeQL query packs / advisories even with no
+    # code changes. Sunday 03:17 UTC (odd minute to avoid the top-of-hour
+    # GitHub Actions scheduling crowd).
+    - cron: '17 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    # CodeQL needs write access to upload results to the repo's code
+    # scanning tab — everything else in this job only reads.
+    permissions:
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # This repo has a Kotlin/Java Android app plus a native C
+        # (JNI/CMake) layer — scan both. CodeQL's Java analyzer covers
+        # Kotlin sources in the same project.
+        language: [ 'java-kotlin', 'c-cpp' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      # java-kotlin and c-cpp both need an actual build to trace, since
+      # this project mixes Gradle/Kotlin with a CMake/NDK native layer.
+      # autobuild handles the common Gradle case; the native side is built
+      # separately by main.yml and isn't duplicated here — CodeQL's C/C++
+      # analysis on this matrix leg will pick up whatever compiles during
+      # autobuild's Gradle invocation (which triggers the NDK/CMake build
+      # for app/src/main/cpp as part of assembleDebug). If that ever stops
+      # tracing the native code (e.g. a Gradle task rename), replace
+      # autobuild here with the same NDK/CMake setup steps used in
+      # main.yml's build job, scoped to a single ABI, before the
+      # "Perform CodeQL Analysis" step below.
+      - name: Set up JDK
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'

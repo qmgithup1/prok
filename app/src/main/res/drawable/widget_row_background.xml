@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): tap feedback for the small
+     quick-connect button and every row in the scrollable list — RemoteViews
+     supports a subset of drawables/attrs (see Android's documented
+     RemoteViews limitations), and a selector with a translucent pressed
+     state is one of the safe ones, unlike a full Material ripple. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_row_pressed" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+</selector>

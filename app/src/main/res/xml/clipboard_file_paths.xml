@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    CLIPBOARD-SYNC FEATURE: backs the FileProvider declared in
+    AndroidManifest.xml (authority "${applicationId}.clipboardprovider"),
+    used by ClipboardSyncManager to hand a remote-originated image to the
+    Android system clipboard as a content:// Uri (ClipData.newUri) instead of
+    a raw file:// path — file:// Uris handed to other apps are blocked by
+    Android's StrictMode/FileUriExposedException and, per this project's own
+    existing FIX-FILE-URI stance in AndroidManifest.xml, are avoided
+    everywhere else in the app for the same reason.
+
+    Only the dedicated "clipboard" cache subfolder is exposed — nothing else
+    under the app's cache or files directories is reachable through this
+    provider.
+-->
+<paths>
+    <cache-path name="clipboard" path="clipboard/" />
+</paths>

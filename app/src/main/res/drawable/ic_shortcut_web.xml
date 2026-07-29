@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SHORTCUT-ICON FEATURE (WEB-PORTAL): standalone (non-adaptive) launcher
+    icon used for pinned home-screen shortcuts on Web-portal connections —
+    see ShortcutHelper.kt's iconResFor(). Previously fell back to
+    ic_shortcut_rdp; this is the dedicated artwork for that TODO. Same
+    single-flat-vector shape and badge/stroke language as ic_shortcut_rdp.xml
+    (circular badge + cyan outline) so pinned shortcuts read as one family
+    regardless of protocol, but the glyph itself is a browser chrome (tab +
+    address bar + nav dot) instead of a monitor, to stay visually distinct
+    from RDP/VNC's screen-shaped glyphs.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Circular badge background -->
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:fillColor="#0B1A33"/>
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:strokeColor="#3300E5FF"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+    <!-- Browser window body -->
+    <path
+        android:pathData="M25,30 L83,30 Q88,30 88,35 L88,72 Q88,77 83,77 L25,77 Q20,77 20,72 L20,35 Q20,30 25,30 Z"
+        android:fillColor="#1A2C4D"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"/>
+    <!-- Address/tab bar strip -->
+    <path
+        android:pathData="M20,44 L88,44"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"/>
+    <!-- Window traffic-light dots -->
+    <path android:pathData="M28,37 A2.2,2.2 0 1,1 27.99,37 Z" android:fillColor="#00E5FF"/>
+    <path android:pathData="M36,37 A2.2,2.2 0 1,1 35.99,37 Z" android:fillColor="#4DF0FF"/>
+    <path android:pathData="M44,37 A2.2,2.2 0 1,1 43.99,37 Z" android:fillColor="#4DF0FF"/>
+    <!-- Globe glyph inside the page area -->
+    <path
+        android:pathData="M54,50 A11,11 0 1,1 53.99,50 Z"
+        android:strokeColor="#4DF0FF"
+        android:strokeWidth="2.2"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M43,60 L65,60"
+        android:strokeColor="#4DF0FF"
+        android:strokeWidth="2.2"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M54,50 C50,50 47,54.5 47,60 C47,65.5 50,70 54,70 C58,70 61,65.5 61,60 C61,54.5 58,50 54,50 Z"
+        android:strokeColor="#4DF0FF"
+        android:strokeWidth="2.2"
+        android:fillColor="#00000000"/>
+    <!-- Stand -->
+    <path
+        android:pathData="M48,77 L60,77 L63,88 L45,88 Z"
+        android:fillColor="#1A2C4D"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2"/>
+    <path
+        android:pathData="M40,88 L68,88"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"/>
+</vector>

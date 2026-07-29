@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): shown by ListView's setEmptyView()
+     plumbing (see widget_connections_list.xml's doc comment) whenever
+     RdpProfileRemoteViewsFactory.getCount() is 0 — either no connections are
+     saved yet, or the instance is filtered to Favorites-only and none are
+     starred. Text distinguishes the two via
+     HexRdpAppWidgetProvider.buildConnectionListViews() picking the right
+     string resource before setRemoteAdapter() runs. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/widget_empty_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="12sp"
+        android:text="@string/widget_empty_no_connections" />
+</LinearLayout>

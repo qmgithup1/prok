@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QUICK-SETTINGS-TILE FEATURE (Part 1/2): flat, single-color vector used
+    for both the tile's runtime icon (Icon.createWithResource in
+    QuickConnectTileService.render()) and the <service> tag's android:icon
+    in AndroidManifest.xml (shown in the "Edit tiles" panel before the user
+    has ever added it). Deliberately a single solid-white path with no
+    background layer — unlike ic_shortcut_*.xml's colorful circular badges —
+    because Quick Settings/System UI applies its own tint (active/inactive/
+    unavailable) and background chip on top of whatever this draws; a
+    pre-colored icon would just look wrong tinted grey/accent by the system.
+
+    A simple bolt-in-a-circle "quick connect" glyph, generic across every
+    protocol on purpose: the tile can only ever be bound to one connection
+    at a time, and that connection's own name is what actually identifies it
+    (see QuickConnectTileService.render()'s tile.label) — the icon just
+    needs to read as "connect" at a glance.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFFFF">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M13,2 L4.5,13 L11,13 L10,22 L19,10 L12.5,10 Z" />
+</vector>

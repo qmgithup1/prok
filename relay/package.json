@@ -1,0 +1,19 @@
+{
+  "name": "systemsgo-cira-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SystemsGo/HexRDP companion CIRA relay (AMT-VPRO phase 6, path (b)). App-facing WebSocket half implemented in this pass; device-facing APF half is a stub — see README.md.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test:echo": "node test/echoClient.js",
+    "test:wss": "node test/wssEndToEnd.selftest.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

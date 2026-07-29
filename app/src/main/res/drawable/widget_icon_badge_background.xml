@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): translucent accent-colored circle
+     behind ic_tile_quick_connect.xml in each row/the small widget's button —
+     reuses that same generic "connect" glyph (see its own doc comment for why
+     it's deliberately protocol-agnostic) rather than the full 108dp launcher-
+     style ic_shortcut_*.xml badges, which are sized/composed for a launcher
+     icon slot, not a compact widget row. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/widget_icon_badge_bg" />
+</shape>

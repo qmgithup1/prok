@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET FEATURE (Part 1/2): the small ("1x1"/narrow) widget
+    size — a single tappable card bound to whichever one connection the user
+    picked in WidgetConfigureActivity (WidgetPreferences.DisplayMode.SINGLE_CONNECTION),
+    the widget equivalent of the Quick Settings tile (QuickConnectTileService)
+    and a pinned shortcut (ShortcutHelper) rolled into one glanceable card.
+    HexRdpAppWidgetProvider swaps this in for CONNECTION_LIST-mode instances too
+    whenever the placed size is too small to usefully scroll a list (see
+    HexRdpAppWidgetProvider.chooseLayout()).
+
+    android:id/text1 (name), android:id/text2 (host:port / subtitle) and the
+    status dot ids below are all set programmatically from
+    HexRdpAppWidgetProvider.buildSingleConnectionViews() — kept as plain view
+    ids (not custom @+id/... ones) purely so this layout mirrors
+    widget_list_item.xml's id shape and the two can share the same
+    RemoteViews-population helper.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/widget_bg_outer">
+
+    <LinearLayout
+        android:id="@+id/widget_root_row"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp"
+        android:background="@drawable/widget_card_background"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/widget_icon_badge_background">
+
+            <ImageView
+                android:id="@+id/widget_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_tile_quick_connect"
+                android:contentDescription="@null" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@android:id/text1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Home Server" />
+
+            <TextView
+                android:id="@android:id/text2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="192.168.1.10 · RDP" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/widget_status_dot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/widget_status_dot_disconnected"
+            android:contentDescription="@null" />
+    </LinearLayout>
+</FrameLayout>

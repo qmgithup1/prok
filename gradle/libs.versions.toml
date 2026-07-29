@@ -1,0 +1,387 @@
+# ════════════════════════════════════════════════════════════════════
+# SystemsGo — Version Catalog (آخر تحديث: يونيو 2026)
+# ════════════════════════════════════════════════════════════════════
+#
+# ⚠️  قواعد صارمة:
+#   1. kotlin + ksp يجب أن يتطابقا: ksp = "<kotlin>-<patch>"
+#   2. hilt (dagger) + hiltNavCompose إصدارات منفصلة لكن متوافقة
+#   3. bouncycastle: bcprov + bctls يجب أن يكونا نفس الإصدار دائماً
+#   4. jsch 0.2.x يستخدم package اسمه com.jcraft.jsch — لا تغيير في الكود
+#   5. coil: نبقى على 2.7.0 (آخر 2.x) — coil3 يغيّر package name كاملاً
+#
+# ════════════════════════════════════════════════════════════════════
+
+[versions]
+
+# ── Build Tools ──────────────────────────────────────────────────────
+agp = "8.7.3"            # Android Gradle Plugin — متوافق مع Gradle 8.10.2
+
+# ── Kotlin / KSP (يجب أن يتطابقا!) ──────────────────────────────────
+# 🔴 CRITICAL: القاعدة = ksp يبدأ بنفس إصدار kotlin تماماً
+#   kotlin=2.1.21 → ksp=2.1.21-2.0.1  ✅
+#   kotlin=2.1.0  → ksp=2.1.21-2.0.1  ❌ (سيفشل البناء)
+kotlin = "2.1.21"        # was: 2.1.0 → أحدث 2.1.x stable + يُصلح bug في KSP
+ksp    = "2.1.21-2.0.1"  # was: 2.1.0-1.0.29 → يجب مطابقة kotlin
+
+# ── Hilt (DI) ────────────────────────────────────────────────────────
+# 🔴 CRITICAL: Hilt 2.54 + Kotlin 2.1.x = خطأ:
+#   "[Hilt] Provided Metadata instance has version 2.1.0, max is 2.0.0"
+#   السبب: kotlinx-metadata-jvm القديم داخل Hilt 2.54 لا يدعم Kotlin 2.1.x
+#   الحل: Hilt 2.56+ يحتوي kotlinx-metadata-jvm محدَّث
+hilt          = "2.56"   # was: 2.54 → 🔴 الإصلاح الأساسي لفشل البناء
+hiltNavCompose = "1.2.0" # androidx.hilt — stable (1.4.x لا تزال beta)
+# CLOUD-SYNC (الجزء 3/3): androidx.hilt:hilt-work + androidx.hilt:hilt-compiler
+# لحقن CloudSyncWorker (@HiltWorker) — نفس رقم إصدار hiltNavCompose عمداً،
+# فكل مصنّفات androidx.hilt (hilt-work/hilt-compiler/hilt-navigation-compose)
+# تُصدَر معاً بنفس الرقم دائماً. تحقّق من Maven Central وقت البناء الفعلي.
+hiltWork = "1.2.0"
+
+# ── AndroidX Core ────────────────────────────────────────────────────
+coreKtx             = "1.16.0"    # was: 1.15.0
+appcompat           = "1.7.0"     # keep
+lifecycleRuntimeKtx = "2.9.0"    # was: 2.8.7
+activityCompose     = "1.10.1"   # was: 1.9.3
+navigationCompose   = "2.8.5"    # keep — 2.9.x تغيير سلوك NavController
+room                = "2.7.1"    # was: 2.6.1
+datastore           = "1.1.4"    # was: 1.1.1
+coroutines          = "1.10.2"   # was: 1.9.0
+workManager         = "2.11.2"   # was: 2.10.0 → من الوثائق الرسمية
+splashscreen        = "1.2.0"    # was: 1.0.1  → من الوثائق الرسمية
+
+# ── Compose ──────────────────────────────────────────────────────────
+composeBom = "2026.06.00"  # was: 2026.04.01 → أحدث stable BOM (يونيو 2026)
+                           # يُحدّث: Material3 1.11.3, UI, Foundation, Animation تلقائياً
+
+# ── Testing (stable لسنوات) ───────────────────────────────────────────
+junit        = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+
+# ── Baseline Profile / Macrobenchmark (PERF-FIX: startup + navigation) ─
+# مصدر الأرقام: developer.android.com/topic/performance/baselineprofiles/overview
+# (آخر تحديث موثّق: 2026-07-01) — نفس الأرقام الرسمية المُوصى بها هناك.
+# profileinstaller: مكتبة runtime خفيفة داخل تطبيق app نفسه — هي المسؤولة
+# عن تثبيت أي baseline profile (سواء ملفنا الخاص أو تلك المرفقة أصلاً داخل
+# مكتبات AndroidX/Compose نفسها) على جهاز المستخدم عبر ART. بدونها، حتى لو
+# وُجد ملف baseline-prof.txt فلن يُستخدم أبداً.
+# androidxBenchmark: يُستخدم لكل من benchmark-macro-junit4 (قياس الأداء)
+# وplugin "androidx.baselineprofile" (توليد الملف) — نفس رقم الإصدار للاثنين.
+profileinstaller = "1.4.1"
+androidxBenchmark = "1.4.1"
+uiautomator       = "2.3.0"
+
+# ── Network / Crypto / SSH ───────────────────────────────────────────
+# BouncyCastle — TLS/NLA encryption لـ RDP
+# ⚠️ bcprov + bctls يجب أن يكونا نفس الإصدار دائماً
+bouncycastle = "1.84"  # was: 1.80 → Apr 2026 (أحدث stable)
+                       # jsch الجديد نفسه يعتمد على 1.84 → نوحّد الإصدار
+
+# JSch (com.github.mwiede) — SSH2 client لخاصية SSH Terminal
+# package name: com.jcraft.jsch — محفوظ في كل الإصدارات → لا تغيير في الكود
+# الإصدار 0.2.x على Maven Central، أحدث 0.2.x هو 0.2.24
+jsch = "0.2.24"  # was: 0.2.18
+                 # ملاحظة: المشروع انتقل لنظام إصدار جديد (2.x)
+                 # أحدث إصدار 2.28.2 لكن يتطلب اختبار التوافق
+
+# FTP-FEATURE: Apache Commons Net — عميل FTP/FTPS/TFTP خالص Java، لا يحتاج
+# أي كود أصلي (NDK). يوفر FTPClient (FTP عادي) و FTPSClient (FTPS صريح/ضمني)
+# و TFTPClient من نفس الحزمة.
+commonsNet = "3.13.0"
+
+# SMB-FEATURE: jcifs-ng — pure-Java SMB2/SMB3 client (maintained fork of jCIFS).
+# LGPL-2.1 licensed; used as a normal Gradle dependency (dynamic linking), which
+# is the standard, license-compliant way to consume LGPL libraries on Android.
+jcifsNg = "2.1.10"
+
+# WEBDAV-FEATURE: sardine-android (thegrizzlylabs fork) — WebDAV client built on
+# OkHttp, distributed via JitPack (already configured in settings.gradle.kts).
+# We also reference okhttp3.* directly (upload-progress interceptor), so it's
+# pinned here explicitly rather than relying on whatever version transitively
+# comes in through coil/sardine.
+sardineAndroid = "0.9"
+
+# RDP-OVER-WEBSOCKET FEATURE: OkHttp is already pulled in transitively (by
+# sardine-android/coil) and referenced directly for the upload-progress
+# interceptor in FileTransferManager.kt — see sardineAndroid's comment just
+# above. Pinned explicitly here (rather than continuing to rely on whatever
+# version comes in transitively) because RdpWebSocketTransport.kt is a new,
+# independent direct consumer of okhttp3.WebSocket/CertificatePinner, and a
+# future bump/removal of sardine-android should not silently change or drop
+# the OkHttp version this transport relies on.
+okhttp = "4.12.0"
+
+
+# ── UI Libraries ─────────────────────────────────────────────────────
+# Coil — تحميل الصور
+# ⚠️ coil3 يغيّر package name إلى io.coil-kt.coil3
+#    وتتطلب الهجرة تغيير imports + إضافة coil-network-okhttp
+#    → نبقى على 2.7.0 (آخر 2.x) حتى الهجرة المقصودة
+coil   = "2.7.0"  # keep — آخر إصدار 2.x، لا upgrade تلقائي لـ 3.x
+
+# Lottie — أنيميشن After Effects
+lottie = "6.7.1"  # was: 6.6.2 → أحدث stable (أكتوبر 2025)
+
+# Gson — JSON serialization
+gson = "2.12.0"  # was: 2.11.0 → أحدث على Maven Central
+
+# Biometric — لمصادقة بصمة الإصبع / وجه / رمز الجهاز
+# ALPHA-LIB FIX (reviewed again — decision unchanged): androidx.biometric has had NO new
+# stable release since 1.1.0 (Jan 2021). Every fix/feature added since — Android 12+
+# BiometricManager.Authenticators support, the memory-leak fixes, and specifically the
+# 2-arg BiometricPrompt constructor / non-Activity-host fix that launchBiometric() in
+# AppLockScreen.kt depends on (see that file's "biometric 1.2.0-alpha05: new 2-arg
+# constructor" comment) — only ever shipped in the alpha channel. Downgrading to 1.1.0
+# would be a functional regression (loses fixes this code relies on), not a stability
+# upgrade, and the next alpha line (1.4.0-alphaXX) is a ground-up API redesign
+# (AuthenticationRequest/AuthenticationResult replacing BiometricPrompt.PromptInfo) that
+# would need a real migration + a build environment to verify, not a version-string bump.
+# Staying on 1.2.0-alpha05 here is the deliberate, correct call, not an oversight.
+biometric = "1.2.0-alpha05"
+
+# HIGH-3 FIX: SQLCipher — transparent AES-256 encryption for the Room SQLite database
+# 🔴 CRITICAL FIX (build break): the artifact "net.zetetic:android-database-sqlcipher" is
+# the OLD/deprecated coordinate — it ships classes under the "net.sqlcipher.database" package.
+# Our code (DatabaseEncryptionMigrator.kt, AppModule.kt) imports "net.zetetic.database.sqlcipher.*",
+# which is the package shipped by the NEW/renamed artifact "net.zetetic:sqlcipher-android".
+# Using the old artifact name with the new package imports causes "Unresolved reference 'zetetic'"
+# at compile time even though the Maven repo resolves fine. Fixed by switching the artifact id
+# below from "android-database-sqlcipher" to "sqlcipher-android" (see [libraries] section).
+# 4.10.0 verified present on Maven Central (net/zetetic/sqlcipher-android/4.10.0).
+sqlcipher  = "4.10.0"  # was: 4.5.4 (android-database-sqlcipher) → wrong artifact for net.zetetic.database.sqlcipher.* package
+# ALPHA-LIB FIX: security-crypto reached a genuine stable 1.1.0 release (July 2025) — unlike
+# biometric below, this one really did graduate. Confirmed no API removals between
+# 1.1.0-alpha06 (the old pin) and 1.1.0 stable: 1.1.0-alpha07/beta01/rc01 only *deprecated*
+# EncryptedFile/EncryptedSharedPreferences/MasterKey in favour of direct Android Keystore use
+# (a future-migration signal, not a break) — every call site in LastFrameStore.kt,
+# EncryptedPrefsHelper.kt, DatabaseKeyProvider.kt etc. still compiles unchanged against 1.1.0.
+security-crypto = "1.1.0"  # was: 1.1.0-alpha06 → now a real stable release, source-compatible
+# 🔴 CRITICAL FIX: net.zetetic:sqlcipher-android requires androidx.sqlite as an explicit
+# companion dependency (it is NOT pulled in transitively by the AAR). 2.6.2 is the latest stable.
+androidxSqlite = "2.6.2"
+
+# bVNC — مكتبة VNC/RFB (libvncserver) لخاصية الاتصال بـ VNC
+# ✅ الـ repo الحقيقي هو: iiordanov/remote-desktop-clients (وليس iiordanov/bVNC)
+# ✅ تنسيق الـ tag الصحيح: RELEASE-v6.4.2 (وليس أرقام مثل 3.10.1)
+# JitPack multi-module: group = com.github.iiordanov.remote-desktop-clients
+# bvnc = "RELEASE-v6.4.2"  ← معطَّل: JitPack لا يستطيع بناء bVNC (NDK/FreeRDP/sqlcipher)
+
+# QR-SCANNER-REDESIGN: replaced zxing-android-embedded's self-contained
+# CaptureActivity with a hand-built CameraX + ML Kit screen (QrScannerActivity)
+# so the app can offer its own square viewfinder design, a front/back camera
+# flip button (zxing-android-embedded's default UI has no such control), and
+# scanning a QR code out of a picked gallery photo — none of which the old
+# library's built-in Activity supported without forking it.
+# CameraX — Google's officially maintained camera API, used here only for a
+# Preview + ImageAnalysis use case (no capture/video needed).
+cameraX = "1.4.1"
+# ML Kit on-device barcode scanning — decodes both the live camera frames and
+# a still image picked from the gallery with the exact same API, entirely
+# on-device (no network call, no data leaves the phone).
+mlkitBarcodeScanning = "17.3.0"
+# QR-SHARE FEATURE: zxing "core" only (no zxing-android-embedded, no camera/UI
+# code) — a small pure-Java module used solely to *encode* a QR bitmap for
+# "Share via QR". Scanning already uses ML Kit (see mlkitBarcodeScanning
+# above); this is the opposite direction and a different, much lighter
+# library since encoding doesn't need any of ML Kit's on-device model.
+zxingCore = "3.5.3"
+
+# ── Cloud Sync (Drive/Dropbox) ──────────────────────────────────────
+# CLOUD-SYNC FEATURE (Part 1/3 of 3): version-catalog entries for the
+# optional "Sync connections to Google Drive / Dropbox" feature (Settings →
+# Cloud Sync). Part 1 only wires up these dependencies + the local,
+# non-network plumbing that Part 2 (GoogleDriveSyncProvider /
+# DropboxSyncProvider + CloudSyncManager) and Part 3 (WorkManager auto-sync +
+# UI) build on. All versions below were confirmed present on Maven
+# Central / Google's Maven repo at the time this was written — same
+# verification standard as every other 🔴 CRITICAL FIX entry in this file.
+#
+# Credential Manager — modern replacement for the deprecated GoogleSignIn
+# API; used to let the user pick a Google account to link Drive with.
+credentialManager = "1.6.0"
+# Google ID — the Credential Manager extension that returns an actual Google
+# ID token from the account picker (GetGoogleIdOption).
+googleid = "1.1.1"
+# Google API Client for Android — REST client + OAuth2 credential glue the
+# Drive v3 API service class needs (Part 2 calls the Drive REST API through
+# this, scoped to the appDataFolder — see CloudSyncProvider.kt for why).
+googleApiClient = "2.9.0"
+googleApiClientAndroid = "2.8.1"
+# Drive v3 REST API — generated service class + model POJOs.
+googleDriveApi = "v3-rev20260428-2.0.0"
+# Dropbox SDK for Android (AAR) — official client; includes the OAuth2 PKCE
+# app-linking flow (Auth.startOAuth2PKCE) built specifically for Android.
+dropboxAndroidSdk = "7.0.0"
+
+# CRASH-REPORTING FIX: Sentry over Firebase Crashlytics — no google-services.json /
+# Firebase project needed, just a DSN (see SENTRY_SETUP.md). sentry-android already
+# bundles an unhandled-exception handler + ANR watchdog; no separate ANR artifact needed.
+sentry = "7.20.1"
+
+# ── Microsoft Authentication Library (Entra ID / Azure AD SSO login) ──
+# ENTRA-ID-AUTH FEATURE: official Microsoft MSAL for Android. Used to sign the
+# user in against Microsoft Entra ID and acquire the tokens that feed the RDP
+# NLA/SSO flow (see EntraIdAuthManager.kt). msal-common is pulled in
+# transitively by msal itself — no separate entry needed.
+msal = "5.10.0"
+
+# ── PAC (Proxy Auto-Config) support ──────────────────────────────────
+# PAC-SUPPORT FEATURE (Part 1/n): PacFileParser.kt needs a JS engine to run
+# the .pac file's FindProxyForURL(url, host) function.
+# Why Rhino, and why THIS version specifically:
+#   • Pure Java/Kotlin, no NDK/native component — this project already keeps
+#     its one native surface (FreeRDP) isolated in app/src/main/cpp; adding a
+#     second native dependency (e.g. J2V8, which ships a libv8.so per ABI)
+#     just to run a few lines of PAC JS would duplicate that whole NDK/CI
+#     packaging burden for no real benefit.
+#   • GraalJS was also considered and rejected: it needs the Truffle
+#     framework and is built/tested for server-side JVMs, not Android — no
+#     established Android embedding path.
+#   • Version pin: Rhino 1.8.0+ (Jan 2026) was restructured into separate
+#     Maven modules and, per the project's own docs, "requires Java 17 or
+#     higher to run" — i.e. it now depends on newer java.* runtime surface,
+#     not just class-file target level, which is an open question on
+#     minSdk 26 (Android 8) devices even though this module already compiles
+#     with jvmTarget 17. 1.7.14.1 is the latest patch on the older,
+#     single-jar 1.7.x line: the version with the long, documented track
+#     record of being embedded on Android by other open-source projects
+#     (typically with Context.optimizationLevel = -1 — see
+#     PacFileParser.kt for why), so it's the lower-risk choice here.
+rhino = "1.7.14.1"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+# AppCompat — provides Theme.AppCompat.DayNight.NoActionBar for XML themes
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+# CRASH-REPORTING FIX: plain library artifact, no Gradle plugin — avoids needing a
+# Sentry auth token in CI just to upload debug symbols. Native (JNI/FreeRDP) crash
+# symbolication can be added later via the Sentry NDK module if that becomes a need.
+sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
+# ENTRA-ID-AUTH FEATURE: MSAL for Android — see EntraIdAuthManager.kt for the
+# interactive/silent sign-in flow that consumes this.
+msal = { group = "com.microsoft.identity.client", name = "msal", version.ref = "msal" }
+# PAC-SUPPORT FEATURE: Mozilla Rhino — pure-JVM JS engine used to execute a
+# PAC file's FindProxyForURL(). See the [versions] "rhino" entry above for
+# why this library/version was chosen.
+rhino = { group = "org.mozilla", name = "rhino", version.ref = "rhino" }
+# PERF-FIX (Baseline Profile) ────────────────────────────────────────
+# runtime lib داخل :app — تُثبِّت أي baseline profile على جهاز المستخدم.
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+# instrumentation-test-only libs داخل :baselineprofile
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxBenchmark" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+# PERF-FIX: powers collectAsStateWithLifecycle() — pauses StateFlow collection
+# (and the recomposition it triggers) whenever the hosting screen/Activity is
+# not at least STARTED, instead of collecting and recomposing continuously in
+# the background. Same version as lifecycle-runtime-ktx.
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
+# AUTO-LOCK-FIX: ProcessLifecycleOwner — used to detect real app-level
+# foreground/background transitions (as opposed to Activity.onStop/onStart,
+# which also fire when navigating between same-task Activities, e.g. opening
+# RdpSessionActivity from MainActivity). Same version as lifecycle-runtime-ktx.
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavCompose" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+# CLOUD-SYNC (الجزء 3/3): يوفّر @HiltWorker/@AssistedInject + HiltWorkerFactory
+# لِـ CloudSyncWorker (لا يوجد نمط WorkManager+Hilt سابق في المشروع —
+# DataResetWorker/NotificationUpdateWorker يستخدمان object عادي بلا حقن Hilt،
+# لكن CloudSyncManager @Inject singleton حقيقي يحتاج حقناً فعلياً هنا).
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
+# مُصنِّف androidx.hilt المنفصل عن hilt-compiler (com.google.dagger) أعلاه —
+# مطلوب تحديداً لتوليد كود @HiltWorker (WorkerAssistedFactory)، وليس نفس المصنّف.
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bctls = { group = "org.bouncycastle", name = "bctls-jdk18on", version.ref = "bouncycastle" }
+# FIX-HTTPS: bcpkix provides JcaX509v3CertificateBuilder used for self-signed TLS cert generation
+bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
+# JSch fork (com.github.mwiede) — actively maintained pure-Java SSH2 client,
+# used for the SSH/terminal protocol option. No NDK/native code required.
+jsch = { group = "com.github.mwiede", name = "jsch", version.ref = "jsch" }
+# FTP-FEATURE: FTPClient/FTPSClient/TFTPClient — pure Java, no native deps.
+commons-net = { group = "commons-net", name = "commons-net", version.ref = "commonsNet" }
+# SMB-FEATURE: SMB2/SMB3 client — package name stays "jcifs.*" (unlike the
+# org.codelibs fork which renamed packages), so this is the drop-in choice.
+jcifs-ng = { group = "eu.agno3.jcifs", name = "jcifs-ng", version.ref = "jcifsNg" }
+# WEBDAV-FEATURE: package is com.thegrizzlylabs.sardineandroid (one word) —
+# confirmed from the library's own source/tests, not the org.thegrizzlylabs.sardine
+# name one might guess from the artifact coordinate.
+sardine-android = { group = "com.github.thegrizzlylabs", name = "sardine-android", version.ref = "sardineAndroid" }
+# RDP-OVER-WEBSOCKET FEATURE: see okhttp's version comment above.
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+# Biometric — مصادقة بيومترية (BiometricManager, BiometricPrompt)
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+# HIGH-3 FIX: SQLCipher — AES-256 encrypted SQLite via Room's openHelperFactory
+# 🔴 CRITICAL FIX (build break): artifact id changed from "android-database-sqlcipher" (old,
+# package net.sqlcipher.database.*) to "sqlcipher-android" (new, package net.zetetic.database.sqlcipher.*)
+# to match the imports actually used in the codebase.
+sqlcipher = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
+# 🔴 CRITICAL FIX: required explicit companion dependency for net.zetetic:sqlcipher-android
+# (the androidx.sqlite SupportSQLite* interfaces that SupportFactory implements).
+androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "androidxSqlite" }
+# MED-2 FIX: security-crypto — EncryptedFile / EncryptedSharedPreferences (AES-256-GCM)
+security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
+# bVNC module داخل iiordanov/remote-desktop-clients (JitPack multi-module format)
+# bvnc = { group = "com.github.iiordanov.remote-desktop-clients", name = "bVNC", version.ref = "bvnc" }  ← معطَّل: local stubs بدلاً منه
+# QR-SCANNER-REDESIGN: CameraX (Preview + ImageAnalysis use cases only — no
+# camera-video, this app never records) + ML Kit barcode scanning, powering
+# the custom QrScannerActivity screen.
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcodeScanning" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxingCore" }
+
+# ── Cloud Sync (Drive/Dropbox) — see the CLOUD-SYNC FEATURE (Part 1/3) note
+# in [versions] above. Providers are implemented in Part 2; these entries
+# only need to resolve, they aren't imported by any code yet in Part 1.
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentialManager" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialManager" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+google-api-client = { group = "com.google.api-client", name = "google-api-client", version.ref = "googleApiClient" }
+google-api-client-android = { group = "com.google.api-client", name = "google-api-client-android", version.ref = "googleApiClientAndroid" }
+google-api-services-drive = { group = "com.google.apis", name = "google-api-services-drive", version.ref = "googleDriveApi" }
+# Dropbox SDK for Android (AAR, group com.dropbox.core, artifact "dropbox-android-sdk")
+# — NOT "dropbox-core-sdk": that's the plain-JVM artifact, whose 8.x line
+# requires Java 21+ and ships no Android OAuth-PKCE helper. This one is
+# built for Android and includes Auth.startOAuth2PKCE().
+dropbox-android-sdk = { group = "com.dropbox.core", name = "dropbox-android-sdk", version.ref = "dropboxAndroidSdk" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+# PERF-FIX: يُستخدم فقط في موديول :baselineprofile الجديد (ليس :app) —
+# com.android.test يخبر Gradle أن هذا موديول اختبارات فقط (لا يُحزَّم داخل الـ APK).
+android-test = { id = "com.android.test", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+# PERF-FIX: يُطبَّق على :app (لاستهلاك/تثبيت الملف الناتج تلقائياً في الـ APK)
+# وعلى :baselineprofile (لتوليد الملف عبر instrumentation test حقيقي).
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidxBenchmark" }

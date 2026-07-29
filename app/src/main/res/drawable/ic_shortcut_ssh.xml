@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SHORTCUT-ICON FEATURE: see ic_shortcut_rdp.xml's header comment — same
+     purpose, SSH's badge tint (terminal green) so pinned shortcuts are
+     visually distinguishable by protocol at a glance on the home screen. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:fillColor="#071A0F"/>
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:strokeColor="#3300E676"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+    <!-- Terminal window -->
+    <path
+        android:pathData="M24,30 L84,30 Q88,30 88,34 L88,74 Q88,78 84,78 L24,78 Q20,78 20,74 L20,34 Q20,30 24,30 Z"
+        android:fillColor="#0D2416"
+        android:strokeColor="#00E676"
+        android:strokeWidth="2.5"/>
+    <!-- Title bar dots -->
+    <path android:pathData="M28,36 A2,2 0 1,1 27.99,36 Z" android:fillColor="#00E676"/>
+    <path android:pathData="M34,36 A2,2 0 1,1 33.99,36 Z" android:fillColor="#4DFFA6"/>
+    <path android:pathData="M40,36 A2,2 0 1,1 39.99,36 Z" android:fillColor="#4DFFA6"/>
+    <path android:pathData="M20,41 L88,41" android:strokeColor="#1A3D26" android:strokeWidth="1.5" android:fillColor="#00000000"/>
+    <!-- Prompt glyph: ">" followed by a blinking-cursor bar -->
+    <path
+        android:pathData="M30,49 L40,57 L30,65"
+        android:strokeColor="#00E676"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M46,65 L64,65"
+        android:strokeColor="#00E676"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"/>
+</vector>

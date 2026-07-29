@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SHORTCUT-ICON FEATURE: standalone (non-adaptive) launcher icon used for
+    pinned home-screen shortcuts on RDP connections — see ShortcutHelper.kt's
+    iconResFor(). Kept as a single flat vector (no separate foreground/
+    background layers) since ShortcutInfoCompat.setIcon() via
+    IconCompat.createWithResource() only needs one drawable, and the launcher
+    itself applies any adaptive-icon masking/shadow on top.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Circular badge background -->
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:fillColor="#0B1A33"/>
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:strokeColor="#3300E5FF"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+    <!-- Monitor body -->
+    <path
+        android:pathData="M27,32 L81,32 Q86,32 86,37 L86,66 Q86,71 81,71 L27,71 Q22,71 22,66 L22,37 Q22,32 27,32 Z"
+        android:fillColor="#1A2C4D"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"/>
+    <!-- Screen -->
+    <path
+        android:pathData="M30,38 L78,38 L78,63 L30,63 Z"
+        android:fillColor="#0F2338"/>
+    <path
+        android:pathData="M35,45 L60,45"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M35,52 L68,52"
+        android:strokeColor="#4DF0FF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M35,59 L50,59"
+        android:strokeColor="#4DF0FF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"/>
+    <!-- Stand -->
+    <path
+        android:pathData="M48,71 L60,71 L63,82 L45,82 Z"
+        android:fillColor="#1A2C4D"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2"/>
+    <path
+        android:pathData="M40,82 L68,82"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"/>
+</vector>

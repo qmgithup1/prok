@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CRIT-3 FIX: Explicit Network Security Configuration.
+  - Trusts only system CAs — no user-installed CAs (prevents corp-MITM attacks).
+  - Prevents accidental plain-text connections even on Android 6-8 where the
+    platform default could allow cleartext in some edge cases.
+
+  SCOPE NOTE (do not misread this as app-wide cleartext protection): the
+  cleartextTrafficPermitted="false" below is enforced only by Android's
+  standard network stack — HttpURLConnection/HttpsURLConnection, WebView,
+  and any library that calls through to it (OkHttp does, for example, via
+  android.security.NetworkSecurityPolicy). In this app that covers RESTCONF,
+  Redfish, the RD Web feed client, and Guacamole's WebSocket/REST legs.
+
+  It does NOT cover the raw java.net.Socket/SSLSocket connections this app's
+  core remote-access protocols use directly — Telnet, VNC, RDP (native
+  FreeRDP bridge), IPMI, AMT SOL/IDER/KVM, SNMP, rlogin, Mosh, the serial
+  console, and NFS/ONC-RPC all open sockets themselves and never consult
+  NetworkSecurityPolicy, so this config has zero effect on whether *those*
+  connections are cleartext. Several of them (plain Telnet, VNC, unencrypted
+  RDP) are cleartext by design/user choice, wrapped in TLS/SSH only when the
+  person explicitly enables it per profile (`useTls`, "tunnel via SSH", etc.)
+  — that per-protocol opt-in, not this file, is what actually governs
+  encryption for those transports. Do not rely on this file as evidence that
+  those protocols are protected against cleartext.
+
+  ENFORCEMENT FOR THE RAW-SOCKET PROTOCOLS (CRIT-3-B): since this file
+  architecturally cannot cover them, the actual enforcement mechanism is
+  tools/verify_socket_security.py — a Gradle task (`verifySocketSecurity`,
+  wired into `check`) that scans app/src/main/java for every raw
+  Socket/DatagramSocket/ServerSocket construction and requires each one to
+  be on record in tools/socket_security_manifest.json with a reviewed
+  justification (protocol-inherent cleartext, TOFU-pinned TLS wrap,
+  loopback-only, own crypto layer, etc.). A new or changed call site that
+  isn't accounted for there fails the build. See that script's module
+  docstring for the full rationale.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust only system CA store — user-installed CAs are excluded. -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

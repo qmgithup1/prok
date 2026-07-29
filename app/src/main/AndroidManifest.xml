@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ── Storage / File Transfer ──────────────────────────────────────────── -->
+    <!-- READ_EXTERNAL_STORAGE: API 26-32 (Android 8–12L) for phone file browser -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- WRITE_EXTERNAL_STORAGE: API 26-28 (Android 8–9) for saving downloaded files -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <!-- READ_MEDIA_* : API 33+ (Android 13+) granular media permissions -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- MIC-REDIRECT FEATURE: needed for the "Redirect Microphone" per-profile
+         RDP toggle (MS-RDPEAI "audin" channel) — see AFreeRdpBridge.connect()
+         and systemsgo_jni.c's FreeRDP_AudioCapture block. Requested at runtime
+         in RdpSessionActivity.onCreate, same pattern as POST_NOTIFICATIONS
+         below. Harmless to declare even for users who never enable the
+         toggle: the native audin channel is never loaded unless a profile
+         explicitly opts in. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- CRIT-2 FIX: MANAGE_EXTERNAL_STORAGE removed — it granted full access to
+         ALL files on the device (including other apps' sandboxes), violating
+         least-privilege. READ_MEDIA_* (API 33+) and READ_EXTERNAL_STORAGE (API
+         26-32) declared above already cover every access pattern in the app.
+         For non-media folders use Storage Access Framework (ACTION_OPEN_DOCUMENT_TREE). -->
+
+    <!-- ── Network ──────────────────────────────────────────────────────────── -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Bug #8 FIX: Required to prevent Android WiFi driver from filtering UDP
+         broadcast packets used by Wake-on-LAN. Without this lock, Magic Packets
+         are silently dropped on most WiFi adapters. -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- BUG-08: Removed CHANGE_NETWORK_STATE — no code in the app calls any
+         API that requires it. Its presence unnecessarily enlarged the attack
+         surface and flagged in Play Store security reviews. -->
+
+    <!-- ── Camera (QR Code Scan for connection setup) ───────────────────────── -->
+    <!-- Requested at runtime (see HomeScreen's QR scan launcher) right before
+         starting the scanner; declaring android:required="false" on the
+         <uses-feature> lets the app still install on devices with no camera
+         (e.g. some tablets) — those devices simply won't offer "Scan QR Code". -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- ── Input / Haptic ───────────────────────────────────────────────────── -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- ── Printer Redirection ──────────────────────────────────────────────── -->
+    <!-- PRINTER-REDIRECT FEATURE: no runtime permission is needed to call
+         android.print.PrintManager (it's a normal system service, like
+         CLIPBOARD_SERVICE) — this just signals the optional dependency so
+         the app still installs on devices/builds with no print framework at
+         all (android:required="false"), same reasoning as the camera
+         <uses-feature> entries above. See RemotePrintManager and the
+         "Redirect Printers" toggle in the connection form. -->
+    <uses-feature android:name="android.software.print" android:required="false" />
+
+    <!-- ── Smart Card Redirection (USB-CCID reader) ─────────────────────────── -->
+    <!-- SMARTCARD-REDIRECT FEATURE: android.hardware.usb.host lets the app act
+         as a USB host and talk directly to a plugged-in CCID smart-card
+         reader (interface class 0x0B) via android.hardware.usb — this is
+         what UsbCcidReader/PcscUsbBridge use in place of a system pcscd,
+         since Android has none. android:required="false" so the app still
+         installs on devices with no USB host support at all (e.g. many
+         tablets/some phones); those devices simply can't offer smart-card
+         redirection, same reasoning as the camera/print <uses-feature>
+         entries above. No <uses-permission> is needed for USB host access
+         itself — per-device access is a one-time UsbManager.requestPermission
+         dialog, not a manifest/runtime permission (see UsbCcidReader). -->
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+
+    <!-- NFC-READER FEATURE: contactless-card counterpart to the USB-CCID
+         feature block immediately above — lets NfcCcidReader/PcscUsbBridge
+         read an ISO/IEC 14443-4 (PIV/CAC/eID-style) smart card tapped to
+         the device's own NFC radio, with no external reader hardware
+         needed at all. android:required="false" so the app still installs
+         on devices with no NFC radio; those devices simply fall back to
+         USB-CCID-only smart-card redirection (or none, if neither is
+         present), same "gracefully do without" reasoning as every other
+         optional <uses-feature> in this file. android.permission.NFC IS a
+         real manifest permission (unlike USB host access above) — it is a
+         normal, not a dangerous/runtime, permission, so no runtime prompt
+         is needed, only this declaration. -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+
+    <!-- ── Screen awake during session ─────────────────────────────────────── -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- ── Notifications (Android 13+ POST_NOTIFICATIONS required at runtime) ─ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- ── Foreground service for background RDP session ───────────────────── -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- SHADOW-SERVER FEATURE: required (API 34+) to run a foreground
+         service with foregroundServiceType="mediaProjection" — see
+         ShadowScreenCaptureService, which screen-captures via Android's
+         MediaProjection API to feed the RDP Server API a real framebuffer
+         instead of milestone 1's static placeholder. Normal permission (no
+         runtime prompt); the actual user consent for screen capture itself
+         is the separate MediaProjectionManager.createScreenCaptureIntent()
+         system dialog, requested in ShadowServerActivity, not this
+         manifest entry. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <!-- OEM-COMPAT FIX: lets the app ask the user to exempt it from Doze/App-Standby
+         battery optimisation, which is the #1 cause of background RDP/VNC/SSH
+         sessions silently dying on Xiaomi (MIUI), Honor/Huawei (MagicUI/EMUI),
+         Oppo (ColorOS), Vivo (FuntouchOS) and similar heavily-customised OEM skins. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- ── Receive boot for auto-reconnect (future) ─────────────────────────── -->
+    <!-- ✅ قفل البصمة -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <!--
+        BUG 12 FIX: Removed USE_FINGERPRINT — deprecated since API 28.
+        androidx.biometric does not require it; its presence triggers
+        unnecessary security warnings in Play Store reviews.
+    -->
+
+    <!-- ENTRA-ID-AUTH FEATURE: package-visibility allowlist (required on
+         Android 11+ / API 30+, see developer.android.com/training/package-visibility).
+         Without this, PackageManager queries MSAL relies on internally to
+         find a Custom-Tabs-capable browser (and the Authenticator app, if
+         present) silently return nothing on API 30+, and signIn() fails as
+         if no browser were installed. -->
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <!-- WARP-STATUS FEATURE: package-visibility declaration required on API 30+
+             for WarpStatusChecker.isWarpAppInstalled()'s getPackageInfo() call to
+             see the Cloudflare WARP app instead of silently returning "not found". -->
+        <package android:name="com.cloudflare.onedotonedotonedotone" />
+    </queries>
+
+    <!--
+        CLEANUP: allowBackup="false" makes Android ignore dataExtractionRules
+        and fullBackupContent entirely — per-file backup exclusion rules only
+        take effect when allowBackup="true". Those two attributes were removed
+        below because they described exclusions (PIN, TOFU keys, database,
+        screenshots) that were never actually being applied; the well-documented
+        reasoning behind each exclusion still lives in res/xml/backup_rules.xml
+        and res/xml/data_extraction_rules.xml for reference, or as a starting
+        point if backup is ever re-enabled in the future.
+    -->
+    <application
+        android:name=".SystemsGoApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SystemsGo"
+        android:localeConfig="@xml/locales_config"
+        android:largeHeap="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:hardwareAccelerated="true"
+        android:manageSpaceActivity=".ui.ManageSpaceActivity"
+        tools:targetApi="36">
+        <!-- MANAGE-SPACE FEATURE / "24-HOUR VULNERABILITY" FIX:
+             android:manageSpaceActivity above replaces the system's default,
+             completely unauthenticated "Clear storage"/"Clear data" button in
+             Settings → Apps → SystemsGo → Storage with a "Manage space" button
+             (same idea Telegram and other security-sensitive apps use).
+             Without this, anyone with physical access to an unlocked device
+             could wipe every saved connection/credential from the OS's own
+             app-info screen with a single tap — bypassing App Lock AND the
+             "Forgot PIN?" 24h delayed-reset safeguard entirely, since the
+             system clears storage itself and never runs a line of our code.
+             See ManageSpaceActivity.kt for the forwarding flow. -->
+
+        <!-- ── Main Activity ──────────────────────────────────────────────── -->
+        <!-- UI-AUDIT FIX: android:resizeableActivity was left implicit here.
+             It already defaults to true on API 24+, but leaving it implicit
+             meant the home/connections list was never verified against
+             split-screen, freeform, or foldable-hinge resizing the way
+             RdpSessionActivity's session UI was (see that activity's own
+             EXTERNAL-DISPLAY / DEX FEATURE comment) — a tablet or foldable
+             user could resize the app from the launcher/recents and land on
+             an unverified layout. Declared explicitly for the same guarantee
+             and to make the intent auditable. -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:resizeableActivity="true"
+            android:enableOnBackInvokedCallback="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Open .rdp files from file managers / email / browser -->
+            <!-- BUG #4 FIX: Added BROWSABLE category so the app is offered when the user
+                 opens an .rdp link from a web browser. Without it, browser intents are
+                 silently filtered out since the system requires BROWSABLE for web-originated
+                 VIEW intents (https://developer.android.com/guide/components/intents-filters#browser). -->
+            <!-- FIX-FILE-URI: The file:// + BROWSABLE combination is removed.
+                 A malicious app on the device could craft an explicit ACTION_VIEW intent
+                 with a file:// URI pointing to any file the app can read, bypassing the
+                 content URI permission model. Keeping only content:// URIs forces the OS
+                 to grant temporary read permission through the ContentResolver, which is
+                 both correct and safe. File managers on Android 7+ (minSdk=26) already
+                 use content:// URIs when sharing files; file:// is legacy and unsafe. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/x-rdp" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="*/*" android:pathPattern=".*\.rdp" />
+            </intent-filter>
+        </activity>
+
+        <!-- MANAGE-SPACE FEATURE: the target of android:manageSpaceActivity
+             above. exported="true" is required — the system Settings app
+             (a different UID) launches this Activity directly when the user
+             taps "Manage space". It holds no UI of its own, touches no data,
+             and performs no destructive action; it only forwards into
+             MainActivity's existing PIN/biometric-gated flow — see
+             ManageSpaceActivity.kt. Translucent + noHistory + excluded from
+             recents since it is never meant to be visible or revisited on
+             its own; it should feel instantaneous, exactly like tapping a
+             normal in-app Settings entry. -->
+        <activity
+            android:name=".ui.ManageSpaceActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
+
+        <!-- ── RDP Session Activity (immersive full-screen) ───────────────── -->
+        <!-- PIP FEATURE: supportsPictureInPicture lets this Activity shrink into a
+             floating window (Android's Picture-in-Picture mode) instead of being
+             stopped when the user leaves it while a remote session is connected.
+             configChanges already lists screenSize|smallestScreenSize|screenLayout,
+             which also covers the resize Android performs when entering/exiting
+             PiP, so the Activity is not recreated (and the live session survives)
+             for that transition either. -->
+        <!-- PINNED-SHORTCUT FEATURE: exported="true" (was false) so a pinned
+             home-screen shortcut (see util/ShortcutHelper.kt) can start this
+             Activity directly — pinned shortcuts are invoked by the Launcher
+             app, an external process, and Android refuses to start a
+             non-exported Activity from outside our own app. The only external
+             input accepted is a "profile_id" extra referencing an existing,
+             locally-saved profile — no credentials or connection details are
+             ever passed in — the same trust boundary MainActivity's existing
+             .rdp ACTION_VIEW intent-filter below already relies on. -->
+        <!-- EXTERNAL-DISPLAY / DEX FEATURE: android:resizeableActivity below is
+             explicit (rather than relying on the API 24+ default) so DeX/
+             Desktop-Mode window resizing and free-form/multi-window placement
+             are always honored, matching the configChanges above that already
+             handle the resulting size/layout changes without recreating the
+             Activity. -->
+        <activity
+            android:name=".ui.screens.RdpSessionActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:theme="@style/Theme.SystemsGo.Session">
+            <!-- SMARTCARD-REDIRECT FEATURE: lets Android hand this activity a
+                 USB_DEVICE_ATTACHED intent (with permission already granted,
+                 no extra dialog) when a CCID smart-card reader is plugged in
+                 while a session with enableSmartcardRedirect is active/
+                 foreground — see UsbCcidReader.onNewIntent handling in
+                 RdpSessionActivity. Scoped to CCID devices only via
+                 usb_device_filter.xml (interface class 0x0B), so plugging in
+                 an unrelated USB device (mouse, keyboard, drive, ...) never
+                 triggers this. Harmless to declare even for users who never
+                 enable the toggle — the filter just never matches. -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/usb_device_filter" />
+        </activity>
+
+        <!-- ── Web/HTTPS Portal Activity (WEB-PORTAL FEATURE) ────────────────── -->
+        <!-- Embedded-WebView session for a ProtocolType.WEB profile — any HTTPS
+             management portal (Guacamole, ESXi/vCenter, iDRAC/iLO, Proxmox,
+             pfSense, ...), or the RD Web Access "Pages" login itself as a
+             fallback from RdWebFeedScreen when the feed's Basic-auth endpoint
+             isn't usable. See com.systemsgo.hex.web.WebPortalActivity's class
+             doc for why this is a separate Activity rather than a fifth branch
+             inside RdpSessionActivity. exported="true" + the same
+             "profile_id"-only trust boundary as RdpSessionActivity below, for
+             the identical reason: a pinned home-screen shortcut (see
+             util/ShortcutHelper.kt) must be able to start this Activity
+             directly from the Launcher process. -->
+        <activity
+            android:name=".web.WebPortalActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- ── BMC Management Activity (REDFISH-IPMI FEATURE) ─────────────────── -->
+        <!-- Native session UI for ProtocolType.REDFISH / ProtocolType.IPMI
+             profiles — out-of-band server management (power control, sensors,
+             event log, virtual media, SOL console) via
+             com.systemsgo.hex.redfish.protocol.RedfishClient /
+             com.systemsgo.hex.ipmi.protocol.IpmiClient. Same shape as
+             WebPortalActivity above: exported=\"true\" + the same
+             "profile_id"-only trust boundary, so a pinned home-screen shortcut
+             can start it directly from the Launcher process. -->
+        <activity
+            android:name=".ui.screens.BmcManagementActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- ── SFTP File Transfer Activity (SFTP-STANDALONE FEATURE) ──────────── -->
+        <!-- Session UI for a standalone ProtocolType.SFTP profile — opens
+             directly into FileTransferScreen (the same composable
+             RdpSessionActivity's in-session "Files" panel already uses for SSH
+             profiles), with no terminal/framebuffer session behind it. Same
+             shape/trust-boundary as WebPortalActivity above: exported="true" +
+             the same "profile_id"-only extra, so a pinned home-screen shortcut
+             can start it directly from the Launcher process. -->
+        <activity
+            android:name=".ui.screens.SftpFileTransferActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+
+        <!-- RESTCONF FEATURE (Part 1/4): session Activity for ProtocolType.RESTCONF
+             profiles — native RFC 8040 REST/YANG explorer via
+             com.systemsgo.hex.restconf.protocol.RestconfClient. Same shape as
+             BmcManagementActivity above: exported="true" + the same
+             "profile_id"-only trust boundary, so a pinned home-screen shortcut
+             can start it directly from the Launcher process. -->
+        <activity
+            android:name=".ui.screens.RestconfExplorerActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- SNMP FEATURE: session Activity for ProtocolType.SNMP profiles — SNMP
+             device dashboard, MIB browser/walk, Get/Set tool, and trap/inform
+             receiver via com.systemsgo.hex.snmp.protocol.SnmpClient /
+             SnmpTrapListener. Same shape/trust-boundary as BmcManagementActivity
+             above (exported="true" + "profile_id"-only extra, so a
+             pinned home-screen shortcut can start it directly). -->
+        <activity
+            android:name=".ui.screens.SnmpManagementActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- NETCONF FEATURE: session Activity for ProtocolType.NETCONF profiles —
+             native NETCONF-over-SSH (RFC 6242/6241) session UI via
+             com.systemsgo.hex.netconf.protocol.NetconfClient/NetconfOperations.
+             Same shape as BmcManagementActivity above. -->
+        <activity
+            android:name=".ui.screens.NetconfSessionActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- MODBUS-TCP FEATURE (Part 2/2): session Activity for
+             ProtocolType.MODBUS_TCP profiles — live dashboard of
+             user-defined points plus a Register Tool and Points editor via
+             com.systemsgo.hex.modbus.protocol.ModbusTcpClient. Same
+             shape/trust-boundary as SnmpManagementActivity above
+             (exported="true" + "profile_id"-only extra, so a pinned
+             home-screen shortcut can start it directly). -->
+        <activity
+            android:name=".ui.screens.ModbusManagementActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- PROXMOX-API FEATURE (Part 3/N): session Activity for
+             ProtocolType.PROXMOX profiles — node/guest inventory, power
+             controls, and VNC console launch via
+             com.systemsgo.hex.proxmox.protocol.ProxmoxApiClient /
+             com.systemsgo.hex.proxmox.ProxmoxVncBridge. Same
+             shape/trust-boundary as ModbusManagementActivity above. -->
+        <activity
+            android:name=".ui.screens.ProxmoxManagementActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- VMWARE-VSPHERE FEATURE (Part 3/N): session Activity for
+             ProtocolType.VMWARE_VSPHERE profiles — VM/host inventory, power
+             controls, and WEBMKS console launch via
+             com.systemsgo.hex.vsphere.protocol.VSphereApiClient /
+             com.systemsgo.hex.vsphere.VSphereVncBridge. Same
+             shape/trust-boundary as ProxmoxManagementActivity above. -->
+        <activity
+            android:name=".ui.screens.VSphereManagementActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- SPLIT-SCREEN FEATURE: hosts two independent RdpSessionViewModel-backed
+             panes (see SplitScreenActivity.kt). Not exported — only ever launched
+             from within the app (SplitScreenPickerScreen), unlike RdpSessionActivity
+             which also needs to accept pinned home-screen shortcuts. configChanges
+             mirrors RdpSessionActivity's so undocking from DeX / folding a foldable
+             / rotating doesn't tear down either pane's live connection. Desktop-class
+             gating (tablet/foldable/DeX/Desktop Mode only) is enforced in Compose via
+             DeviceFormFactor.supportsDesktopFeatures, not here — the manifest can't
+             express that condition. -->
+        <activity
+            android:name=".ui.screens.SplitScreenActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- ARD FEATURE: manual-test screen for ArdAdminClient.addComputer /
+             sendUnixCommand — see ArdCommandActivity.kt's class doc. Not
+             exported and not routed through SessionLauncher: there is no
+             ProtocolType.ARD or saved-profile form yet, this is only for
+             exercising the untested handshake against a real Mac. -->
+        <activity
+            android:name=".ui.screens.ArdCommandActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- ── QR Scanner Activity (QR-SCANNER-REDESIGN) ────────────────────── -->
+        <!-- Custom CameraX + ML Kit screen replacing zxing-android-embedded's
+             built-in CaptureActivity — see QrScannerActivity.kt. Not exported:
+             only ever launched from within the app (HomeScreen's "Scan QR
+             Code" option), after CAMERA permission has already been granted.
+             Fullscreen Session theme reused since this, like RdpSessionActivity,
+             is an immersive camera-preview screen with no system chrome. -->
+        <activity
+            android:name=".ui.screens.QrScannerActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density|fontScale"
+            android:screenOrientation="unspecified"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.SystemsGo.Session" />
+
+        <!-- ── Background Session Foreground Service ──────────────────────── -->
+        <service
+            android:name=".ui.screens.RdpSessionService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!-- ── SHADOW-SERVER FEATURE ─────────────────────────────────────── -->
+        <!-- Not exported: only ever launched from within the app (see
+             ShadowServerActivity's doc for its own "not wired into a nav
+             graph yet" note — this is that same milestone's counterpart
+             for the Activity that starts it). foregroundServiceType lists
+             both mediaProjection (the screen-capture half) and
+             connectedDevice (mirrors RdpSessionService above — this
+             service is, functionally, also "a remote session is active",
+             just in the host rather than client direction). -->
+        <activity
+            android:name=".shadow.ShadowServerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SystemsGo" />
+        <service
+            android:name=".shadow.ShadowScreenCaptureService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection|connectedDevice" />
+
+        <!-- ── PROXY-RELAY FEATURE ───────────────────────────────────────── -->
+        <!-- Not exported: only ever launched from within the app (same
+             "not wired into a nav graph yet" scope as ShadowServerActivity
+             above). foregroundServiceType is connectedDevice only — unlike
+             ShadowScreenCaptureService, this never touches MediaProjection;
+             see RdpProxyRelay's class doc for why (it composes the
+             already-existing client/server bridges instead). -->
+        <activity
+            android:name=".proxy.RdpProxyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SystemsGo" />
+        <service
+            android:name=".proxy.RdpProxyService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!-- ── NETCONF CALL HOME FEATURE (RFC 8071, Part 12) ─────────────────── -->
+        <!-- Always-on listener for devices dialing this app instead of the app
+             dialing them — see NetconfCallHomeService's class doc comment.
+             connectedDevice is the correct foregroundServiceType, same
+             reasoning as RdpProxyService above (this, too, is functionally an
+             inbound network session the OS should treat as a live device
+             connection, not a generic background task). -->
+        <service
+            android:name=".netconf.service.NetconfCallHomeService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!-- ── USB-REDIRECT FEATURE (Part 1/3) ───────────────────────────── -->
+        <!-- Not exported: only ever launched from within the app (see
+             UsbRedirectionService.start()), same "internal foreground worker"
+             shape as RdpProxyService above. foregroundServiceType is
+             connectedDevice — the correct Android 14+ (API 34) FGS type for
+             USB-host-adjacent work — matching ShadowScreenCaptureService's
+             own connectedDevice half above.
+
+             The android.hardware.usb.action.USB_DEVICE_ATTACHED intent-filter
+             lets Android itself launch/foreground this activity path when a
+             device is plugged in AND the user has previously approved that
+             exact device (see device_filter meta-data) — this is optional
+             convenience on top of, not a replacement for, the
+             BroadcastReceiver-based hot-plug detection UsbRedirectionManager
+             already performs continuously while the service/app is running;
+             most redirection flows never need this intent-filter to fire at
+             all. Points at a permissive device_filter (any class) rather
+             than one narrow class list, since URBDRC redirects any device
+             class per MS-RDPEUSB — narrowing this filter would only limit
+             which devices can auto-launch the app when plugged in while the
+             app isn't already running, not which devices can be redirected. -->
+        <activity
+            android:name=".usb.UsbDeviceAttachedActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SystemsGo"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/usb_device_filter_urbdrc" />
+        </activity>
+        <service
+            android:name=".usb.UsbRedirectionService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!-- SHADOW-SERVER FEATURE: input-injection half — see
+             RemoteInputAccessibilityService's doc comment and
+             res/xml/accessibility_service_config.xml. android:permission
+             is what actually restricts binding to the system (a real
+             uses-permission entry in this manifest would be meaningless
+             here — see removed note in the permissions block above), and
+             exported must be true for the system Accessibility framework
+             to bind it; that framework enforcing BIND_ACCESSIBILITY_SERVICE
+             is exactly what keeps any other app from binding it instead.
+             Purely opt-in: the user must explicitly enable it in Settings >
+             Accessibility (this manifest entry alone grants nothing). -->
+        <service
+            android:name=".shadow.RemoteInputAccessibilityService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- ── CLIPBOARD-SYNC FEATURE: image clipboard content provider ───── -->
+        <!-- Lets ClipboardSyncManager expose a remote-originated image as a
+             content:// Uri (ClipData.newUri) so other apps can paste it, without
+             ever handing out a raw file:// path — see the doc comment on
+             app/src/main/res/xml/clipboard_file_paths.xml. Not exported; other
+             apps only ever get transient read access via the URI permission
+             grant that ClipData itself attaches, never direct provider access. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.clipboardprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/clipboard_file_paths" />
+        </provider>
+
+        <!-- ENTRA-ID-AUTH FEATURE: captures the redirect back from the system
+             browser / Custom Tabs once the user finishes signing in to
+             Microsoft Entra ID (see EntraIdAuthManager.signIn). The
+             android:path value MUST end with the exact same
+             base64-urlencoded signature hash configured as redirect_uri in
+             res/raw/msal_config.json, or the browser will have nowhere to
+             hand the auth code back to — see https://aka.ms/msal-config. -->
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="msauth"
+                    android:host="com.systemsgo.hex"
+                    android:path="/REPLACE_WITH_BASE64_URLENCODED_SIGNATURE_HASH" />
+            </intent-filter>
+        </activity>
+
+        <!-- CLOUD-SYNC FEATURE (Part 2/3): captures the redirect back from
+             the system browser / Custom Tab once the user finishes the
+             Dropbox PKCE OAuth flow (see DropboxSyncProvider.startLink()).
+             com.dropbox.core.android.AuthActivity is provided by the
+             dropbox-android-sdk artifact itself — it forwards the result to
+             Auth.getDbxCredential(), which DropboxSyncProvider.completeLinkIfPending()
+             reads. The db-<APP_KEY> scheme below now comes from the
+             ${dropboxRedirectScheme} manifest placeholder, which
+             app/build.gradle.kts derives from the SAME dropboxAppKey value
+             used for DropboxSyncProvider's DROPBOX_APP_KEY BuildConfig field
+             (see the CLOUD-SYNC-CONFIG FIX comment there) — so setting
+             dropbox.app.key once (env var or Gradle property) updates both
+             and they can never silently drift apart. Nothing in this file
+             needs editing when you fill in the real App Key.
+
+             CONFIG-VALIDITY FIX: the previous literal placeholder here,
+             "db-TODO_REPLACE_WITH_DROPBOX_APP_KEY", contained underscores,
+             which are not valid characters in a URI scheme (RFC 3986 only
+             allows letters, digits, "+", "-", "."). It happened to be
+             harmless only because it could never match a real redirect
+             anyway — but it was still malformed and could trip manifest/URI
+             validation on some tooling. A real Dropbox App Key is
+             alphanumeric, so this stops being a concern once
+             dropbox.app.key is actually set. -->
+        <activity
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${dropboxRedirectScheme}" />
+            </intent-filter>
+        </activity>
+
+        <!-- ── QUICK-SETTINGS-TILE FEATURE (Part 1/2) ──────────────────────
+             android:icon/android:label here are what the system's "Edit
+             tiles" panel shows BEFORE the user has ever added the tile
+             (the runtime icon/label set in
+             QuickConnectTileService.render() only apply once it's already
+             on a panel). android:exported must be true and the
+             BIND_QUICK_SETTINGS_TILE permission must be declared exactly
+             this way — SystemUI is a different app/process and refuses to
+             bind an unexported or unprotected TileService. The
+             ACTIVE_TILE meta-data is deliberately omitted/false (default):
+             this tile's state only needs to refresh while the panel is
+             open (onStartListening) or when explicitly poked by
+             QsTileUpdater.requestUpdate(), not the far more restrictive
+             "active tile" polling model. -->
+        <service
+            android:name=".tile.QuickConnectTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_quick_connect"
+            android:label="@string/qs_tile_label_unconfigured"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- ── HOME-SCREEN-WIDGET FEATURE (Part 1/2) ───────────────────────
+             android:exported must be true — like the QS tile above, the
+             Launcher is a different app/process and refuses to deliver
+             APPWIDGET_UPDATE/APPWIDGET_DELETED/APPWIDGET_OPTIONS_CHANGED
+             broadcasts to an unexported receiver. Unlike the tile, there is
+             no BIND_*-style permission to protect this with — AppWidgetProvider
+             receivers are meant to be exported; the system itself is the only
+             realistic sender of these particular actions. android:icon/label
+             here are what the system's "Add widget" picker shows. -->
+        <receiver
+            android:name=".widget.SystemsGoAppWidgetProvider"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_quick_connect"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/systemsgo_widget_info" />
+        </receiver>
+
+        <!-- RemoteViewsService backing the CONNECTION_LIST widget's ListView —
+             see RdpProfileWidgetService's own doc comment. BIND_REMOTEVIEWS is
+             the platform-documented protection for this exact component type:
+             only the system (which always holds this permission) is able to
+             bind to it, regardless of android:exported, so — again unlike the
+             tile/provider above — this one is deliberately left non-exported. -->
+        <service
+            android:name=".widget.RdpProfileWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Configuration screen launched both by the system's own
+             ACTION_APPWIDGET_CONFIGURE flow (when the widget is first placed —
+             see systemsgo_widget_info.xml's android:configure) and directly by
+             SystemsGoAppWidgetProvider for its unconfigured "tap to set up"
+             recovery (see WidgetConfigureActivity.reconfigureIntent). Must be
+             exported=true for the first of those two callers: the system
+             widget host (Launcher) is, again, a different process/app. -->
+        <activity
+            android:name=".widget.WidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SystemsGo"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+
+</manifest>

@@ -1,0 +1,17 @@
+{
+  "client_id": "REPLACE_WITH_ENTRA_APP_CLIENT_ID",
+  "authorization_user_agent": "DEFAULT",
+  "redirect_uri": "msauth://com.systemsgo.hex/REPLACE_WITH_BASE64_URLENCODED_SIGNATURE_HASH",
+  "account_mode": "SINGLE",
+  "broker_redirect_uri_registered": false,
+  "authorities": [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADMyOrg",
+        "tenant_id": "REPLACE_WITH_TENANT_ID"
+      },
+      "default": true
+    }
+  ]
+}

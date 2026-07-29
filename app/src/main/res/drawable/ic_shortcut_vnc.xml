@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SHORTCUT-ICON FEATURE: see ic_shortcut_rdp.xml's header comment — same
+     purpose, VNC's badge tint (violet, matching QuantumBlue-ish accents used
+     elsewhere in the app) so pinned shortcuts are visually distinguishable
+     by protocol at a glance on the home screen. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:fillColor="#170B33"/>
+    <path
+        android:pathData="M54,4 A50,50 0 1,1 53.99,4 Z"
+        android:strokeColor="#337C4DFF"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+    <!-- Monitor body -->
+    <path
+        android:pathData="M27,30 L81,30 Q86,30 86,35 L86,64 Q86,69 81,69 L27,69 Q22,69 22,64 L22,35 Q22,30 27,30 Z"
+        android:fillColor="#241A4D"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="2.5"/>
+    <path
+        android:pathData="M30,36 L78,36 L78,61 L30,61 Z"
+        android:fillColor="#180F38"/>
+    <!-- Remote cursor / connection glyph -->
+    <path
+        android:pathData="M40,42 L40,58 L45,53.5 L48,60 L51,58.5 L48,52 L54,52 Z"
+        android:fillColor="#B39DFF"/>
+    <path
+        android:pathData="M60,44 A6,6 0 1,1 59.99,44 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="2"/>
+    <path
+        android:pathData="M60,54 A2,2 0 1,1 59.99,54 Z"
+        android:fillColor="#7C4DFF"/>
+    <!-- Stand -->
+    <path
+        android:pathData="M48,69 L60,69 L63,80 L45,80 Z"
+        android:fillColor="#241A4D"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="2"/>
+    <path
+        android:pathData="M40,80 L68,80"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"/>
+</vector>

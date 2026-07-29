@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET THEME SYNC (dark counterpart of values/colors.xml).
+
+    Picked up automatically by the system when the device/launcher is in dark
+    mode (Configuration.UI_MODE_NIGHT_YES) — RemoteViews resources resolve
+    resource qualifiers exactly like any other Android view, so no code
+    change is needed in HexRdpAppWidgetProvider for this to take effect.
+
+    Values are the same dark constants already defined in values/colors.xml
+    (deep_space/nebula_surface/star_dust/comet_tail/success_green_widget),
+    just aliased under the widget_* names so the widget layouts/drawables
+    only ever reference widget_* and get the right palette for whichever
+    mode is active, without duplicating the actual color values.
+-->
+<resources>
+    <color name="widget_bg_outer">@color/deep_space</color>
+    <color name="widget_card_surface">@color/nebula_surface</color>
+    <color name="widget_text_primary">@color/star_dust</color>
+    <color name="widget_text_secondary">@color/comet_tail</color>
+    <color name="widget_success">@color/success_green_widget</color>
+    <color name="widget_row_pressed">#1F00E5FF</color>
+    <color name="widget_icon_badge_bg">#3300E5FF</color>
+</resources>

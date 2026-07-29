@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  NOTIFICATION-ICON FIX (v2 - corrected): dedicated small-icon drawable for
+  NotificationCompat.Builder#setSmallIcon, used across RdpSessionService,
+  UsbRedirectionService, ShadowScreenCaptureService, NetconfCallHomeService,
+  RdpProxyService, and DataResetManager.
+
+  Android status-bar/notification icons must be a single-color white
+  silhouette on a transparent background (the OS only reads the alpha
+  channel and paints it solid white on API 21+); anything else renders as a
+  solid white blob.
+
+  IMPORTANT: this traces the app's *actual* icon — the rocket — not the old
+  hexagon+"H" mark in ic_launcher_foreground.xml (a stale/unused leftover
+  from an earlier "hex" package-name-era design that isn't what the real
+  adaptive-icon foreground/monochrome mipmaps or ic_rocket_ref_body.xml /
+  ic_rocket_ref_flame.xml depict). This mirrors the same silhouette already
+  shipped correctly in mipmap-*/ic_launcher_monochrome.png (the themed-icon
+  layer), just as a scalable vector so it stays crisp at every notification
+  icon density instead of relying on a padded adaptive-icon-sized bitmap.
+
+  Traced from the overall body + flame contours in ic_rocket_ref_body.xml /
+  ic_rocket_ref_flame.xml (their outermost silhouette paths only — all the
+  internal gradient/shading layers are dropped, since only the opaque shape
+  matters for a notification icon, not shading detail that's invisible once
+  reduced to alpha-only white at 24dp anyway).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="11dp"
+    android:height="24dp"
+    android:viewportWidth="344.05"
+    android:viewportHeight="745.93"
+    android:tint="#FFFFFF">
+
+    <!-- Rocket body, fins, window, collar (outer silhouette only) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M171.81,0 C183.68,7.2 192.35,18.08 200.61,29.04 C226.98,64 245.79,104.06 255.84,146.68 C266.9,192.22 266.77,236.42 262.63,282.72 C262.16,287.98 260.85,295.59 263.77,300.13 C270.13,303.4 274.71,293.96 278.83,297.24 C290.56,306.56 326.24,339.01 332.08,351.05 L340.88,360.92 C344.05,364.1 343.52,368.2 343.51,372.48 C343.49,391.42 342.36,410.46 341.61,429.38 C341.17,440.35 341.57,452.07 340.01,462.91 C339.52,466.31 338.62,471 336.23,473.55 C335.04,474.83 333.63,474.97 331.93,474.89 C313.2,474.08 264.2,434.21 249.73,444.78 C244.83,448.36 244.45,454.95 241.97,460.05 C250.14,474.02 248.93,478.2 252.42,494.2 C253.36,498.54 259.63,509.51 259.71,512.55 C260.39,536.59 261.31,569.3 255.57,592.39 C253.64,600.15 250.94,610.83 248.99,617.53 C245.89,614.05 246.82,610.73 247.12,606.36 C245.43,609.08 241.35,615.28 238.48,616.29 C237.06,614.09 237.62,605.49 237.5,601.86 C243.53,583.37 244.95,569.16 247.8,550.22 C248.85,543.28 243.75,535.03 249.33,527.35 C250.21,526.15 250.12,523.9 249.59,522.38 C248.32,518.73 244.93,518.51 243.32,514.97 C240.96,509.78 239.95,502.94 237.75,497.9 C234.54,490.52 229.24,483.22 226.56,475.6 C223.22,477.92 218.71,479.13 214.52,480.71 C217.94,482.39 218.38,486.13 218.38,486.13 C211.72,480.56 192.12,467.43 187.1,480.47 C184.08,480.32 181.93,480.07 178.93,479.63 C171.59,474.66 165.91,474.61 158.88,478.42 C159.49,480.17 155.27,479.71 155.27,479.71 C145.1,466.53 126.92,483.7 119.99,492.49 C122.81,483.55 131.76,479.92 132.66,476.17 C129.24,473.66 117.77,470.66 114.01,472.09 C110.73,479.27 107.9,487.76 104.99,493.94 C95.63,513.79 84.95,530.47 87.36,553.58 C88.66,566.03 92.09,574.79 94.14,586.73 C94.61,589.49 90.98,593.04 90.9,598.33 C90.4,611.49 97.72,619.65 101.41,631.31 C107.9,651.8 116.19,668.93 127.87,686.96 C130.88,691.61 133.03,696.87 136.64,701.3 C151.12,721.59 149.81,726.02 172.46,741.88 C153.89,745.93 132.51,703.75 123.76,691.21 C107.93,668.54 100.08,644.38 89.42,619.25 C87.71,615.22 83.36,610.9 82.25,607.39 C79.27,597.93 78.68,586.7 76.94,576.86 C66.53,521.23 82.16,504.12 100.65,457.03 C99.45,452.6 97.53,446.98 94.19,443.77 C74.32,434.07 21.65,484.87 6.77,474.2 C2.53,468.03 0.6,379.73 0,363.33 C15.18,340.82 43.16,315.14 63.51,296.93 C68.15,292.78 74.75,303.79 80.63,300.33 C81.16,295.72 79.38,273.2 79.12,266.52 C73,184.68 87.6,96.64 138.72,32.88 C146.71,22.21 158.7,7.97 170.16,1 Z"/>
+
+    <!-- Exhaust flame (outer silhouette only) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M187.1,480.47 C192.12,467.43 211.72,480.56 218.38,486.13 C221.45,490.26 223.99,493.79 225.06,498.28 C232.91,513.3 228.01,539.8 223.05,555.72 C221.03,562.36 218.49,568.84 215.46,575.09 C213.38,568.6 209.24,554.55 206.64,548.94 C206.26,559.29 202.38,580.15 198.86,589.75 C197.59,595.75 187.47,637.75 185.39,641.82 C184.93,645.56 184.08,653.89 182.48,656.91 C173.37,674.04 174.28,690.55 173.98,709.5 C172.92,719.4 175.66,729.7 172.11,734.71 C169.59,733.65 169.33,732.92 167.58,730.66 C168.34,723.5 170.64,725.01 170.14,716.82 C170.27,711.95 166.11,674.01 164.43,668.58 C161.17,657.98 156.54,650.65 153.99,635.83 C151.4,630.3 144.4,596.39 142.74,588.85 C138.66,573.13 136.73,564.41 134.97,548.26 C133.24,549.79 132.04,554.95 131.16,557.61 C130.73,560.41 127.89,568.61 126.87,571.73 C114.07,548.54 108.55,517.05 119.99,492.49 C126.92,483.7 145.1,466.53 155.27,479.71 C160.35,479.44 159.49,480.17 163.39,477.71 C165.91,474.61 171.59,474.66 179.33,475.95 C181.93,480.07 184.08,480.32 187.1,480.47 Z"/>
+</vector>

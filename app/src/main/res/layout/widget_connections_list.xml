@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET FEATURE (Part 1/2): the larger, resizable widget size —
+    a scrollable list of saved connections (WidgetPreferences.DisplayMode.CONNECTION_LIST),
+    filtered to either every connection or favorites-only per that instance's
+    config. Content comes from RdpProfileWidgetService (a RemoteViewsService)
+    via android.R.id.list's adapter — see HexRdpAppWidgetProvider.buildConnectionListViews()
+    for where setRemoteAdapter()/setPendingIntentTemplate()/setEmptyView() are wired up.
+
+    android.R.id.list / android.R.id.empty are the well-known framework ids
+    RemoteViewsService-backed widgets are expected to use (mirrors, e.g., the
+    platform's own StackWidget sample) — not just a style choice, ListView's
+    RemoteViews plumbing specifically looks for android.R.id.empty via
+    setEmptyView() to know which sibling view to show/hide as the adapter's
+    row count changes.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/widget_bg_outer"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="6dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_header_title"
+            android:textColor="@color/widget_text_primary"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <ImageView
+            android:id="@+id/widget_open_app_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="6dp"
+            android:background="@drawable/widget_row_background"
+            android:src="@drawable/ic_tile_quick_connect"
+            android:contentDescription="@string/widget_open_app_cd" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/widget_card_background">
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:listSelector="@android:color/transparent"
+            android:scrollbars="none" />
+
+        <include
+            android:id="@android:id/empty"
+            layout="@layout/widget_list_empty" />
+    </FrameLayout>
+</LinearLayout>

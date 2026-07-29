@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET — OPTIONAL MATERIAL YOU (API 31+, dark).
+    Dark-mode counterpart of values-v31/colors.xml — see that file's comment.
+    Darker/more saturated swatches from the same tonal palette so the badge/
+    pressed tint reads correctly against the dark widget_card_surface used in
+    this (-night) bucket.
+-->
+<resources>
+    <color name="widget_icon_badge_bg">@android:color/system_accent1_700</color>
+    <color name="widget_row_pressed">@android:color/system_accent1_800</color>
+</resources>

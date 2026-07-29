@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        BUGFIX-THEME-SYNC: this used to be #FF050A18, a value that didn't
+        actually match SpaceDark.background (#FF020816) in Color.kt — two
+        separate "sources of truth" for the same intended color. Now identical,
+        so the native window background exactly matches the first Compose frame.
+    -->
+    <color name="deep_space">#FF020816</color>
+    <!-- Matches SpaceLight.background in Color.kt, used by Theme.SystemsGo.Light
+         below so the splash/window background can match a light-mode user's
+         last-saved preference instead of always showing the dark background. -->
+    <color name="deep_space_light">#FFF2F6FF</color>
+    <color name="nebula_violet">#FF1A0A2E</color>
+    <color name="cosmic_blue">#FF0D1B3E</color>
+    <color name="pulsar_cyan">#FF00E5FF</color>
+    <color name="star_dust">#FFE8EAF6</color>
+    <color name="nova_pink">#FFFF2D78</color>
+
+    <!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): RemoteViews layouts can't read
+         Compose's LocalSpaceColors (ui/theme/Color.kt), since they're inflated
+         and rendered inside the Launcher's own process, not ours — so the
+         widget's static XML layouts need their own plain color resources.
+         Values below are copied 1:1 from SpaceDark in Color.kt (surface /
+         textSecondary) so the widget still reads as "the same app" next to
+         deep_space/pulsar_cyan/star_dust above, which already do this for the
+         window background / accent / primary text. -->
+    <color name="nebula_surface">#FF0E1A30</color>
+    <color name="comet_tail">#FF8FA3C8</color>
+    <!-- Matches Color.kt's DarkSuccess, used for the widget row "connected" dot. -->
+    <color name="success_green_widget">#FF00FFB3</color>
+
+    <!-- HOME-SCREEN-WIDGET THEME SYNC: the widget's RemoteViews layouts used to
+         hard-reference the always-dark deep_space/star_dust/comet_tail/nebula_surface/
+         success_green_widget colors above directly, so the widget stayed dark even
+         when the device (and every other launcher surface) was in light mode.
+
+         The widget has no access to the in-app isDarkMode preference or Compose's
+         LocalSpaceColors (it's rendered by the Launcher process from static
+         RemoteViews, same limitation documented on nebula_surface above) — but it
+         *can* follow the system day/night configuration via values-night, the same
+         mechanism every other light/dark-aware Android surface uses. So the widget
+         layouts/drawables below now reference these widget_* names instead, and
+         this default (no -night qualifier) file supplies the LIGHT values, matching
+         SpaceLight in Color.kt 1:1. See values-night/colors.xml for the dark
+         counterpart, which reuses the existing dark constants above so there is
+         still a single source of truth for the dark palette. -->
+    <color name="widget_bg_outer">#FFF2F6FF</color>          <!-- = SpaceLight.background -->
+    <color name="widget_card_surface">#FFFFFFFF</color>       <!-- = SpaceLight.surface -->
+    <color name="widget_text_primary">#FF0A1628</color>       <!-- = SpaceLight.textPrimary -->
+    <color name="widget_text_secondary">#FF3D5478</color>     <!-- = SpaceLight.textSecondary -->
+    <color name="widget_success">#FF00875A</color>            <!-- = LightSuccess -->
+    <color name="widget_row_pressed">#1F0057CC</color>        <!-- SpaceLight.accent @ ~12% -->
+    <color name="widget_icon_badge_bg">#330057CC</color>      <!-- SpaceLight.accent @ ~20% -->
+</resources>

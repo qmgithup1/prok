@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HOME-SCREEN-WIDGET — OPTIONAL MATERIAL YOU (API 31+, light).
+
+    Only the two purely-decorative accent elements (the icon badge circle and
+    the row/button pressed-state tint) are swapped for the device's dynamic
+    wallpaper-derived palette here. Deliberately NOT touching widget_bg_outer /
+    widget_card_surface / widget_text_* / widget_success: those carry the
+    app's own space/cyan brand identity (same reasoning most branded apps use
+    to keep their palette instead of fully following the wallpaper), so only
+    the small accent touches adapt to the user's system theme. Pre-31 devices
+    simply fall back to the static @color/widget_icon_badge_bg / widget_row_pressed
+    from values/colors.xml.
+
+    system_accent1_100/200 are pastel/light swatches from the platform's
+    generated tonal palette — appropriate against the light widget_card_surface
+    used in this (non -night) bucket.
+-->
+<resources>
+    <color name="widget_icon_badge_bg">@android:color/system_accent1_100</color>
+    <color name="widget_row_pressed">@android:color/system_accent1_200</color>
+</resources>

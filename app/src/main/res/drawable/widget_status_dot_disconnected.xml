@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HOME-SCREEN-WIDGET FEATURE (Part 1/2): the inactive counterpart to
+     widget_status_dot_connected.xml — a dim outline instead of a filled dot,
+     so a not-currently-connected row doesn't read as an error state. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="1.5dp" android:color="@color/widget_text_secondary" />
+</shape>

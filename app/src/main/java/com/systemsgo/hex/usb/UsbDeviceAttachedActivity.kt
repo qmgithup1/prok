@@ -1,9 +1,9 @@
 package com.systemsgo.hex.usb
 
-import android.app.Activity
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -20,9 +20,15 @@ import javax.inject.Inject
  * attach event into it, then finishes immediately. If USB redirection is
  * disabled in settings, [UsbRedirectionManager.handleDeviceAttachedFromSystem]
  * itself is a no-op — this activity never forces the feature on.
+ *
+ * Extends [ComponentActivity] rather than the plain platform [android.app.Activity]
+ * because Hilt requires every @AndroidEntryPoint Activity to be a (direct or
+ * indirect) subclass of androidx.activity.ComponentActivity — this activity
+ * never draws any UI, so ComponentActivity (no AppCompat theme dependency
+ * needed) is the minimal correct base class.
  */
 @AndroidEntryPoint
-class UsbDeviceAttachedActivity : Activity() {
+class UsbDeviceAttachedActivity : ComponentActivity() {
 
     @Inject lateinit var usbRedirectionManager: UsbRedirectionManager
 

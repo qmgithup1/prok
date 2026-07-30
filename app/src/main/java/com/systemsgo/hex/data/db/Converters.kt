@@ -5,6 +5,9 @@ import com.systemsgo.hex.data.model.CodecPreference
 import com.systemsgo.hex.data.model.ProtocolType
 import com.systemsgo.hex.data.model.ProxyType
 import com.systemsgo.hex.data.model.RemoteAppDisplayMode
+import com.systemsgo.hex.data.model.SerialParity
+import com.systemsgo.hex.data.model.SerialRedirectMode
+import com.systemsgo.hex.data.model.SerialStopBits
 import com.systemsgo.hex.data.model.SshAuthType
 import com.systemsgo.hex.data.model.SshJumpHop
 import com.systemsgo.hex.data.model.SshJumpHopCodec
@@ -61,6 +64,37 @@ class Converters {
 
     @TypeConverter
     fun toVncRepeaterMode(value: String): VncRepeaterMode = VncRepeaterMode.fromName(value)
+
+    // ── Serial Console / Serial-over-Network (RdpProfile.serialRedirectMode /
+    // serialConsoleTransport / serialConsoleParity / serialConsoleStopBits) ──
+    // BUG FIX: these three enum-typed columns had no registered TypeConverter
+    // at all — Room's schema validation fails for the whole RdpProfile entity
+    // (and therefore the whole @Database) the moment any of its columns has an
+    // unconvertible type, which is exactly what surfaced as KSP's cascading
+    // "SystemsGoDatabase could not be resolved" errors. Same String-backed
+    // enum pattern as SshAuthType above, including the same defensive
+    // firstOrNull-with-fallback so a future renamed/removed enum constant in
+    // an old on-disk value degrades to a safe default instead of crashing.
+    @TypeConverter
+    fun fromSerialRedirectMode(value: SerialRedirectMode): String = value.name
+
+    @TypeConverter
+    fun toSerialRedirectMode(value: String): SerialRedirectMode =
+        SerialRedirectMode.entries.firstOrNull { it.name == value } ?: SerialRedirectMode.LOCAL_DEVICE
+
+    @TypeConverter
+    fun fromSerialParity(value: SerialParity): String = value.name
+
+    @TypeConverter
+    fun toSerialParity(value: String): SerialParity =
+        SerialParity.entries.firstOrNull { it.name == value } ?: SerialParity.NONE
+
+    @TypeConverter
+    fun fromSerialStopBits(value: SerialStopBits): String = value.name
+
+    @TypeConverter
+    fun toSerialStopBits(value: String): SerialStopBits =
+        SerialStopBits.entries.firstOrNull { it.name == value } ?: SerialStopBits.ONE
 
     // ── Tags (RdpProfile.tags) ───────────────────────────────────────────────
     // Lightweight storage: tags have no identity of their own, so they're

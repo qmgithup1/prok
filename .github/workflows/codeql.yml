@@ -31,7 +31,19 @@ jobs:
         # This repo has a Kotlin/Java Android app plus a native C
         # (JNI/CMake) layer — scan both. CodeQL's Java analyzer covers
         # Kotlin sources in the same project.
-        language: [ 'java-kotlin', 'c-cpp' ]
+        include:
+          - language: java-kotlin
+            build-mode: autobuild
+          # c-cpp uses build-mode "none": CodeQL infers the C compilation
+          # units (app/src/main/cpp/*.c) straight from source, without
+          # needing a working build. We stopped using autobuild here
+          # because its qmake-wrapper heuristic matches ANY top-level
+          # "*.pro" file as a Qt project — including app/proguard-rules.pro,
+          # which is not a qmake file at all — and fails with
+          # "Extra characters after test expression" before ever reaching
+          # the real Gradle/NDK build.
+          - language: c-cpp
+            build-mode: none
 
     steps:
       - name: Checkout
@@ -41,18 +53,8 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
 
-      # java-kotlin and c-cpp both need an actual build to trace, since
-      # this project mixes Gradle/Kotlin with a CMake/NDK native layer.
-      # autobuild handles the common Gradle case; the native side is built
-      # separately by main.yml and isn't duplicated here — CodeQL's C/C++
-      # analysis on this matrix leg will pick up whatever compiles during
-      # autobuild's Gradle invocation (which triggers the NDK/CMake build
-      # for app/src/main/cpp as part of assembleDebug). If that ever stops
-      # tracing the native code (e.g. a Gradle task rename), replace
-      # autobuild here with the same NDK/CMake setup steps used in
-      # main.yml's build job, scoped to a single ABI, before the
-      # "Perform CodeQL Analysis" step below.
       - name: Set up JDK
         if: matrix.language == 'java-kotlin'
         uses: actions/setup-java@v4
@@ -61,6 +63,7 @@ jobs:
           java-version: '17'
 
       - name: Autobuild
+        if: matrix.build-mode == 'autobuild'
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis

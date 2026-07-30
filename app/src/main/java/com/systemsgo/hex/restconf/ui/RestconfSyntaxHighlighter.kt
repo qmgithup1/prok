@@ -32,7 +32,7 @@ object RestconfSyntaxHighlighter {
         else highlightJson(text, keyColor = QuantumBlue, stringColor = PlasmaGreen, numberColor = SolarFlare, keywordColor = PulsarCyan, punctColor = VoidPurple)
 
     private val jsonKeyRegex = Regex(""""([^"\\]|\\.)*"\s*(?=:)""")
-    private val jsonStringRegex = Regex(""""([^"\\]|\\.)*"""")
+    private val jsonStringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
     private val jsonNumberRegex = Regex("""-?\b\d+\.?\d*([eE][+-]?\d+)?\b""")
     private val jsonKeywordRegex = Regex("""\b(true|false|null)\b""")
     private val jsonPunctRegex = Regex("""[{}\[\],:]""")

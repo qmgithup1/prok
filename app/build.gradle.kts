@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,7 +16,7 @@ plugins {
 // way gradle.properties is — load it by hand so google.drive.client.id /
 // dropbox.app.key placed there (see local.properties, gitignored) are picked
 // up by project.findProperty(...) below exactly like a normal Gradle property.
-val localProperties = java.util.Properties().apply {
+val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         localPropertiesFile.inputStream().use { load(it) }
@@ -481,10 +483,11 @@ baselineProfile {
     // نولّد فقط على متغيّر release (المطابق لما يستلمه المستخدم فعلياً من
     // Play/الـ APK النهائي) — لا داعي لبروفايل لـ debug.
     automaticGenerationDuringBuild = false
-    // لو كان جهاز التوليد لا يدعم أخذ صلاحيات القفل التلقائي (Auto Lock)
-    // خلال السيناريو المُسجَّل، فهذا يمنع فشل التوليد بسبب تنبيهات النظام
-    // (صلاحيات، إلخ) — أمان إضافي بدون تأثير على نتيجة البروفايل نفسه.
-    useConnectedDevices = true
+    // ملاحظة: useConnectedDevices ليست خاصية على extension الـ"consumer" هنا
+    // في app — هي فقط على extension الـ"producer" داخل موديول
+    // :baselineprofile (انظر baselineprofile/build.gradle.kts:85 حيث هي
+    // مضبوطة فعلاً بشكل صحيح). وجودها هنا كان يسبب خطأ
+    // "Unresolved reference: useConnectedDevices".
 }
 
 // ════════════════════════════════════════════════════════════════════

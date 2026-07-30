@@ -1,6 +1,7 @@
 package com.systemsgo.hex.data.db
 
 import androidx.room.TypeConverter
+import com.systemsgo.hex.transfer.FtpSecurity
 import com.systemsgo.hex.data.model.CodecPreference
 import com.systemsgo.hex.data.model.ProtocolType
 import com.systemsgo.hex.data.model.ProxyType
@@ -95,6 +96,21 @@ class Converters {
     @TypeConverter
     fun toSerialStopBits(value: String): SerialStopBits =
         SerialStopBits.entries.firstOrNull { it.name == value } ?: SerialStopBits.ONE
+
+    // ── FTP/FTPS-STANDALONE FEATURE (RdpProfile.ftpSecurity) ─────────────────
+    // BUG FIX (second missing converter, found after the Serial* fix above
+    // didn't clear the KSP "SystemsGoDatabase could not be resolved" error):
+    // ftpSecurity is declared with the fully-qualified type
+    // com.systemsgo.hex.transfer.FtpSecurity rather than a plain imported
+    // name, which is why grepping for simple type names in Converters.kt
+    // missed it on the first pass. Same String-backed enum pattern as every
+    // converter above.
+    @TypeConverter
+    fun fromFtpSecurity(value: FtpSecurity): String = value.name
+
+    @TypeConverter
+    fun toFtpSecurity(value: String): FtpSecurity =
+        FtpSecurity.entries.firstOrNull { it.name == value } ?: FtpSecurity.PLAIN
 
     // ── Tags (RdpProfile.tags) ───────────────────────────────────────────────
     // Lightweight storage: tags have no identity of their own, so they're

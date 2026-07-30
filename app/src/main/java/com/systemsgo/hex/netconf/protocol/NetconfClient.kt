@@ -721,7 +721,7 @@ class NetconfClient(
             _stats.value = _stats.value.copy(notificationCount = _stats.value.notificationCount + 1)
             return
         }
-        val id = Regex("""message-id\s*=\s*"([^"]+)"""").find(xml)?.groupValues?.get(1)
+        val id = Regex("message-id\\s*=\\s*\"([^\"]+)\"").find(xml)?.groupValues?.get(1)
             ?: Regex("""message-id\s*=\s*'([^']+)'""").find(xml)?.groupValues?.get(1)
         if (id != null) {
             pendingReplies.remove(id)?.complete(xml)

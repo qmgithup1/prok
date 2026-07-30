@@ -76,6 +76,19 @@ android {
             matchingFallbacks += listOf("release")
         }
     }
+
+    // Must match :app's own compileOptions/kotlinOptions (both 17) — without
+    // this, Java here defaults to 1.8 while Kotlin defaults to the toolchain
+    // JDK (17), and AGP's strict JVM-target validation fails the build with
+    // "Inconsistent JVM Target Compatibility Between Java and Kotlin Tasks".
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 // PERF-FIX: see the big comment block above — deliberately manual/on-demand

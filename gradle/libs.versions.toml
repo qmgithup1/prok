@@ -21,7 +21,17 @@ agp = "8.7.3"            # Android Gradle Plugin — متوافق مع Gradle 8.
 #   kotlin=2.1.21 → ksp=2.1.21-2.0.1  ✅
 #   kotlin=2.1.0  → ksp=2.1.21-2.0.1  ❌ (سيفشل البناء)
 kotlin = "2.1.21"        # was: 2.1.0 → أحدث 2.1.x stable + يُصلح bug في KSP
-ksp    = "2.1.21-2.0.1"  # was: 2.1.0-1.0.29 → يجب مطابقة kotlin
+ksp    = "2.1.21-2.0.2"  # was: 2.1.21-2.0.1 → 🔴 CI FIX: 2.1.21-2.0.1 has a confirmed
+# upstream KSP2 bug that makes kspBenchmarkReleaseKotlin (and other ksp*Kotlin tasks)
+# crash with a bare "KSP failed with exit code: PROCESSING_ERROR" and NO diagnostic
+# message at all (see https://github.com/google/ksp/issues/2468 — reproduced by many
+# unrelated Room/Hilt projects on this exact kotlin/ksp pair, independent of any one
+# project's source code). In this app that silent crash left SystemsGoDatabase's
+# Room-generated implementation ungenerated, which Hilt's AppModule processing then
+# reported as the confusing cascading error "'SystemsGoDatabase' could not be
+# resolved" for every @Provides method taking/returning it. 2.1.21-2.0.2 is the next
+# patch release for the same kotlin=2.1.21 (still satisfies "ksp = <kotlin>-<patch>")
+# and does not carry this regression.
 
 # ── Hilt (DI) ────────────────────────────────────────────────────────
 # 🔴 CRITICAL: Hilt 2.54 + Kotlin 2.1.x = خطأ:

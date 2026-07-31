@@ -628,7 +628,7 @@ val MIGRATION_28_29 = object : Migration(28, 29) {
  * v29 -> v30: ENTRA-ID-AUTH FEATURE (Gateway hop). Adds the two columns
  * backing GatewayAuthMode + the display-only linked-account UPN — see
  * RdpProfile.gatewayAuthMode / entraLinkedUpn's doc comments. Same
- * "purely additive" pattern as every prior *AuthMode/*Enabled column
+ * "purely additive" pattern as every prior *AuthMode / *Enabled column
  * (e.g. MIGRATION_28_29): an existing profile defaults to
  * GatewayAuthMode.PASSWORD.name ('PASSWORD') and an empty linked UPN, so it
  * keeps authenticating to its Gateway with gatewayUsername/gatewayPassword
@@ -1275,4 +1275,3 @@ val MIGRATION_63_64 = object : Migration(63, 64) {
         db.execSQL("ALTER TABLE rdp_profiles ADD COLUMN ciraRelayUseTls INTEGER NOT NULL DEFAULT 0")
     }
 }
-

@@ -63,7 +63,7 @@ enum class VSpherePowerAction(val wireValue: String) {
     START("start"),
     /** Hard stop — equivalent to pulling the power. Prefer [SHUTDOWN] when VMware Tools is running. */
     STOP("stop"),
-    /** Graceful in-guest shutdown via VMware Tools (`guest.shutdown`, not a `power/*` endpoint) — requires Tools to be running. */
+    /** Graceful in-guest shutdown via VMware Tools (`guest.shutdown`, not a `power` endpoint) — requires Tools to be running. */
     SHUTDOWN("shutdown"),
     /** Graceful in-guest restart via VMware Tools (`guest.reboot`) — requires Tools to be running. */
     RESET("reset"),
